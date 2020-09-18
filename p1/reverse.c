@@ -17,9 +17,9 @@
  *   Write to output file
  */
 
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 
 // debug preprocessor directives
@@ -78,13 +78,6 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  char **inputStrAry;
-  inputStrAry = malloc(sizeof(char *) * maxLines);
-  if (inputStrAry == NULL) {
-    fprintf(stderr,
-            "Error: Failed to allocate space for input file content!\n");
-  }
-
   FILE *outFile;
   outFile = fopen(outFilename, "w");
   if (outFile == NULL) {
@@ -98,14 +91,49 @@ int main(int argc, char *argv[]) {
   //   fwrite(readLine, MAX_LINE_LEN, 1, outFile);
   // }
 
+  char **inputStrAry;
+  inputStrAry = malloc(sizeof(char *) * maxLines);
+  if (inputStrAry == NULL) {
+    fprintf(stderr, "Error: Failed to allocate space for line array!\n");
+  }
+
   // getline does not exist in Windows
-  size_t nread;
+  ssize_t nread;
   char *line = NULL;
   size_t len = 0;  // man says need to free the buffer if getline fails?
+  unsigned long long int lineCnt = 0;
   while ((nread = getline(&line, &len, inFile)) != -1) {
-    fwrite(line, nread, 1, outFile);
+    int lineEnd =  nread - 2; // lineEnd starts one before pos of newline char 
+    if(line[lineEnd+1] != '\n') {
+      lineEnd = lineEnd + 1;  
+    }
+    
+    int lineStart = 0;
+    while (lineStart < lineEnd) {
+      char temp = line[lineStart];
+      line[lineStart] = line[lineEnd];
+      line[lineEnd] = temp;
+      lineStart++;
+      lineEnd--;
+    }
+
+    // fwrite(line, nread, 1, outFile);
+    inputStrAry[lineCnt] = (char *)malloc(strlen(line) + 1);
+    if (inputStrAry[lineCnt] == NULL) {
+      fprintf(stderr, "Error: Failed to allocate space for line!\n");
+    }
+    strcpy(inputStrAry[lineCnt], line);
+    debugPrintf("%s", inputStrAry[lineCnt]);
+    lineCnt++;
   }
   free(line);
+
+  for (int i = 0; i < lineCnt; i++) {
+    char *writeLine = inputStrAry[i];
+    debugPrintf("%s", writeLine);
+    fwrite(writeLine, strlen(writeLine), 1, outFile);
+    free(inputStrAry[i]);
+  }
 
   if (fclose(inFile) != 0) {
     printf("Error: Could not close input file!\n");
@@ -116,7 +144,7 @@ int main(int argc, char *argv[]) {
     printf("Error: Could not close output file!\n");
     exit(1);
   }
-
+  
   free(inputStrAry);
   exit(0);
 }
