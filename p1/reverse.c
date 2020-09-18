@@ -17,7 +17,7 @@
  *   Write to output file
  */
 
-#define  _GNU_SOURCE
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -58,14 +58,14 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
   }
-  
+
   debugPrintf("input file: %s\noutput file: %s\n", inFilename, outFilename);
 
   // input file size
   unsigned long long int maxLines;  // # of lines < input file size
   struct stat inStat;
   if (stat(inFilename, &inStat) == -1) {
-    fprintf(stderr, "Error: stat() failed. Could not get the filesize!\n");
+    fprintf(stderr, "Error: stat() failed to read %s.\n", inFilename);
     exit(1);
   }
   maxLines = inStat.st_size;
@@ -79,36 +79,44 @@ int main(int argc, char *argv[]) {
   }
 
   char **inputStrAry;
-  char *line = NULL;
-  size_t len = 0;  // man says need to free the buffer if getline fails?
-  size_t nread;
   inputStrAry = malloc(sizeof(char *) * maxLines);
   if (inputStrAry == NULL) {
     fprintf(stderr,
             "Error: Failed to allocate space for input file content!\n");
   }
-  
+
   FILE *outFile;
-  outFile = fopen(outFilename, "r");
+  outFile = fopen(outFilename, "w");
   if (outFile == NULL) {
     fprintf(stderr, "Error: Could not read the specified file!\n");
     exit(1);
   }
 
+  // char readLine[MAX_LINE_LEN];
+  // while (fgets(readLine, MAX_LINE_LEN, inFile) != NULL) {
+  //   fwrite(readLine, MAX_LINE_LEN, 1, stdout);
+  //   fwrite(readLine, MAX_LINE_LEN, 1, outFile);
+  // }
+
+  // getline does not exist in Windows
+  size_t nread;
+  char *line = NULL;
+  size_t len = 0;  // man says need to free the buffer if getline fails?
   while ((nread = getline(&line, &len, inFile)) != -1) {
     fwrite(line, nread, 1, outFile);
   }
+  free(line);
 
   if (fclose(inFile) != 0) {
     printf("Error: Could not close input file!\n");
     exit(1);
   }
-  
-    if (fclose(outFile) != 0) {
+
+  if (fclose(outFile) != 0) {
     printf("Error: Could not close output file!\n");
     exit(1);
   }
-  
+
   free(inputStrAry);
   exit(0);
 }
