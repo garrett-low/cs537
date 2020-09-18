@@ -70,17 +70,21 @@ int main(int argc, char *argv[]) {
   }
   maxLines = inStat.st_size;
 
+  FILE *outFile;
+  outFile = fopen(outFilename, "wb");
+  if (outFile == NULL) {
+    fprintf(stderr, "Error: Could not read the specified file!\n");
+    exit(1);
+  }
+  
+  if (maxLines == 0) { // input file is empty
+    exit(0); // Hints say to exit(0) when runs cleanly? why not return 0?
+  }
+
   // read file
   FILE *inFile;
   inFile = fopen(inFilename, "r");
   if (inFile == NULL) {
-    fprintf(stderr, "Error: Could not read the specified file!\n");
-    exit(1);
-  }
-
-  FILE *outFile;
-  outFile = fopen(outFilename, "w");
-  if (outFile == NULL) {
     fprintf(stderr, "Error: Could not read the specified file!\n");
     exit(1);
   }
@@ -97,9 +101,9 @@ int main(int argc, char *argv[]) {
   size_t len = 0;  // man says need to free the buffer if getline fails?
   unsigned long long int lineCnt = 0;
   while ((nread = getline(&line, &len, inFile)) != -1) {
-    int lineEnd = nread - 2;  // lineEnd starts one before pos of newline char
+    int lineEnd = nread - 2;  // content starts one before pos of newline char
     int lineLen = nread - 1;
-    if (line[lineEnd + 1] != '\n') {
+    if (nread == 1 || line[lineEnd + 1] != '\n') {
       lineEnd = lineEnd + 1;
       lineLen = lineLen + 1;
     }
@@ -124,9 +128,13 @@ int main(int argc, char *argv[]) {
   }
   free(line);
 
+  debugPrintf("line count: %lli\n", lineCnt);
+
   for (int i = lineCnt - 1; i >= 0; i--) {
-    char *writeLine;
-    if (i != 0) {
+    char *writeLine = inputStrAry[i];
+    // if this is not the last line and the line doesn't contain only a newline
+    // then we need to add a new line
+    if (i != 0 && strlen(inputStrAry[i]) != 1) {
       writeLine = strcat(inputStrAry[i], "\n");
     } else {
       writeLine = inputStrAry[i];
