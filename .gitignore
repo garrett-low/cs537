@@ -2,3 +2,4 @@ p1/*.exe
 p1/out/*
 p1/tar/*
 !p1/tar/in/
+p1/*.txt
