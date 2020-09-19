@@ -17,6 +17,14 @@
 #include <string.h>
 #include <sys/stat.h>
 
+// debug preprocessor directives
+#ifdef DEBUG
+#define debugPrintf(...) printf(__VA_ARGS__)
+#else
+#define debugPrintf(...) ((void)0)
+#endif
+
+// other macros
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
 
@@ -46,14 +54,13 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "Error: Failed to allocate space for header filename!\n");
       exit(1);
     }
-    memset(hdrName, '\0', 256);
+    memset(hdrName, '\0', sizeof(char) * 256);
     int inNameLen = strlen(inName);
     if (memcpy(hdrName, inName, inNameLen) == NULL) {
       fprintf(stderr, "Error: Could not set or copy filename %s\n", inName);
       exit(EXIT_FAILURE);
     }
-    int hdrNameLen = strlen(hdrName);
-    if (fwrite(hdrName, hdrNameLen, 1, tarStream) < 0) {
+    if (fwrite(hdrName, sizeof(char) * 256, 1, tarStream) < 0) {
       fprintf(stderr, "Error: Could not write filename to archive %s\n", tarName);
       exit(EXIT_FAILURE);
     }
@@ -69,13 +76,23 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "Error: Could not write filesize to archive %s\n", tarName);
       exit(EXIT_FAILURE);
     }
-    
+
     // add the file contents to the tar, in chunks
     FILE *inStream = NULL;
-    unsigned char buffer[1024];
+    unsigned char buffer[1];
     size_t bytesRead = 0;
     inStream = fopen(inName, "rb");
-    if (inStream = NULL)
+    if (inStream == NULL) {
+      fprintf(stderr, "Error: Could not open the input file!\n");
+      exit(EXIT_FAILURE);
+    } else {
+      while ((bytesRead = fread(buffer, 1, sizeof(buffer), inStream)) > 0) {
+        if (fwrite(buffer, sizeof(buffer), 1, tarStream) < 0) {
+          fprintf(stderr, "Error: Could not write content to archive %s\n", tarName);
+          exit(EXIT_FAILURE);
+        }
+      }
+    }
 
     // add padding (8 nul characters) at end of file content
     char padding[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -85,10 +102,10 @@ int main(int argc, char *argv[]) {
     }
 
     free(hdrName);
-      if (fclose(inStream) != 0) {
-    fprintf(stderr, "Error: Could not close input file!\n");
-    exit(1);
-  }
+    if (fclose(inStream) != 0) {
+      fprintf(stderr, "Error: Could not close input file!\n");
+      exit(1);
+    }
   }
 
   if (fclose(tarStream) != 0) {
