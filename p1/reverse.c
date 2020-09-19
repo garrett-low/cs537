@@ -88,6 +88,7 @@ int main(int argc, char *argv[]) {
   inputStrAry = malloc(sizeof(char *) * maxLines);
   if (inputStrAry == NULL) {
     fprintf(stderr, "Error: Failed to allocate space for line array!\n");
+    exit(1);
   }
 
   // getline does not exist in Windows
@@ -115,6 +116,7 @@ int main(int argc, char *argv[]) {
     inputStrAry[lineCnt] = (char *)malloc(lineLen + 1);
     if (inputStrAry[lineCnt] == NULL) {
       fprintf(stderr, "Error: Failed to allocate space for line!\n");
+      exit(1);
     }
 
     memcpy(inputStrAry[lineCnt], line, sizeof(char) * lineLen);
@@ -136,17 +138,20 @@ int main(int argc, char *argv[]) {
     }
 
     debugPrintf("%s", writeLine);
-    fwrite(writeLine, strlen(writeLine), 1, outFile);
+    if (fwrite(writeLine, strlen(writeLine), 1, outFile) < 1) {
+      fprintf(stderr, "Error: Could not write to %s!\n", outFilename);
+      exit(1);
+    }
     free(inputStrAry[i]);
   }
 
   if (fclose(inFile) != 0) {
-    printf("Error: Could not close input file!\n");
+    fprintf(stderr, "Error: Could not close input file!\n");
     exit(1);
   }
 
   if (fclose(outFile) != 0) {
-    printf("Error: Could not close output file!\n");
+    fprintf(stderr, "Error: Could not close output file!\n");
     exit(1);
   }
 
