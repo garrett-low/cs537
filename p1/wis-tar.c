@@ -27,6 +27,7 @@
 // other macros
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
+#define MAX_BUFFER_SIZE 1024
 
 int main(int argc, char *argv[]) {
   // handle too few args
@@ -79,7 +80,11 @@ int main(int argc, char *argv[]) {
 
     // add the file contents to the tar, in chunks
     FILE *inStream = NULL;
-    unsigned char buffer[1];
+    int bufferSize = 0;
+    if (inSize < MAX_BUFFER_SIZE) {
+      bufferSize = inSize;
+    }
+    unsigned char buffer[bufferSize];
     size_t bytesRead = 0;
     inStream = fopen(inName, "rb");
     if (inStream == NULL) {
