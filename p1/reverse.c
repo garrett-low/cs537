@@ -49,14 +49,9 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, USAGE_ERROR);
       exit(1);
     }
-  } else if (argv[1][1] == 'o') {
-    if (argv[3][1] == 'i') {
-      outFilename = argv[2];
-      inFilename = argv[4];
-    } else {
-      fprintf(stderr, USAGE_ERROR);
-      exit(1);
-    }
+  } else {
+    fprintf(stderr, USAGE_ERROR);
+    exit(1);
   }
 
   debugPrintf("input file: %s\noutput file: %s\n", inFilename, outFilename);
@@ -76,9 +71,9 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Error: Could not read the specified file!\n");
     exit(1);
   }
-  
-  if (maxLines == 0) { // input file is empty
-    exit(0); // Hints say to exit(0) when runs cleanly? why not return 0?
+
+  if (maxLines == 0) {  // input file is empty
+    exit(0);  // Hints say to exit(0) when runs cleanly? why not return 0?
   }
 
   // read file
