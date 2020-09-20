@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
   }
 
   char **inputStrAry;
-  inputStrAry = malloc(sizeof(char *) * maxLines);
+  inputStrAry = (char **)malloc(sizeof(char *) * maxLines);
   if (inputStrAry == NULL)
   {
     fprintf(stderr, "Error: Failed to allocate space for line array!\n");
@@ -103,17 +103,7 @@ int main(int argc, char *argv[])
   unsigned long long int lineCnt = 0;
   while ((nread = getline(&line, &len, inFile)) != -1)
   {
-    int lineEnd = nread - 2; // nread-2: content starts one before pos of newline char
-    // all of this commented out was for handling of files where
-    // the final line is not newline-terminated
-    // int lineLen = nread - 1;
-    // if (nread == 1 || line[lineEnd + 1] != '\n') {
-    //   lineEnd = lineEnd + 1;
-    //   lineLen = lineLen + 1;
-    // }
-    // debugPrintf("nread: %li\n", nread);
-    // debugPrintf("lineEnd: %i\n", lineEnd);
-    // debugPrintf("strlen: %li\n", strlen(line));
+    int lineEnd = nread - 2;
 
     // swap
     int lineStart = 0;
@@ -134,32 +124,32 @@ int main(int argc, char *argv[])
     }
 
     memcpy(inputStrAry[lineCnt], line, sizeof(char) * (nread - 1)); // nread-1: don't include newline
-    debugPrintf("%s", inputStrAry[lineCnt]);
+    // debugPrintf("%s", inputStrAry[lineCnt]);
     lineCnt++;
   }
   free(line);
 
-  debugPrintf("line count: %lli\n", lineCnt);
+  // debugPrintf("line count: %lli\n", lineCnt);
 
   for (int i = lineCnt - 1; i >= 0; i--)
   {
-    char *writeLine = inputStrAry[i];
-    // if this is not the last line and the line doesn't contain only a newline
-    // then we need to add a new line
-    // if (i != 0 && strlen(inputStrAry[i]) != 1) {
-    // always add newline because piazza clarification
-    writeLine = strcat(inputStrAry[i], "\n");
-    // } else {
-    //   writeLine = inputStrAry[i];
-    // }
+    char *writeLine = NULL;
+    writeLine = (char *)malloc(strlen(inputStrAry[i]) + 2);
+    if (writeLine == NULL)
+    {
+      fprintf(stderr, "Error: Failed to allocate space for writeLine!\n");
+      exit(1);
+    }
+    strcpy(writeLine,inputStrAry[i]);
+    writeLine = strcat(writeLine, "\n");
 
-    debugPrintf("%s", writeLine);
     if (fwrite(writeLine, strlen(writeLine), 1, outFile) < 1)
     {
       fprintf(stderr, "Error: Could not write to %s!\n", outFilename);
       exit(1);
     }
-    free(inputStrAry[i]);
+    debugPrintf("%s", writeLine);
+    free(writeLine);
   }
 
   if (fclose(inFile) != 0)
@@ -174,8 +164,12 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  free(inputStrAry);
+  for (int i = 0; i < maxLines; i++)
+  {
+    free(inputStrAry[i]);
+  }
+
   exit(0);
-  
+
   return 0;
 }
