@@ -13,6 +13,18 @@ kernel/
     #define SYS_getwritecount 22
   sysfunc.h - Add getwriteccount system call handler
     int sys_getwritecount(void);
+  proc.h - add writecount member to proc struct to track calls to write per process
+    int writecount;              // # of times the process has called write()
+  sysfile.c - count calls to write by incrementing writecount in sys_write() body
+    proc->writecount++;
+  getwritecount.c - implement getwritecount() function
+    int sys_getwritecount(void) {
+      return proc->writecount;
+    }
 include/
   syscall.h - Map getwritecount function pointer SYS_* to function handler sys_* in array
     [SYS_getwritecount] sys_getwritecount,
+    
+
+tests -
+  
