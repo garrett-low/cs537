@@ -1,3 +1,4 @@
+# p1
 p1/*.exe
 p1/out/*
 p1/tar/*
@@ -21,5 +22,26 @@ p1/xv6/xv6-fa20/kernel/*
 !p1/xv6/xv6-fa20/kernel/sysfunc.h
 p1/xv6/xv6-fa20/user/*
 !p1/xv6/xv6-fa20/user/
+!p1/xv6/xv6-fa20/user/makefile.mk
 !p1/xv6/xv6-fa20/user/user.h
 !p1/xv6/xv6-fa20/user/usys.S
+
+# p1b
+p1b/*
+!p1b/xv6-fa20/
+p1b/xv6-fa20/*
+p1b/xv6-fa20/include/*
+!p1b/xv6-fa20/include/
+!p1b/xv6-fa20/include/syscall.h
+p1b/xv6-fa20/kernel/*
+!p1b/xv6-fa20/kernel/
+!p1b/xv6-fa20/kernel/getwritecount.c
+!p1b/xv6-fa20/kernel/proc.h
+!p1b/xv6-fa20/kernel/syscall.c
+!p1b/xv6-fa20/kernel/sysfile.c
+!p1b/xv6-fa20/kernel/sysfunc.h
+p1b/xv6-fa20/user/*
+!p1b/xv6-fa20/user/
+!p1b/xv6-fa20/user/makefile.mk
+!p1b/xv6-fa20/user/user.h
+!p1b/xv6-fa20/user/usys.S

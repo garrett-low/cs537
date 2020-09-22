@@ -3,28 +3,33 @@ low
 
 README for P1B - adding a system call "getwritecount" to xv6
 
-user/
-  usys.S - Add getwritecount
-    SYSCALL(getwritecount)
-  user.h - Add getwritecount prototype
-    int getwritecount(void);
-kernel/
-  syscall.c - Define system call number (aka trap number?) for new call
-    #define SYS_getwritecount 22
-  sysfunc.h - Add getwriteccount system call handler
-    int sys_getwritecount(void);
-  proc.h - add writecount member to proc struct to track calls to write per process
-    int writecount;              // # of times the process has called write()
-  sysfile.c - count calls to write by incrementing writecount in sys_write() body
-    proc->writecount++;
-  getwritecount.c - implement getwritecount() function
-    int sys_getwritecount(void) {
-      return proc->writecount;
-    }
-include/
-  syscall.h - Map getwritecount function pointer SYS_* to function handler sys_* in array
-    [SYS_getwritecount] sys_getwritecount,
+implementation - 
+  user/
+    usys.S - Add getwritecount
+      SYSCALL(getwritecount)
+    user.h - Add getwritecount prototype
+      int getwritecount(void);
+  kernel/
+    syscall.c - Define system call number (aka trap number?) for new call
+      #define SYS_getwritecount 22
+    sysfunc.h - Add getwritecount system call handler
+      int sys_getwritecount(void);
+    proc.h - add writecount member to proc struct to track calls to write per process
+      int writecount;              // # of times the process has called write()
+    sysfile.c - count calls to write by incrementing writecount in sys_write() body
+      proc->writecount++;
+    getwritecount.c - implement getwritecount() function;
+                      not sure why these #include's were needed, trial and error only;
+                      I also could have added the function to an existing file
+                      
+      int sys_getwritecount(void) {
+        return proc->writecount;
+      }
+  include/
+    syscall.h - Map getwritecount function pointer SYS_* to function handler sys_* in array
+      [SYS_getwritecount] sys_getwritecount,
     
 
 tests -
-  
+  user/makefile.mk - added testgetwritecount to list of user programs
+  user/testgetwritecount - attempt to implement a getwritecount test
