@@ -1,0 +1,18 @@
+Garrett Low
+low
+
+README for P1B - adding a system call "getwritecount" to xv6
+
+user/
+  usys.S - Add getwritecount
+    SYSCALL(getwritecount)
+  user.h - Add getwritecount prototype
+    int getwritecount(void);
+kernel/
+  syscall.c - Define system call number (aka trap number?) for new call
+    #define SYS_getwritecount 22
+  sysfunc.h - Add getwriteccount system call handler
+    int sys_getwritecount(void);
+include/
+  syscall.h - Map getwritecount function pointer SYS_* to function handler sys_* in array
+    [SYS_getwritecount] sys_getwritecount,

@@ -36,6 +36,7 @@
 
 int main(int argc, char *argv[])
 {
+  // invalid arguments
   if (argc != 5)
   {
     fprintf(stderr, USAGE_ERROR);
@@ -54,9 +55,8 @@ int main(int argc, char *argv[])
     fprintf(stderr, USAGE_ERROR);
     exit(1);
   }
-
-  debugPrintf("input file: %s\noutput file: %s\n", inFilename, outFilename);
-
+  // debugPrintf("input file: %s\noutput file: %s\n", inFilename, outFilename);
+  
   FILE *outFile;
   outFile = fopen(outFilename, "wb");
   if (outFile == NULL)
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  // input file size is 0
+  // check input file size
   unsigned long long int maxLines; // # of lines < input file size
   struct stat inStat;
   if (stat(inFilename, &inStat) == -1)
@@ -87,7 +87,8 @@ int main(int argc, char *argv[])
   {          // input file is empty
     exit(0); // Hints say to exit(0) when runs cleanly? why not return 0?
   }
-
+  
+  // allocate space for input file strings
   char **inputStrAry;
   inputStrAry = (char **)malloc(sizeof(char *) * maxLines);
   if (inputStrAry == NULL)
@@ -103,7 +104,7 @@ int main(int argc, char *argv[])
   unsigned long long int lineCnt = 0;
   while ((nread = getline(&line, &len, inFile)) != -1)
   {
-    int lineEnd = nread - 2;
+    int lineEnd = nread - 2; // nread: don't swap newline
 
     // swap
     int lineStart = 0;
@@ -123,14 +124,15 @@ int main(int argc, char *argv[])
       exit(1);
     }
 
-    memcpy(inputStrAry[lineCnt], line, sizeof(char) * (nread - 1)); // nread-1: don't include newline
+    memcpy(inputStrAry[lineCnt], line, sizeof(char) * (nread - 1)); // nread: strip newline
     // debugPrintf("%s", inputStrAry[lineCnt]);
     lineCnt++;
   }
   free(line);
 
   // debugPrintf("line count: %lli\n", lineCnt);
-
+  
+  // loop over input string array and write to file, add terminating newline
   for (int i = lineCnt - 1; i >= 0; i--)
   {
     char *writeLine = NULL;
@@ -151,25 +153,26 @@ int main(int argc, char *argv[])
     debugPrintf("%s", writeLine);
     free(writeLine);
   }
-
+  
+  // cleanup
   if (fclose(inFile) != 0)
   {
     fprintf(stderr, "Error: Could not close input file!\n");
     exit(1);
   }
-
   if (fclose(outFile) != 0)
   {
     fprintf(stderr, "Error: Could not close output file!\n");
     exit(1);
   }
-
   for (int i = 0; i < maxLines; i++)
   {
     free(inputStrAry[i]);
   }
+  
+  free(inputStrAry);
 
   exit(0);
 
-  return 0;
+  return 0; // redundant
 }
