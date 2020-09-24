@@ -14,7 +14,7 @@ implementation -
       #define SYS_getwritecount 22
     sysfunc.h - Add getwritecount system call handler
       int sys_getwritecount(void);
-    proc.h - add writecount member to proc struct to track calls to write per process
+    proc.h - add 'writecount' member to 'proc' struct; use this track write calls per process
       int writecount;              // # of times the process has called write()
     sysfile.c - count calls to write by incrementing writecount in sys_write() body
       proc->writecount++;

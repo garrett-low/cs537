@@ -22,9 +22,10 @@ p1/xv6/xv6-fa20/kernel/*
 !p1/xv6/xv6-fa20/kernel/sysfunc.h
 p1/xv6/xv6-fa20/user/*
 !p1/xv6/xv6-fa20/user/
-!p1/xv6/xv6-fa20/user/makefile.mk
-!p1/xv6/xv6-fa20/user/user.h
 !p1/xv6/xv6-fa20/user/usys.S
+!p1/xv6/xv6-fa20/user/user.h
+!p1/xv6/xv6-fa20/user/makefile.mk
+!p1/xv6/xv6-fa20/user/testgetwritecount.c
 
 # p1b
 p1b/*
@@ -42,6 +43,7 @@ p1b/xv6-fa20/kernel/*
 !p1b/xv6-fa20/kernel/sysfunc.h
 p1b/xv6-fa20/user/*
 !p1b/xv6-fa20/user/
-!p1b/xv6-fa20/user/makefile.mk
-!p1b/xv6-fa20/user/user.h
 !p1b/xv6-fa20/user/usys.S
+!p1b/xv6-fa20/user/user.h
+!p1b/xv6-fa20/user/makefile.mk
+!p1b/xv6-fa20/user/testgetwritecount.c
