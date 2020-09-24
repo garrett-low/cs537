@@ -6,26 +6,27 @@ p1/*.txt
 p1/inputfile
 p1/wis-tar
 p1/reverse
-!p1/xv6/
-p1/xv6/*
-!p1/xv6/xv6-fa20/
-p1/xv6/xv6-fa20/*
-p1/xv6/xv6-fa20/include/*
-!p1/xv6/xv6-fa20/include/
-!p1/xv6/xv6-fa20/include/syscall.h
-p1/xv6/xv6-fa20/kernel/*
-!p1/xv6/xv6-fa20/kernel/
-!p1/xv6/xv6-fa20/kernel/getwritecount.c
-!p1/xv6/xv6-fa20/kernel/proc.h
-!p1/xv6/xv6-fa20/kernel/syscall.c
-!p1/xv6/xv6-fa20/kernel/sysfile.c
-!p1/xv6/xv6-fa20/kernel/sysfunc.h
-p1/xv6/xv6-fa20/user/*
-!p1/xv6/xv6-fa20/user/
-!p1/xv6/xv6-fa20/user/usys.S
-!p1/xv6/xv6-fa20/user/user.h
-!p1/xv6/xv6-fa20/user/makefile.mk
-!p1/xv6/xv6-fa20/user/testgetwritecount.c
+#P1B /p1 - exclude xv6 files
+# !p1/xv6/
+# p1/xv6/*
+# !p1/xv6/xv6-fa20/
+# p1/xv6/xv6-fa20/*
+# p1/xv6/xv6-fa20/include/*
+# !p1/xv6/xv6-fa20/include/
+# !p1/xv6/xv6-fa20/include/syscall.h
+# p1/xv6/xv6-fa20/kernel/*
+# !p1/xv6/xv6-fa20/kernel/
+# !p1/xv6/xv6-fa20/kernel/getwritecount.c
+# !p1/xv6/xv6-fa20/kernel/proc.h
+# !p1/xv6/xv6-fa20/kernel/syscall.c
+# !p1/xv6/xv6-fa20/kernel/sysfile.c
+# !p1/xv6/xv6-fa20/kernel/sysfunc.h
+# p1/xv6/xv6-fa20/user/*
+# !p1/xv6/xv6-fa20/user/
+# !p1/xv6/xv6-fa20/user/usys.S
+# !p1/xv6/xv6-fa20/user/user.h
+# !p1/xv6/xv6-fa20/user/makefile.mk
+# !p1/xv6/xv6-fa20/user/testgetwritecount.c
 
 # p1b
 p1b/*
