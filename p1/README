@@ -32,4 +32,4 @@ implementation -
 
 tests -
   user/makefile.mk - added testgetwritecount to list of user programs
-  user/testgetwritecount - attempt to implement a getwritecount test
+  user/testgetwritecount.c - attempt to implement a getwritecount test
