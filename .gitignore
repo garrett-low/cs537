@@ -48,3 +48,9 @@ p1b/xv6-fa20/user/*
 !p1b/xv6-fa20/user/user.h
 !p1b/xv6-fa20/user/makefile.mk
 !p1b/xv6-fa20/user/testgetwritecount.c
+
+#p2a
+p2a/*
+!p2a/strtok_test.c
+!p2a/wish.c
+!p2a/discussion.c
