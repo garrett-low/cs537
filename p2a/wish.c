@@ -15,6 +15,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <linux/limits.h>
+#include <stdbool.h>
 
 #define INPUT_LENGTH_MAX 128
 #define GENERIC_ERROR "An error has occurred\n"
@@ -26,7 +27,8 @@
 #define debugPrintf(...) ((void)0)
 #endif
 
-int readCmd();
+static int readCmd();
+static void parseCmd();
 
 int main(int argc, char *argv[])
 {
@@ -49,14 +51,64 @@ int main(int argc, char *argv[])
       continue;
     }
 
-    char *arg0 = strtok(cmd, " \t");
+    char *cmdArg[128];
+    bool hasOutputRedir = false;
+    bool hasInputRedir = false;
+    bool hasPipe = false;
+    bool isBackground = false;
+    char **cmdArgPostAnglePipe = NULL;
+    parseCmd(cmd, cmdArg, cmdArgPostAnglePipe, &hasOutputRedir, &hasInputRedir, &hasPipe, &isBackground);
+
+    // char *cmdArg[128];
+    // cmdArg[0] = strtok(cmd, " \t");
+    // int i = 1;
+    // bool hasOutputRedir = false;
+    // bool hasInputRedir = false;
+    // bool hasPipe = false;
+    // bool isBackground = false;
+    // int anglePipeArgIndex = -1;
+    // int ampersandArgIndex = -1;
+    // do
+    // {
+    //   cmdArg[i] = strtok(NULL, " \t");
+    //   i++;
+
+    //   // assume redirection and pipeline never used together for this prj
+    //   if (cmdArg[i] == '<' || cmdArg[i] == '>')
+    //   {
+    //     hasOutputRedirector = true;
+    //     hasInputRedir = true;
+    //     anglePipeArgIndex = i;
+    //   }
+    //   else if (cmdArg[i] == '|')
+    //   {
+    //     hasPipe = true;
+    //     anglePipeArgIndex = i;
+    //   }
+
+    //   // assume redirection can be used with bg execution for this prj
+    //   // assume pipeline cannot be used with bg execution for this prj
+    //   if (cmdArg[i] == '&')
+    //   {
+    //     isBackground = true; // redundant because we have ampersandArgIndex
+    //     ampersandArgIndex = i;
+    //   }
+
+    // } while (cmdArg[i] != NULL);
+
+    // char **cmdArgPostAnglePipe = NULL;
+    // if (anglePipeArgIndex != -1)
+    // {
+    //   cmdArg[anglePipeArgIndex] = NULL;
+    //   cmdArgPostAnglePipe = &cmdArg[anglePipeArgIndex + 1];
+    // }
 
     // built-in commands
-    if (strcmp(arg0, "exit") == 0)
+    if (strcmp(cmdArg[0], "exit") == 0)
     {
       exit(0);
     }
-    else if (strcmp(arg0, "pwd") == 0)
+    else if (strcmp(cmdArg[0], "pwd") == 0)
     {
       char workingDir[PATH_MAX];
       if (getcwd(workingDir, PATH_MAX) == NULL)
@@ -66,53 +118,36 @@ int main(int argc, char *argv[])
       }
       printf("%s\n", workingDir);
     }
-    else if (strcmp(arg0, "cd") == 0)
+    else if (strcmp(cmdArg[0], "cd") == 0)
     {
-      char *arg2 = strtok(NULL, " \t");
-      debugPrintf("arg2: %s.\n", arg2);
-      if (arg2 == NULL)
+      if (cmdArg[1] == NULL)
       {
         chdir(getenv("HOME"));
       }
       else
       {
-        if (chdir(arg2) == -1)
+        if (chdir(cmdArg[1]) == -1)
         {
           write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
           continue;
         }
       }
     }
-    // not built-in commands
+    // non-built-in commands
     else
     {
-      char *cmdArg[128];
-      cmdArg[0] = arg0;
-      int i = 1;
-      do
-      {
-        cmdArg[i] = strtok(NULL, " \t");
-        i++;
-      } while (cmdArg[i] != NULL);
-
-      i = 0;
-      while (cmdArg[i] != NULL)
-      {
-        debugPrintf("arg %i: %s.\n", i, cmdArg[i]);
-        i++;
-      }
-      debugPrintf("arg %i: %s.\n", i, cmdArg[i]);
-
       int pid = fork();
+
+      // child
       if (pid == 0)
       {
-        // child
         if (execvp(cmdArg[0], cmdArg) == -1)
         {
           write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
           exit(1);
         }
       }
+      // parent
       else if (pid > 0)
       {
         waitpid(-1, NULL, 0);
@@ -130,11 +165,14 @@ int main(int argc, char *argv[])
  *   - >128 characters - print an error message
  *   - all whitespace - don't print an error message
  * 
+ * Parameters:
+ *   cmd - output - trimmed user input
+ * 
  * Returns:
  *   0 if valid input (<= 128 chars)
  *   -1 if error or invalid input
  */
-int readCmd(char *cmd)
+static int readCmd(char *cmd)
 {
   if (fgets(cmd, sizeof(char) * INPUT_LENGTH_MAX, stdin) == NULL)
   {
@@ -205,4 +243,79 @@ int readCmd(char *cmd)
   debugPrintf("\"%s\" - trimmed all whitespace cmd\n", cmd);
 
   return 0;
+}
+
+static void parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
+                     bool *hasOutputRedir, bool *hasInputRedir, bool *hasPipe,
+                     bool *isBackground)
+{
+  cmdArg[0] = strtok(cmd, " \t");
+  *hasOutputRedir = false;
+  *hasInputRedir = false;
+  *hasPipe = false;
+  *isBackground = false;
+
+  int i = 1;
+  int anglePipeArgIndex = -1;
+  int ampersandArgIndex = -1;
+  do
+  {
+    cmdArg[i] = strtok(NULL, " \t");
+    i++;
+
+    // // assume redirection and pipeline never used together for this prj
+    // if (cmdArg[i][0] == '<' || cmdArg[i][0] == '>')
+    // {
+    //   *hasOutputRedir = true;
+    //   *hasInputRedir = true;
+    //   anglePipeArgIndex = i;
+    // }
+    // else if (cmdArg[i][0] == '|')
+    // {
+    //   *hasPipe = true;
+    //   anglePipeArgIndex = i;
+    // }
+
+    // // assume redirection can be used with bg execution for this prj
+    // // assume pipeline cannot be used with bg execution for this prj
+    // if (cmdArg[i][0] == '&')
+    // {
+    //   *isBackground = true; // redundant because we have ampersandArgIndex
+    //   ampersandArgIndex = i;
+    // }
+
+  } while (cmdArg[i] != NULL);
+
+  cmdArgPostAnglePipe = NULL;
+  if (anglePipeArgIndex != -1)
+  {
+    cmdArg[anglePipeArgIndex] = NULL;
+    cmdArgPostAnglePipe = &cmdArg[anglePipeArgIndex + 1];
+  }
+
+  i = 0;
+  while (cmdArg[i] != NULL)
+  {
+    debugPrintf("\"%s\" - arg%i\n", i, cmdArg[i]);
+    i++;
+  }
+  debugPrintf("\"%s\" - arg%i\n", i, cmdArg[i]);
+
+  if (cmdArgPostAnglePipe != NULL)
+  {
+    i = 0;
+    while (cmdArgPostAnglePipe[i] != NULL)
+    {
+      debugPrintf("\"%s\" - arg%i\n", i, cmdArgPostAnglePipe[i]);
+      i++;
+    }
+    debugPrintf("\"%s\" - arg%i\n", i, cmdArgPostAnglePipe[i]);
+  }
+
+  debugPrintf("%s - has \">\"\n", hasOutputRedir ? "true" : "false");
+  debugPrintf("%s - has \"<\"\n", hasInputRedir ? "true" : "false");
+  debugPrintf("%s - has \"|\"\n", hasPipe ? "true" : "false");
+  debugPrintf("%s - has \"&\"\n", isBackground ? "true" : "false");
+
+  return;
 }
