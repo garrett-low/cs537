@@ -31,9 +31,9 @@
 #endif
 
 static int readCmd();
-static void parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
-                     bool *hasOutputRedir, bool *hasInputRedir, bool *hasPipe,
-                     bool *isBackground);
+static int parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
+                    bool *hasOutputRedir, bool *hasInputRedir, bool *hasPipe,
+                    bool *isBackground);
 static void handleExit();
 static void handlePwd();
 static void handleCd(char *path);
@@ -65,8 +65,11 @@ int main(int argc, char *argv[])
     bool hasPipe = false;
     bool isBackground = false;
     char *cmdArgPostAnglePipe[INPUT_LENGTH_MAX];
-    parseCmd(cmd, cmdArg, cmdArgPostAnglePipe, &hasOutputRedir, &hasInputRedir,
-             &hasPipe, &isBackground);
+    if (parseCmd(cmd, cmdArg, cmdArgPostAnglePipe, &hasOutputRedir, &hasInputRedir,
+                 &hasPipe, &isBackground) == -1)
+    {
+      continue;
+    }
 
     // built-in commands
     if (strcmp(cmdArg[0], "exit") == 0)
@@ -89,7 +92,7 @@ int main(int argc, char *argv[])
       // child
       if (pid == 0)
       {
-        if (hasOutputRedir)
+        if (hasOutputRedir == true)
         {
           char *path = cmdArgPostAnglePipe[0];
           int retVal;
@@ -123,7 +126,7 @@ int main(int argc, char *argv[])
       }
     }
 
-    if (hasOutputRedir)
+    if (hasOutputRedir == true)
     {
       for (int i = 0; i < 2; i++)
       {
@@ -222,9 +225,9 @@ static int readCmd(char *cmd)
   return 0;
 }
 
-static void parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
-                     bool *hasOutputRedir, bool *hasInputRedir, bool *hasPipe,
-                     bool *isBackground)
+static int parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
+                    bool *hasOutputRedir, bool *hasInputRedir, bool *hasPipe,
+                    bool *isBackground)
 {
   cmdArg[0] = strtok(cmd, " \t");
   *hasOutputRedir = false;
@@ -282,17 +285,24 @@ static void parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
       if (cmdArgPostAnglePipe[i] == NULL)
       {
         write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
-        return;
+        return -1;
       }
       strcpy(cmdArgPostAnglePipe[i], cmdArg[anglePipeArgIndex + i + 1]);
     }
     cmdArgPostAnglePipe[i] = NULL; // set last argv to NULL
+
+    // we expect exactly one word after pipe or redirector
+    if (cmdArgPostAnglePipe[0] == NULL || cmdArgPostAnglePipe[1] != NULL)
+    {
+      write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+      return -1;
+    }
   }
 
-  debugPrintf("%s - has \">\"\n", *hasOutputRedir ? "true" : "false");
-  debugPrintf("%s - has \"<\"\n", *hasInputRedir ? "true" : "false");
-  debugPrintf("%s - has \"|\"\n", *hasPipe ? "true" : "false");
-  debugPrintf("%s - has \"&\"\n", *isBackground ? "true" : "false");
+  debugPrintf("%s - \">\" output redir\n", *hasOutputRedir ? "true" : "false");
+  debugPrintf("%s - \"<\" input redir\n", *hasInputRedir ? "true" : "false");
+  debugPrintf("%s - \"|\" pipeline\n", *hasPipe ? "true" : "false");
+  debugPrintf("%s - \"&\" bg exec\n", *isBackground ? "true" : "false");
 
   i = 0;
   while (cmdArg[i] != NULL)
@@ -313,7 +323,7 @@ static void parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
     debugPrintf("\"%s\" [%p] - arg%i\n", cmdArgPostAnglePipe[i], &cmdArgPostAnglePipe[i], i);
   }
 
-  return;
+  return 0;
 }
 
 static void handleExit()
