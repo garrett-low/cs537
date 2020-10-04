@@ -4,5 +4,5 @@
 
 int main(int argc, char *argv[])
 {
-  printf("1: %d\n", )
+  printf("1: %d\n", 1);
 }

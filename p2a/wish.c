@@ -16,6 +16,9 @@
 #include <unistd.h>
 #include <linux/limits.h>
 #include <stdbool.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #define INPUT_LENGTH_MAX 128
 #define GENERIC_ERROR "An error has occurred\n"
@@ -28,17 +31,19 @@
 #endif
 
 static int readCmd();
-static void parseCmd();
+static void parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
+                     bool *hasOutputRedir, bool *hasInputRedir, bool *hasPipe,
+                     bool *isBackground);
 static void handleExit();
-static void handlePwd());
-static void handleCd());
+static void handlePwd();
+static void handleCd(char *path);
+static void errorAndEndProcess();
 
 int main(int argc, char *argv[])
 {
   if (argc > 1)
   {
-    write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
-    exit(1);
+    errorAndEndProcess();
   }
 
   int historyLine = 0;
@@ -54,13 +59,14 @@ int main(int argc, char *argv[])
       continue;
     }
 
-    char *cmdArg[128];
+    char *cmdArg[INPUT_LENGTH_MAX];
     bool hasOutputRedir = false;
     bool hasInputRedir = false;
     bool hasPipe = false;
     bool isBackground = false;
-    char **cmdArgPostAnglePipe = NULL;
-    parseCmd(cmd, cmdArg, cmdArgPostAnglePipe, &hasOutputRedir, &hasInputRedir, &hasPipe, &isBackground);
+    char *cmdArgPostAnglePipe[INPUT_LENGTH_MAX];
+    parseCmd(cmd, cmdArg, cmdArgPostAnglePipe, &hasOutputRedir, &hasInputRedir,
+             &hasPipe, &isBackground);
 
     // built-in commands
     if (strcmp(cmdArg[0], "exit") == 0)
@@ -69,28 +75,11 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(cmdArg[0], "pwd") == 0)
     {
-      char workingDir[PATH_MAX];
-      if (getcwd(workingDir, PATH_MAX) == NULL)
-      {
-        write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
-        continue;
-      }
-      printf("%s\n", workingDir);
+      handlePwd();
     }
     else if (strcmp(cmdArg[0], "cd") == 0)
     {
-      if (cmdArg[1] == NULL)
-      {
-        chdir(getenv("HOME"));
-      }
-      else
-      {
-        if (chdir(cmdArg[1]) == -1)
-        {
-          write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
-          continue;
-        }
-      }
+      handleCd(cmdArg[1]);
     }
     // non-built-in commands
     else
@@ -100,16 +89,45 @@ int main(int argc, char *argv[])
       // child
       if (pid == 0)
       {
+        if (hasOutputRedir)
+        {
+          char *path = cmdArgPostAnglePipe[0];
+          int retVal;
+          if ((retVal = open(path, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU)) == -1)
+          {
+            errorAndEndProcess();
+          }
+
+          if (dup2(retVal, 1) == -1)
+          {
+            errorAndEndProcess();
+          }
+        }
+
         if (execvp(cmdArg[0], cmdArg) == -1)
         {
-          write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
-          exit(1);
+          errorAndEndProcess();
         }
       }
       // parent
       else if (pid > 0)
       {
-        waitpid(-1, NULL, 0);
+        if (!isBackground)
+        {
+          waitpid(-1, NULL, 0);
+        }
+        else
+        {
+          /* code */
+        }
+      }
+    }
+
+    if (hasOutputRedir)
+    {
+      for (int i = 0; i < 2; i++)
+      {
+        free(cmdArgPostAnglePipe[i]);
       }
     }
   }
@@ -226,9 +244,13 @@ static void parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
     }
 
     // assume redirection and pipeline never used together for this prj
-    if (cmdArg[i][0] == '<' || cmdArg[i][0] == '>')
+    if (cmdArg[i][0] == '>')
     {
       *hasOutputRedir = true;
+      anglePipeArgIndex = i;
+    }
+    else if (cmdArg[i][0] == '<')
+    {
       *hasInputRedir = true;
       anglePipeArgIndex = i;
     }
@@ -249,41 +271,88 @@ static void parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
     i++;
   } while (cmdArg[i] != NULL);
 
-  cmdArgPostAnglePipe = NULL;
   if (anglePipeArgIndex != -1)
   {
     cmdArg[anglePipeArgIndex] = NULL;
-    cmdArgPostAnglePipe = &cmdArg[anglePipeArgIndex + 1];
+
+    for (i = 0; cmdArg[anglePipeArgIndex + i + 1] != NULL; i++)
+    {
+      char *src = cmdArg[anglePipeArgIndex + i + 1];
+      cmdArgPostAnglePipe[i] = malloc(strlen(src) + 1);
+      if (cmdArgPostAnglePipe[i] == NULL)
+      {
+        write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+        return;
+      }
+      strcpy(cmdArgPostAnglePipe[i], cmdArg[anglePipeArgIndex + i + 1]);
+    }
+    cmdArgPostAnglePipe[i] = NULL; // set last argv to NULL
   }
 
   debugPrintf("%s - has \">\"\n", *hasOutputRedir ? "true" : "false");
   debugPrintf("%s - has \"<\"\n", *hasInputRedir ? "true" : "false");
   debugPrintf("%s - has \"|\"\n", *hasPipe ? "true" : "false");
   debugPrintf("%s - has \"&\"\n", *isBackground ? "true" : "false");
-  
+
   i = 0;
   while (cmdArg[i] != NULL)
   {
-    debugPrintf("\"%s\" - arg%i\n", cmdArg[i], i);
+    debugPrintf("\"%s\" [%p] - arg%i\n", cmdArg[i], &cmdArg[i], i);
     i++;
   }
-  debugPrintf("\"%s\" - arg%i\n", cmdArg[i], i);
+  debugPrintf("\"%s\" [%p] - arg%i\n", cmdArg[i], &cmdArg[i], i);
 
-
-  if (cmdArgPostAnglePipe != NULL)
+  if (anglePipeArgIndex != -1)
   {
     i = 0;
     while (cmdArgPostAnglePipe[i] != NULL)
     {
-      debugPrintf("\"%s\" - arg%i\n", cmdArgPostAnglePipe[i], i);
+      debugPrintf("\"%s\" [%p] - arg%i\n", cmdArgPostAnglePipe[i], &cmdArgPostAnglePipe[i], i);
       i++;
     }
-    debugPrintf("\"%s\" - arg%i\n", cmdArgPostAnglePipe[i], i);
+    debugPrintf("\"%s\" [%p] - arg%i\n", cmdArgPostAnglePipe[i], &cmdArgPostAnglePipe[i], i);
   }
 
   return;
 }
 
-static void handleExit() {
+static void handleExit()
+{
   exit(0);
+}
+
+static void handlePwd()
+{
+  char workingDir[PATH_MAX];
+  if (getcwd(workingDir, PATH_MAX) == NULL)
+  {
+    write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+    return;
+  }
+  printf("%s\n", workingDir);
+  return;
+}
+
+static void handleCd(char *path)
+{
+  if (path == NULL)
+  {
+    chdir(getenv("HOME"));
+  }
+  else
+  {
+    if (chdir(path) == -1)
+    {
+      write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+      return;
+    }
+  }
+
+  return;
+}
+
+static void errorAndEndProcess()
+{
+  write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+  exit(1);
 }
