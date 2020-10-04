@@ -51,6 +51,6 @@ p1b/xv6-fa20/user/*
 
 #p2a
 p2a/*
-!p2a/strtok_test.c
-!p2a/wish.c
-!p2a/discussion.c
+!p2a/*.c
+!p2a/*.h
+!*/Makefile
