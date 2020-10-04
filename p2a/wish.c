@@ -26,6 +26,8 @@
 #define debugPrintf(...) ((void)0)
 #endif
 
+int readCmd();
+
 int main(int argc, char *argv[])
 {
   if (argc > 1)
@@ -42,58 +44,19 @@ int main(int argc, char *argv[])
     fflush(stdout);
 
     char cmd[INPUT_LENGTH_MAX];
-    if (fgets(cmd, sizeof(char) * INPUT_LENGTH_MAX, stdin) == NULL)
-    {
-      write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
-      continue;
-    }
-
-    // exceeds 128 bytes
-    if (strchr(cmd, '\n') == NULL)
-    {
-      char readChar;
-      while ((readChar = fgetc(stdin)) != '\n' && readChar != EOF) {
-        
-      }
-      write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
-      continue;
-    }
-
-    // only newline
-    if (cmd[0] == '\n')
+    if (readCmd(&cmd) == -1)
     {
       continue;
     }
 
-    // trim newline
-    size_t cmdLen = strlen(cmd);
-    if (cmdLen > 0 && cmd[cmdLen - 1] == '\n')
-    {
-      cmd[cmdLen - 1] = '\0';
-    }
+    char *arg0 = strtok(cmd, " \t");
 
-    // backup cmd
-    char *cmdCpy = strdup(cmd);
-    if (cmdCpy == NULL)
-    {
-      write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
-      continue;
-    }
-
-    char *arg1 = strtok(cmdCpy, " \t");
-    debugPrintf("arg1: %s.\n", arg1);
-
-    // only whitespace - not an error
-    if (arg1 == NULL)
-    {
-      continue;
-    }
-
-    if (strcmp(arg1, "exit") == 0)
+    // built-in commands
+    if (strcmp(arg0, "exit") == 0)
     {
       exit(0);
     }
-    else if (strcmp(arg1, "pwd") == 0)
+    else if (strcmp(arg0, "pwd") == 0)
     {
       char workingDir[PATH_MAX];
       if (getcwd(workingDir, PATH_MAX) == NULL)
@@ -103,7 +66,7 @@ int main(int argc, char *argv[])
       }
       printf("%s\n", workingDir);
     }
-    else if (strcmp(arg1, "cd") == 0)
+    else if (strcmp(arg0, "cd") == 0)
     {
       char *arg2 = strtok(NULL, " \t");
       debugPrintf("arg2: %s.\n", arg2);
@@ -120,14 +83,126 @@ int main(int argc, char *argv[])
         }
       }
     }
+    // not built-in commands
+    else
+    {
+      char *cmdArg[128];
+      cmdArg[0] = arg0;
+      int i = 1;
+      do
+      {
+        cmdArg[i] = strtok(NULL, " \t");
+        i++;
+      } while (cmdArg[i] != NULL);
 
-    // char *cmdArg[128];
-    // int i = 0;
-    // cmdArg[i] = strtok(cmdCpy, " \t");
-    // while (cmdArg[i] != NULL)
-    // {
-    //   cmdArg[i] = strtok(NULL, " \t");
-    //   debugPrintf("arg %i: %s.\n", i, cmdArg[i]);
-    // }
+      i = 0;
+      while (cmdArg[i] != NULL)
+      {
+        debugPrintf("arg %i: %s.\n", i, cmdArg[i]);
+        i++;
+      }
+      debugPrintf("arg %i: %s.\n", i, cmdArg[i]);
+
+      int pid = fork();
+      if (pid == 0)
+      {
+        // child
+        if (execvp(cmdArg[0], cmdArg) == -1)
+        {
+          write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+          exit(1);
+        }
+      }
+      else if (pid > 0)
+      {
+        waitpid(-1, NULL, 0);
+      }
+    }
   }
+}
+
+/**
+ * readCmd
+ * read from stdin a max of 128 chars
+ * trims leading and trailing whitespace (space or tab)
+ * 
+ * Invalid input:
+ *   - >128 characters - print an error message
+ *   - all whitespace - don't print an error message
+ * 
+ * Returns:
+ *   0 if valid input (<= 128 chars)
+ *   -1 if error or invalid input
+ */
+int readCmd(char *cmd)
+{
+  if (fgets(cmd, sizeof(char) * INPUT_LENGTH_MAX, stdin) == NULL)
+  {
+    write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+    return -1;
+  }
+
+  // exceeds 128 bytes - print error
+  if (strchr(cmd, '\n') == NULL)
+  {
+    char readChar;
+    while ((readChar = fgetc(stdin)) != '\n' && readChar != EOF)
+    {
+    }
+    write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+    return -1;
+  }
+
+  // only newline - not an error
+  if (cmd[0] == '\n')
+  {
+    return -1;
+  }
+
+  // trim newline
+  size_t cmdLen = strlen(cmd);
+  if (cmdLen > 0 && cmd[cmdLen - 1] == '\n')
+  {
+    cmd[cmdLen - 1] = '\0';
+    cmdLen--;
+  }
+
+  debugPrintf("\"%s\" - trimmed newline cmd\n", cmd);
+
+  // trim leading whitespace (forward)
+  for (int i = 0; i < cmdLen; i++)
+  {
+    if (cmd[i] == ' ' || cmd[i] == '\t')
+    {
+      cmd++;
+      i--;
+    }
+    else // hit non-whitespace
+    {
+      break;
+    }
+  }
+
+  // all whitespace - not an error
+  if (strlen(cmd) == 0)
+  {
+    return -1;
+  }
+
+  // trim trailing whitespace (reverse)
+  for (int i = strlen(cmd) - 1; i >= 0; i--)
+  {
+    if (cmd[i] == ' ' || cmd[i] == '\t')
+    {
+      cmd[i] = '\0';
+    }
+    else // hit non-whitespace
+    {
+      break;
+    }
+  }
+
+  debugPrintf("\"%s\" - trimmed all whitespace cmd\n", cmd);
+
+  return 0;
 }
