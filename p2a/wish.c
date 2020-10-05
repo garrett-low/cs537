@@ -32,7 +32,7 @@
 #define debugPrintf(...) ((void)0)
 #endif
 
-static int readCmd();
+static int readCmd(char *cmd, int *historyLine);
 static int parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
                     bool *hasOutputRedir, bool *hasInputRedir, bool *hasPipe,
                     bool *isBackground);
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     fflush(stdout);
 
     char cmd[INPUT_LENGTH_MAX];
-    if (readCmd(&cmd) == -1)
+    if (readCmd(cmd, &historyLine) == -1)
     {
       continue;
     }
@@ -91,10 +91,18 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(cmdArg[0], "pwd") == 0)
     {
+      if (cmdArg[1] != NULL) {
+        write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+        continue;
+      }
       handlePwd();
     }
     else if (strcmp(cmdArg[0], "cd") == 0)
     {
+      if (cmdArg[2] != NULL) {
+        write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+        continue;
+      }
       handleCd(cmdArg[1]);
     }
     // non-built-in commands
@@ -110,7 +118,6 @@ int main(int argc, char *argv[])
           int pipes[2], pidPipe;
           if (pipe(pipes) == -1)
           {
-            debugPrintf("1\n");
             errorAndEndProcess();
           }
 
@@ -119,19 +126,16 @@ int main(int argc, char *argv[])
           {
             if (close(pipes[0]) == -1)
             {
-              debugPrintf("2\n");
               errorAndEndProcess();
             }
 
             if (dup2(pipes[1], STDOUT_FILENO) == -1)
             {
-              debugPrintf("3\n");
               errorAndEndProcess();
             }
 
             if (execvp(cmdArg[0], cmdArg) == -1)
             {
-              debugPrintf("4\n");
               errorAndEndProcess();
             }
           }
@@ -140,19 +144,16 @@ int main(int argc, char *argv[])
           {
             if (close(pipes[1]) == -1)
             {
-              debugPrintf("5\n");
               errorAndEndProcess();
             }
 
             if (dup2(pipes[0], STDIN_FILENO) == -1)
             {
-              debugPrintf("6\n");
               errorAndEndProcess();
             }
 
             if (execvp(cmdArgPostAnglePipe[0], cmdArgPostAnglePipe) == -1)
             {
-              debugPrintf("7\n");
               errorAndEndProcess();
             }
           }
@@ -200,7 +201,6 @@ int main(int argc, char *argv[])
           {
             errorAndEndProcess();
           }
-          debugPrintf("%i\n", pid);
         }
       }
       // parent
@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
  *   0 if valid input (<= 128 chars)
  *   -1 if error or invalid input
  */
-static int readCmd(char *cmd)
+static int readCmd(char *cmd, int *historyLine)
 {
   if (fgets(cmd, sizeof(char) * INPUT_LENGTH_MAX, stdin) == NULL)
   {
@@ -274,6 +274,7 @@ static int readCmd(char *cmd)
   // only newline - not an error
   if (cmd[0] == '\n')
   {
+    *historyLine -= 1;
     return -1;
   }
 
@@ -302,6 +303,7 @@ static int readCmd(char *cmd)
   // all whitespace - not an error
   if (strlen(cmd) == 0)
   {
+    *historyLine -= 1;
     return -1;
   }
 
