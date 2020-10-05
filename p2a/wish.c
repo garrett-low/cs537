@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/signal.h>
 
 #define INPUT_LENGTH_MAX 128
 #define GENERIC_ERROR "An error has occurred\n"
@@ -31,25 +32,14 @@
 #define debugPrintf(...) ((void)0)
 #endif
 
-// typedef struct pidTableStruct
-// {
-//   int pid[MAX_BACKGROUND_PROC];
-//   int head;
-//   int tail;
-//   int size;
-// } pidTable;
-
 static int readCmd();
 static int parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
                     bool *hasOutputRedir, bool *hasInputRedir, bool *hasPipe,
                     bool *isBackground);
-static void handleExit(int* bgPids);
+static void handleExit(int *bgPids);
 static void handlePwd();
 static void handleCd(char *path);
 static void errorAndEndProcess();
-// static char isEmpty(pidTable bgPids);
-// static void enqueue();
-// static void dequeue();
 
 // debug
 static void debugParse(char **cmdArg, char **cmdArgPostAnglePipe,
@@ -64,7 +54,12 @@ int main(int argc, char *argv[])
   }
 
   int historyLine = 0;
-  int bgPids[MAX_BACKGROUND_PROC] = {-1};
+  int bgPids[MAX_BACKGROUND_PROC];
+  for (int i = 0; i < MAX_BACKGROUND_PROC; i++)
+  {
+    bgPids[i] = -1;
+  }
+  
   while (1)
   {
     historyLine++;
@@ -176,10 +171,14 @@ int main(int argc, char *argv[])
             int retVal;
             if ((retVal =
                      open(path, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU)) == -1)
+            {
               errorAndEndProcess();
+            }
 
-            if (dup2(retVal, 1) == -1)
+            if (dup2(retVal, STDOUT_FILENO) == -1)
+            {
               errorAndEndProcess();
+            }
           }
           else if (hasInputRedir)
           {
@@ -187,16 +186,21 @@ int main(int argc, char *argv[])
 
             int retVal;
             if ((retVal = open(path, O_RDONLY)) == -1)
+            {
               errorAndEndProcess();
+            }
 
-            if (dup2(retVal, STDOUT_FILENO) == -1)
+            if (dup2(retVal, STDIN_FILENO) == -1)
+            {
               errorAndEndProcess();
+            }
           }
 
           if (execvp(cmdArg[0], cmdArg) == -1)
           {
             errorAndEndProcess();
           }
+          debugPrintf("%i\n", pid);
         }
       }
       // parent
@@ -375,9 +379,10 @@ static int parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
     }
     cmdArgPostAnglePipe[i] = NULL; // set last argv to NULL
 
-    // we expect exactly one word after redirector
+    // we expect exactly one word after redirector or ampersand for bg exec
     if ((*hasOutputRedir || *hasInputRedir) &&
-        (cmdArgPostAnglePipe[0] == NULL || cmdArgPostAnglePipe[1] != NULL))
+        (cmdArgPostAnglePipe[0] == NULL || cmdArgPostAnglePipe[1] != NULL) &&
+        (cmdArgPostAnglePipe[1][0] != '&'))
     {
       write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
       return -1;
@@ -387,13 +392,13 @@ static int parseCmd(char *cmd, char **cmdArg, char **cmdArgPostAnglePipe,
   return 0;
 }
 
-static void handleExit(int* bgPids)
+static void handleExit(int *bgPids)
 {
   for (int i = 0; i < MAX_BACKGROUND_PROC; i++)
   {
     if (bgPids[i] != -1)
     {
-      kill(bgPids[i]);
+      kill(bgPids[i], SIGTERM);
     }
   }
   exit(0);
@@ -463,71 +468,3 @@ static void debugParse(char **cmdArg, char **cmdArgPostAnglePipe,
     debugPrintf("\"%s\" [%p] - arg%i\n", cmdArgPostAnglePipe[i], &cmdArgPostAnglePipe[i], i);
   }
 }
-
-// /**
-//  * Returns 1 if the set is currently empty, 0 otherwise
-//  */
-// char isEmpty(pidTable bgPids)
-// {
-//   return (bgPids.head == -1) || (bgPids.tail == -1);
-// }
-
-// /**
-//  * Add to the back of the queue by inserting after tail node
-//  */
-// void enqueue(pidTable bgPids, int pid)
-// {
-//   if (bgPids.size >= MAX_BACKGROUND_PROC)
-//   {
-//     write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
-//     return;
-//   }
-
-//   if (isEmpty(bgPids))
-//   { // set is currently empty; head and tail same
-//     bgPids.tail++;
-//     bgPids.head++;
-//     // debugPrintSet(set, 0);
-//   }
-//   else if (bgPids.tail + 1 < MAX_BACKGROUND_PROC)
-//   { // do not wrap around
-//     bgPids.tail++;
-//   }
-//   else
-//   { // wrap around
-//     bgPids.tail = 0;
-//   }
-
-//   bgPids.pid[bgPids.tail] = pid;
-//   bgPids.size++;
-// }
-
-// /**
-//  * Remove from the front of the queue by removing the head node
-//  */
-// void dequeue(pidTable bgPids)
-// {
-//   if (isEmpty(bgPids))
-//   {
-//     write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
-//     return;
-//   }
-
-//   bgPids.pid[bgPids.head] = 0;
-
-//   if (bgPids.head == bgPids.tail)
-//   { // make queue empty
-//     bgPids.head = -1;
-//     bgPids.tail = -1;
-//   }
-//   else if (bgPids.head + 1 < MAX_BACKGROUND_PROC)
-//   { // do not wrap around
-//     bgPids.head++;
-//   }
-//   else
-//   { // wrap around
-//     bgPids.head = 0;
-//   }
-
-//   bgPids.size--;
-// }
