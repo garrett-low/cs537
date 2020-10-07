@@ -1,10 +1,18 @@
 #include "circleQueue.h"
+#include "types.h"
+#include "defs.h"
 #include "param.h"
+#include "mmu.h"
+#include "proc.h"
+#include "x86.h"
+#include "syscall.h"
+#include "sysfunc.h"
+
 
 /**
  * Returns 1 if the set is currently empty, 0 otherwise
  */
-char isEmpty(circleQueue pq) { return (pq.head == -1 || pq.tail == -1) }
+char isEmpty(circleQueue pq) { return (pq.head == -1 || pq.tail == -1); }
 
 /**
  * Add to the back of the queue by inserting after tail node
@@ -18,7 +26,7 @@ int enqueue(circleQueue pq, int pid) {
     pq.head++;
     pq.tail++;
   } else {
-    pq.tail = (pq.tail + 1) % NPROC
+    pq.tail = (pq.tail + 1) % NPROC;
   }
 
   pq.pid[pq.tail] = pid;
@@ -34,13 +42,13 @@ int dequeue(circleQueue pq) {
     return -1;
   }
 
-  int retVal = pq[pq.head];
+  int retVal = pq.pid[pq.head];
   pq.pid[pq.head] = 0;
 
   if (pq.head == pq.tail) {
     setQueueEmpty(pq);
   } else {
-    pq.head = (pq.head + 1) % NPROC
+    pq.head = (pq.head + 1) % NPROC;
   }
   
   pq.size--;
@@ -90,8 +98,8 @@ int swapHead(circleQueue pq, int pid) {
   }
   
   // swap
-  int temp = pq.pid[head];
-  pq.pid[head] = pid;
+  int temp = pq.pid[pq.head];
+  pq.pid[pq.head] = pid;
   pq.pid[currIndex] = temp;
   
   return temp;

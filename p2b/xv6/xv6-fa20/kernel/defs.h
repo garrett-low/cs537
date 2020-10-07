@@ -9,6 +9,8 @@ struct pipe;
 struct proc;
 struct spinlock;
 struct stat;
+// P2B;
+struct pstat;
 
 // bio.c
 void            binit(void);
@@ -109,6 +111,10 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+// P2B
+int             setpri(int, int);
+int             getpri(int);
+int             getpinfo(struct pstat*);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

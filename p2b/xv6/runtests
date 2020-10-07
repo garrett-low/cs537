@@ -1,0 +1,3 @@
+#!/bin/bash
+python ./test_p2b.py -p xv6-fa20 $@ | tee -i runtests.log
+exit $?

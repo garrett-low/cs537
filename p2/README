@@ -24,6 +24,8 @@ State/Definitions:
     * add SYSCALL: getpri, setpri, getpinfo
 * user.h
     * add function prototype: getpri, setpri, getpinfo
+* kernel/Makefile.mk
+    * add files
 
 Implementation:
 * circleQueue.c, circleQueue.h
@@ -31,7 +33,9 @@ Implementation:
       Reused code from a previous class.
 * proc.c - sched()
     * 
+* proc.c - userinit()
+* proc.c - fork()
 * proc.c - scheduler()
-* proc.c - getpri()
-* proc.c - setpri()
-* proc.c - getpinfo()
+* proc.c - getpri(), sys_getpri()
+* proc.c - setpri(), sys_setpri()
+* proc.c - getpinfo(), sys_getpinfo()

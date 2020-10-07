@@ -102,6 +102,10 @@ userinit(void)
   p->cwd = namei("/");
 
   p->state = RUNNABLE;
+  
+  //P2B
+  p->pri = 3;
+  enqueue(pq[3], p->pid);
   release(&ptable.lock);
 }
 
@@ -160,6 +164,10 @@ fork(void)
   pid = np->pid;
   np->state = RUNNABLE;
   safestrcpy(np->name, proc->name, sizeof(proc->name));
+  
+  //P2B
+  np->pri = proc->pri;
+  enqueue(pq[np->pri], np->pid);
   return pid;
 }
 
@@ -337,7 +345,7 @@ sched(void)
     panic("sched interruptible");
   intena = cpu->intena;
   
-  // P2B - dequeue currently running process and set qtail for pstat
+  // P2B - enqueue currently running process and set qtail for pstat
   proc->qtail[proc->pri]++;
   proc->ticks[proc->pri]++;
   if (proc->state == ZOMBIE || proc->state == UNUSED) {
@@ -495,6 +503,17 @@ procdump(void)
  * -1 if pid or pri are invalid
  * 0 if priority set successfully
  */
+int sys_setpri(void) {
+  int pid;
+  int pri;
+  
+  if (argint(0, &pid) < 0 || argint(1, &pri)) {
+    return -1;
+  }
+  
+  return setpri(pid, pri);
+}
+
 int setpri(int pid, int pri) {
   struct proc *p;
   
@@ -506,7 +525,7 @@ int setpri(int pid, int pri) {
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if (p->pid == pid) {
       // Dequeue (after swapping to head) from existing PQ, if any
-      if (swaphead(pq[p->pri], pid) != -1) {
+      if (swapHead(pq[p->pri], pid) != -1) {
         (void) dequeue(pq[p->pri]);
       }
       
@@ -526,8 +545,18 @@ int setpri(int pid, int pri) {
  * Returns priority of specified process
  * Returns -1 if pid is invalid
  */
+int sys_getpri(void) {
+  int pid;
+  
+  if (argint(0, &pid) < 0) {
+    return -1;
+  }
+  
+  return getpri(pid);
+}
+
 int getpri(int pid) {
-  struct proc *p;
+    struct proc *p;
   
   int found = 0;
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -541,6 +570,16 @@ int getpri(int pid) {
   }
   
   return p->pri;
+}
+
+int sys_getpinfo(void) {
+  struct pstat *status;
+  
+  if (argptr(0, (void*) &status, sizeof(*status)) < 0) {
+    return -1;
+  }
+  
+  return getpinfo(status);
 }
 
 int getpinfo(struct pstat * status) {
