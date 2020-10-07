@@ -1,13 +1,11 @@
 Garrett Low
 low
 
-description for P2B: xv6 MLQ scheduler
+Description for P2B: xv6 MLQ scheduler
 
-Boilerplate: things already laid out in prj description:
 * Confirm CPUS in Makefile set to 1. Only consider 1 CPU for this prj.
-*
 
-State:
+State/Definitions:
 * param.h
     * declare constants for timer ticks of different queues
 * pstat.h
@@ -16,9 +14,24 @@ State:
     * new members: prio, ticks[4], qtail[4]
 * proc.c
     * new global static members: pq0, pq1, pq2, pq3
+* syscall.c
+    * map function pointer: sys_getpri, sys_setpri, sys_getpinfo
+* syscall.h
+    * new sys call number: sys_getpri(22), sys_setpri(23), sys_getpinfo(24)
+* sysfunc.h
+    * new sys call handler: sys_getpri, sys_setpri, sys_getpinfo
+* usys.S
+    * add SYSCALL: getpri, setpri, getpinfo
+* user.h
+    * add function prototype: getpri, setpri, getpinfo
 
 Implementation:
 * circleQueue.c, circleQueue.h
     * pq0-3 are implemented as circular array queues.
       Reused code from a previous class.
-
+* proc.c - sched()
+    * 
+* proc.c - scheduler()
+* proc.c - getpri()
+* proc.c - setpri()
+* proc.c - getpinfo()

@@ -40,5 +40,10 @@ void* malloc(uint);
 void free(void*);
 int atoi(const char*);
 
+// P2B
+int setpri(int pid, int pri);
+int getpri(int pid);
+int getpinfo(struct pstat * status);
+
 #endif // _USER_H_
 

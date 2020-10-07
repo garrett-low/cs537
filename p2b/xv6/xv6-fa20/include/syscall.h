@@ -23,5 +23,9 @@
 #define SYS_sbrk   19
 #define SYS_sleep  20
 #define SYS_uptime 21
+// P2B
+#define SYS_getpri 22
+#define SYS_setpri 23
+#define SYS_getpinfo 24
 
 #endif // _SYSCALL_H_

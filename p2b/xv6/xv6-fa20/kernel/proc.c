@@ -486,4 +486,15 @@ procdump(void)
   }
 }
 
+// P2B - new system calls for MLQ implementation and testing
+int setpri(int pid, int pri) {
+  return 0;
+}
 
+int getpri(int pid) {
+  return 0;
+}
+
+int getpinfo(struct pstat * status) {
+  return 0;
+}
