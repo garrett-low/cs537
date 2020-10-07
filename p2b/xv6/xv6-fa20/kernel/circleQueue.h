@@ -13,3 +13,4 @@ int enqueue(circleQueue pq, int pid);
 int dequeue(circleQueue pq);
 void setQueueEmpty(circleQueue pq);
 int peek(circleQueue pq);
+int swaphead(circleQueue pq, int pid);

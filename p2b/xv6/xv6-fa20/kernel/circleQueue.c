@@ -21,7 +21,7 @@ int enqueue(circleQueue pq, int pid) {
     pq.tail = (pq.tail + 1) % NPROC
   }
 
-  pq[pq.tail] = pid;
+  pq.pid[pq.tail] = pid;
   pq.size++;
   return pid;
 }
@@ -35,7 +35,7 @@ int dequeue(circleQueue pq) {
   }
 
   int retVal = pq[pq.head];
-  pq[pq.head] = 0;
+  pq.pid[pq.head] = 0;
 
   if (pq.head == pq.tail) {
     setQueueEmpty(pq);
@@ -53,8 +53,46 @@ void setQueueEmpty(circleQueue pq) {
   pq.size = 0;
 }
 
+/**
+ * Returns pid of front of queue without dequeuing
+ */ 
 int peek(circleQueue pq) {
   if (isEmpty(pq))
     return -1;
-  return pq[pq.head];
+  return pq.pid[pq.head];
+}
+
+/**
+ * Move the specified pid to the head where it can be dequeued if needed
+ * 
+ * Returns:
+ * -1 on error
+ * Otherwise, returns pid of the old head that was swapped.
+ */
+int swapHead(circleQueue pq, int pid) {
+  if (isEmpty(pq))
+    return -1;
+  
+  // pid already at head if only item in line
+  if (pq.size == 1)
+    return pid;
+  
+  // find pid in PQ
+  int currIndex = -1;
+  for(int i = 0; i < NPROC; i++) {
+    if (pq.pid[i] == pid) {
+      currIndex = i;
+      break;
+    }
+  }
+  if (currIndex == -1) { // not found
+    return -1; 
+  }
+  
+  // swap
+  int temp = pq.pid[head];
+  pq.pid[head] = pid;
+  pq.pid[currIndex] = temp;
+  
+  return temp;
 }

@@ -487,12 +487,60 @@ procdump(void)
 }
 
 // P2B - new system calls for MLQ implementation and testing
+
+/**
+ * Given the pid, set the priority of the process
+ * 
+ * Returns:
+ * -1 if pid or pri are invalid
+ * 0 if priority set successfully
+ */
 int setpri(int pid, int pri) {
+  struct proc *p;
+  
+  // Check for valid priority
+  if (pri < 0 || pri > 3) {
+    return -1;
+  }
+  
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if (p->pid == pid) {
+      // Dequeue (after swapping to head) from existing PQ, if any
+      if (swaphead(pq[p->pri], pid) != -1) {
+        (void) dequeue(pq[p->pri]);
+      }
+      
+      // Enqueue on new PQ
+      p->pri = pri;
+      p->qtail[pri]++;
+      (void) enqueue(pq[pri], pid);
+      
+      break; 
+    }
+  }
+  
   return 0;
 }
 
+/**
+ * Returns priority of specified process
+ * Returns -1 if pid is invalid
+ */
 int getpri(int pid) {
-  return 0;
+  struct proc *p;
+  
+  int found = 0;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if (p->pid == pid) {
+      found = 1;
+      break;
+    }
+  }
+  if (!found) {
+    return -1;
+  }
+  
+  return p->pri;
 }
 
 int getpinfo(struct pstat * status) {
