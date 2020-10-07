@@ -544,5 +544,18 @@ int getpri(int pid) {
 }
 
 int getpinfo(struct pstat * status) {
+  struct proc *p;
+  
+  for (int i = 0; i < NPROC; i++) {
+    p = &ptable.proc[i];
+    status->inuse[i] = (p->state != UNUSED);
+    status->pid[i] = p->pid;
+    status->state[i] = p->state;
+    for (int j = 0; j < 3; j++) {
+      status->ticks[i][j] = p->ticks[j];
+      status->qtail[i][j] = p->qtail[j];
+    }
+  }
+  
   return 0;
 }
