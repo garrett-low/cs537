@@ -13,7 +13,7 @@ struct {
 } ptable;
 
 // P2B - add queue arrays
-static circleQueue pq[3];
+static circleQueue pq[4];
 
 static struct proc *initproc;
 
@@ -104,8 +104,16 @@ userinit(void)
   p->state = RUNNABLE;
   
   //P2B
+  // Initialize priority queues to empty
+  for (int i = 0; i < 4; i++) {
+    setQueueEmpty(&pq[i]);
+  }
   p->pri = 3;
-  enqueue(pq[3], p->pid);
+  cprintf("%s [pid %d]\n", p->name, p->pid);
+  enqueue(&pq[p->pri], p->pid);
+  cprintf("peek: %d, h: %d, t: %d, s: %d\n", peek(&pq[3]), pq[3].head, pq[3].tail, pq[3].size);
+  cprintf("peek: %d\n", peek(&pq[2]));
+  cprintf("peek: %d\n", peek(&pq[1]));
   release(&ptable.lock);
 }
 
@@ -167,7 +175,6 @@ fork(void)
   
   //P2B
   np->pri = proc->pri;
-  enqueue(pq[np->pri], np->pid);
   return pid;
 }
 
@@ -268,11 +275,6 @@ void
 scheduler(void)
 {
   struct proc *p;
-  
-  // P2B - Initialize priority queues to empty
-  for (int i = 0; i < 3; i++) {
-    setQueueEmpty(pq[i]);
-  }
 
   for(;;){
     // Enable interrupts on this processor.
@@ -283,34 +285,37 @@ scheduler(void)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
-      
+        
+      cprintf("%s [pid %d] [pri %d]\n", p->name, p->pid, p->pri);
+          
       // P2B - Process is not the front of the line and all queues are not empty
       // look for the front of the line, starting with highest pri
       int currPid = p->pid;
       int frontPid = -1;
       for (int i = 3; i >= 0; i--) {
-        frontPid = peek(pq[i]);
-
-        if (frontPid != -1) {
+        if ((frontPid = peek(&pq[i])) != -1) {
+          cprintf("PQ%d: %d\n", i, peek(&pq[i]));
           break;
         }
       }
-      if (frontPid != currPid && frontPid != -1) continue;
+      if (frontPid != currPid) continue;
       
       // P2B - Process is not done with time slice for PQ1-3
-      int currPri = p->pri;
-      if (currPri == 3 && (p->ticks[3] % PQ3_TICKS != 0)) {
-        continue;
-      } else if (currPri == 2 && (p->ticks[2] % PQ2_TICKS != 0)) {
-        continue;
-      } else if (currPri == 1 && (p->ticks[1] % PQ1_TICKS != 0)) {
-        continue;
-      } else { // if PQ0, we're FIFO so keep running it.???
-        continue;
-      }
+      // int currPri = p->pri;
+      // if (currPri == 3 && (p->ticks[3] % PQ3_TICKS != 0)) {
+      //   continue;
+      // } else if (currPri == 2 && (p->ticks[2] % PQ2_TICKS != 0)) {
+      //   continue;
+      // } else if (currPri == 1 && (p->ticks[1] % PQ1_TICKS != 0)) {
+      //   continue;
+      // } else { // if PQ0, we're FIFO so keep running it.???
+      //   continue;
+      // }
       
-      // P2B - dequeue
-      (void) dequeue(pq[currPri]);
+      cprintf("hello\n");
+      
+      // // P2B - dequeue
+      // (void) dequeue(pq[currPri]);
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
@@ -349,7 +354,9 @@ sched(void)
   proc->qtail[proc->pri]++;
   proc->ticks[proc->pri]++;
   if (proc->state == ZOMBIE || proc->state == UNUSED) {
-    (void) enqueue(pq[proc->pri], proc->pid);
+    if (swapHead(&pq[p->pri], pid) != -1) {
+      (void) dequeue(&pq[p->pri]);
+    }
   }
   
   swtch(&proc->context, cpu->scheduler);
@@ -522,20 +529,25 @@ int setpri(int pid, int pri) {
     return -1;
   }
   
+  int found = 0;
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if (p->pid == pid) {
       // Dequeue (after swapping to head) from existing PQ, if any
-      if (swapHead(pq[p->pri], pid) != -1) {
-        (void) dequeue(pq[p->pri]);
+      if (swapHead(&pq[p->pri], pid) != -1) {
+        (void) dequeue(&pq[p->pri]);
       }
       
       // Enqueue on new PQ
       p->pri = pri;
       p->qtail[pri]++;
-      (void) enqueue(pq[pri], pid);
+      (void) enqueue(&pq[pri], pid);
       
+      found = 1;
       break; 
     }
+  }
+  if (found == 0) {
+    return -1;
   }
   
   return 0;
@@ -565,7 +577,7 @@ int getpri(int pid) {
       break;
     }
   }
-  if (!found) {
+  if (found == 0) {
     return -1;
   }
   
@@ -583,6 +595,10 @@ int sys_getpinfo(void) {
 }
 
 int getpinfo(struct pstat * status) {
+  if (status == NULL) {
+    return -1;
+  }
+  
   struct proc *p;
   
   for (int i = 0; i < NPROC; i++) {

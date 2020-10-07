@@ -14,9 +14,9 @@ typedef struct {
    int size;
 } circleQueue;
 
-char isEmpty(circleQueue pq);
-int enqueue(circleQueue pq, int pid);
-int dequeue(circleQueue pq);
-void setQueueEmpty(circleQueue pq);
-int peek(circleQueue pq);
-int swapHead(circleQueue pq, int pid);
+char isEmpty(circleQueue *pq);
+int enqueue(circleQueue *pq, int pid);
+int dequeue(circleQueue *pq);
+void setQueueEmpty(circleQueue *pq);
+int peek(circleQueue *pq);
+int swapHead(circleQueue *pq, int pid);
