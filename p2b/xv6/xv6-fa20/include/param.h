@@ -17,9 +17,9 @@
 #define MAXARG       32  // max exec arguments
 
 // P2B constants
-#define P3_TICKS 8
-#define P2_TICKS 12
-#define P1_TICKS 16
-#define P0_TICKS 0
+#define PQ3_TICKS 8
+#define PQ2_TICKS 12
+#define PQ1_TICKS 16
+#define PQ0_TICKS 0
 
 #endif // _PARAM_H_

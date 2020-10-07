@@ -6,6 +6,9 @@
  */
 char isEmpty(circleQueue pq) { return (pq.head == -1 || pq.tail == -1) }
 
+/**
+ * Add to the back of the queue by inserting after tail node
+ */
 int enqueue(circleQueue pq, int pid) {
   if (pq.size >= NPROC) {
     return -1;
@@ -20,7 +23,7 @@ int enqueue(circleQueue pq, int pid) {
 
   pq[pq.tail] = pid;
   pq.size++;
-  return 0;
+  return pid;
 }
 
 /**
@@ -48,4 +51,10 @@ void setQueueEmpty(circleQueue pq) {
   pq.head = -1;
   pq.tail = -1;
   pq.size = 0;
+}
+
+int peek(circleQueue pq) {
+  if (isEmpty(pq))
+    return -1;
+  return pq[pq.head];
 }

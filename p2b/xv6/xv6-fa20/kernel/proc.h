@@ -76,7 +76,7 @@ struct proc {
   char name[16];               // Process name (debugging)
   
   // P2B - new state
-  int prio;                    // Scheduling priority queue
+  int pri;                    // Scheduling priority queue
   int ticks[4];                // Ticks per priority queue
   int qtail[4];                // Times moved to tail per priority queue
 };

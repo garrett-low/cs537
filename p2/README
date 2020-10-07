@@ -18,5 +18,7 @@ State:
     * new global static members: pq0, pq1, pq2, pq3
 
 Implementation:
-* proc.c
-    * pq0-3 are implemented as circular array queues
+* circleQueue.c, circleQueue.h
+    * pq0-3 are implemented as circular array queues.
+      Reused code from a previous class.
+

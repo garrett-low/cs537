@@ -13,10 +13,7 @@ struct {
 } ptable;
 
 // P2B - add queue arrays
-static circleQueue pq3;
-static circleQueue pq2;
-static circleQueue pq1;
-static circleQueue pq0;
+static circleQueue pq[3];
 
 static struct proc *initproc;
 
@@ -264,10 +261,10 @@ scheduler(void)
 {
   struct proc *p;
   
-  setQueueEmpty(pq3);
-  setQueueEmpty(pq2);
-  setQueueEmpty(pq1);
-  setQueueEmpty(pq0);
+  // P2B - Initialize priority queues to empty
+  for (int i = 0; i < 3; i++) {
+    setQueueEmpty(pq[i]);
+  }
 
   for(;;){
     // Enable interrupts on this processor.
@@ -278,7 +275,34 @@ scheduler(void)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
+      
+      // P2B - Process is not the front of the line and all queues are not empty
+      // look for the front of the line, starting with highest pri
+      int currPid = p->pid;
+      int frontPid = -1;
+      for (int i = 3; i >= 0; i--) {
+        frontPid = peek(pq[i]);
 
+        if (frontPid != -1) {
+          break;
+        }
+      }
+      if (frontPid != currPid && frontPid != -1) continue;
+      
+      // P2B - Process is not done with time slice for PQ1-3
+      int currPri = p->pri;
+      if (currPri == 3 && (p->ticks[3] % PQ3_TICKS != 0)) {
+        continue;
+      } else if (currPri == 2 && (p->ticks[2] % PQ2_TICKS != 0)) {
+        continue;
+      } else if (currPri == 1 && (p->ticks[1] % PQ1_TICKS != 0)) {
+        continue;
+      } else { // if PQ0, we're FIFO so keep running it.???
+        continue;
+      }
+      
+      // P2B - dequeue
+      (void) dequeue(pq[currPri]);
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
@@ -293,7 +317,6 @@ scheduler(void)
       proc = 0;
     }
     release(&ptable.lock);
-
   }
 }
 
@@ -313,6 +336,14 @@ sched(void)
   if(readeflags()&FL_IF)
     panic("sched interruptible");
   intena = cpu->intena;
+  
+  // P2B - dequeue currently running process and set qtail for pstat
+  proc->qtail[proc->pri]++;
+  proc->ticks[proc->pri]++;
+  if (proc->state == ZOMBIE || proc->state == UNUSED) {
+    (void) enqueue(pq[proc->pri], proc->pid);
+  }
+  
   swtch(&proc->context, cpu->scheduler);
   cpu->intena = intena;
 }
