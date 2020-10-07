@@ -1,0 +1,14 @@
+Garrett Low
+low
+
+description for P2B: xv6 MLQ scheduler
+
+Boilerplate: things already laid out in prj description:
+* Confirm CPUS in Makefile set to 1. Only consider 1 CPU for this prj.
+*
+
+Constants:
+*  param.h
+**  declare constants for timer ticks of different queues
+*  enum procstate
+**   move enum procstate to pstat.h and #include pstat.h in proc.h

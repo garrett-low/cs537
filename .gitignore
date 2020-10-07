@@ -54,3 +54,21 @@ p2a/*
 !p2a/*.c
 !p2a/*.h
 !*/Makefile
+
+# p2b
+# p2b/xv6/*
+# !p2b/xv6/
+# p2b/xv6/xv6-fa20/*
+# !p2b/xv6/xv6-fa20/
+# p2b/xv6/xv6-fa20/include/*
+# !p2b/xv6/xv6-fa20/include/
+# !p2b/xv6/xv6-fa20/include/pstat.h
+# !p2b/xv6/xv6-fa20/include/param.h
+# p2b/xv6/xv6-fa20/kernel/*
+# !p2b/xv6/xv6-fa20/kernel/
+# !p2b/xv6/xv6-fa20/kernel/proc.c
+# !p2b/xv6/xv6-fa20/kernel/proc.h
+# p2b/xv6/xv6-fa20/user/*
+# !p2b/xv6/xv6-fa20/user/
+p2b/xv6/xv6.tar.gz
+*.swp
