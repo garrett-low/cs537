@@ -7,8 +7,16 @@ Boilerplate: things already laid out in prj description:
 * Confirm CPUS in Makefile set to 1. Only consider 1 CPU for this prj.
 *
 
-Constants:
-*  param.h
-**  declare constants for timer ticks of different queues
-*  enum procstate
-**   move enum procstate to pstat.h and #include pstat.h in proc.h
+State:
+* param.h
+    * declare constants for timer ticks of different queues
+* pstat.h
+    * move enum procstate to pstat.h and #include pstat.h in proc.h
+* proc.h
+    * new members: prio, ticks[4], qtail[4]
+* proc.c
+    * new global static members: pq0, pq1, pq2, pq3
+
+Implementation:
+* proc.c
+    * pq0-3 are implemented as circular array queues

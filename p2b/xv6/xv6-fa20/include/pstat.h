@@ -3,6 +3,9 @@
 
 #include "param.h"
 
+// P2B - moved from proc.h
+enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+
 struct pstat {
   int inuse[NPROC]; // whether this slot of the process table is in use (1 or 0)
   int pid[NPROC]; // PID of each process
@@ -13,4 +16,3 @@ struct pstat {
 };
 
 #endif // _PSTAT_H_
-

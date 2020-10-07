@@ -5,11 +5,18 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "circleQueue.h"
 
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
 } ptable;
+
+// P2B - add queue arrays
+static circleQueue pq3;
+static circleQueue pq2;
+static circleQueue pq1;
+static circleQueue pq0;
 
 static struct proc *initproc;
 
@@ -256,6 +263,11 @@ void
 scheduler(void)
 {
   struct proc *p;
+  
+  setQueueEmpty(pq3);
+  setQueueEmpty(pq2);
+  setQueueEmpty(pq1);
+  setQueueEmpty(pq0);
 
   for(;;){
     // Enable interrupts on this processor.
