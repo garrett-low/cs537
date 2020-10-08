@@ -42,8 +42,9 @@ static void handleCd(char *path);
 static void errorAndEndProcess();
 
 // debug
-static void debugParse(char **cmdArg, char **cmdArg2, bool hasOut, bool hasIn,
-                       bool hasPipe, bool isBackground);
+static void debugParse(char *cmd, char **cmdArg, char **cmdArgIn,
+                       char **cmdArgOut, char **cmdArgPipe, bool *hasOut,
+                       bool *hasIn, bool *hasPipe, bool *isBackground);
 
 int main(int argc, char *argv[]) {
   if (argc > 1) {
@@ -67,13 +68,13 @@ int main(int argc, char *argv[]) {
     }
 
     char *cmdArg[INPUT_LENGTH_MAX];
+    char *cmdArgIn[INPUT_LENGTH_MAX];
+    char *cmdArgOut[INPUT_LENGTH_MAX];
+    char *cmdArgPipe[INPUT_LENGTH_MAX];
     bool hasOut = false;
     bool hasIn = false;
     bool hasPipe = false;
     bool isBackground = false;
-    char *cmdArgIn[INPUT_LENGTH_MAX];
-    char *cmdArgOut[INPUT_LENGTH_MAX];
-    char *cmdArgPipe[INPUT_LENGTH_MAX];
     if (parseCmd(cmd, cmdArg, cmdArgIn, cmdArgOut, cmdArgPipe, &hasOut, &hasIn,
                  &hasPipe, &isBackground) == -1) {
       continue;
@@ -165,23 +166,30 @@ int main(int argc, char *argv[]) {
           } else if (hasIn && hasOut) {
             char *inPath = cmdArgIn[0];
             char *outPath = cmdArgOut[0];
+            
+            debugPrintf("1\n");
 
             int retVal;
             if ((retVal = open(inPath, O_RDONLY)) == -1) {
               errorAndEndProcess();
             }
+            debugPrintf("2\n");
 
             if (dup2(retVal, STDIN_FILENO) == -1) {
               errorAndEndProcess();
             }
-
-            if ((retVal = open(outPath, O_RDONLY)) == -1) {
+            debugPrintf("3\n");
+            
+            if ((retVal = open(outPath, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU)) ==
+                -1) {
               errorAndEndProcess();
             }
+            debugPrintf("4\n");
 
-            if (dup2(retVal, STDIN_FILENO) == -1) {
+            if (dup2(retVal, STDOUT_FILENO) == -1) {
               errorAndEndProcess();
             }
+            debugPrintf("5\n");
           }
 
           if (execvp(cmdArg[0], cmdArg) == -1) {
@@ -333,18 +341,30 @@ static int parseCmd(char *cmd, char **cmdArg, char **cmdArgIn, char **cmdArgOut,
 
     cmdArgOut[0] = cmdArg[outArgIndex + 1];
     cmdArgOut[1] = NULL;
-    if (cmdArg[outArgIndex + 2] != NULL) {
+    if (cmdArg[outArgIndex + 2] != NULL && cmdArg[outArgIndex + 2][0] != '&') {
       write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
       return -1;
+    }
+    if (*isBackground) {
+      if (cmdArg[outArgIndex + 2][1] != '\0') {
+        write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+        return -1;
+      }
     }
   } else if (!*hasOut && *hasIn) {
     cmdArg[inArgIndex] = NULL;
 
     cmdArgIn[0] = cmdArg[inArgIndex + 1];
     cmdArgIn[1] = NULL;
-    if (cmdArg[inArgIndex + 2] != NULL) {
+    if (cmdArg[inArgIndex + 2] != NULL && cmdArg[inArgIndex + 2][0] != '&') {
       write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
       return -1;
+    }
+    if (*isBackground) {
+      if (cmdArg[inArgIndex + 2][1] != '\0') {
+        write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+        return -1;
+      }
     }
   } else if (*hasOut && *hasIn) {
     cmdArg[inArgIndex] = NULL;
@@ -357,32 +377,39 @@ static int parseCmd(char *cmd, char **cmdArg, char **cmdArgIn, char **cmdArgOut,
     cmdArgIn[1] = NULL;
 
     if (inArgIndex > outArgIndex) {
-      if (cmdArg[outArgIndex + 2] != NULL) {
+      if (cmdArg[inArgIndex + 2] != NULL && cmdArg[inArgIndex + 2][0] != '&') {
         write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
         return -1;
       }
-
+      if (*isBackground) {
+        if (cmdArg[inArgIndex + 2][1] != '\0') {
+          write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+          return -1;
+        }
+      }
     } else {
-      if (cmdArg[outArgIndex + 2] != NULL) {
+      if (cmdArg[outArgIndex + 2] != NULL &&
+          cmdArg[outArgIndex + 2][0] != '&') {
         write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
         return -1;
       }
-    }
-
-    if (cmdArg[inArgIndex + 2] != NULL) {
-      write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
-      return -1;
+      if (*isBackground) {
+        if (cmdArg[outArgIndex + 2][1] != '\0') {
+          write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+          return -1;
+        }
+      }
     }
   } else if (*hasPipe) {
     cmdArg[pipeArgIndex] = NULL;
-    cmdArgPipe[0] = cmdArg[pipeArgIndex + 1];
-    cmdArgPipe[1] = NULL;
-
-    if (cmdArg[pipeArgIndex + 2] != NULL) {
-      write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
-      return -1;
+    for (i = 0; cmdArg[pipeArgIndex + i + 1] != NULL; i++) {
+      cmdArgPipe[i] = cmdArg[pipeArgIndex + i + 1];
     }
+    cmdArgPipe[i] = NULL;
   }
+
+  debugParse(cmd, cmdArg, cmdArgIn, cmdArgOut, cmdArgPipe, hasOut, hasIn,
+             hasPipe, isBackground);
 
   // if (anglePipeArgIndex != -1) {
   //   cmdArg[anglePipeArgIndex] = NULL;
@@ -457,12 +484,28 @@ static void debugParse(char *cmd, char **cmdArg, char **cmdArgIn,
   }
   debugPrintf("\"%s\" [%p] - arg%i\n", cmdArg[i], &cmdArg[i], i);
 
-  if (hasOut || hasIn || hasPipe) {
+  if (*hasOut) {
     i = 0;
-    while (cmdArg2[i] != NULL) {
-      debugPrintf("\"%s\" [%p] - arg%i\n", cmdArg2[i], &cmdArg2[i], i);
+    while (cmdArgOut[i] != NULL) {
+      debugPrintf("\"%s\" [%p] - arg%i\n", cmdArgOut[i], &cmdArgOut[i], i);
       i++;
     }
-    debugPrintf("\"%s\" [%p] - arg%i\n", cmdArg2[i], &cmdArg2[i], i);
+    debugPrintf("\"%s\" [%p] - arg%i\n", cmdArgOut[i], &cmdArgOut[i], i);
+  }
+  if (*hasIn) {
+    i = 0;
+    while (cmdArgIn[i] != NULL) {
+      debugPrintf("\"%s\" [%p] - arg%i\n", cmdArgIn[i], &cmdArgIn[i], i);
+      i++;
+    }
+    debugPrintf("\"%s\" [%p] - arg%i\n", cmdArgIn[i], &cmdArgIn[i], i);
+  }
+  if (*hasPipe) {
+    i = 0;
+    while (cmdArgPipe[i] != NULL) {
+      debugPrintf("\"%s\" [%p] - arg%i\n", cmdArgPipe[i], &cmdArgPipe[i], i);
+      i++;
+    }
+    debugPrintf("\"%s\" [%p] - arg%i\n", cmdArgPipe[i], &cmdArgPipe[i], i);
   }
 }
