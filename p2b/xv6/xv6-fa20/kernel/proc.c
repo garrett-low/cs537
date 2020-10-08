@@ -182,8 +182,8 @@ fork(void)
   //P2B - child proc gets parent proc and enqueue
   np->pri = proc->pri;
   np->qtail[np->pri] += 1;
-  // cprintf("fork() pid %d pri %d\n", np->pid, np->pri);
   enqueue(&pq[np->pri], np->pid);
+  // cprintf("fork() pid %d pri %d\n", np->pid, np->pri);
   
   return pid;
 }
@@ -294,6 +294,7 @@ scheduler(void)
     acquire(&ptable.lock);
     // P2B - rewrite scheduler
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+      // Get max priority
       int maxPri = -1;
       for (int i = NUM_PQ - 1; i >= 0; i--) {
         if (!isEmpty(&pq[i])) {
@@ -301,16 +302,15 @@ scheduler(void)
           break;
         }
       }
-      
-      int pidNow = peek(&pq[maxPri]); // Currently running PID
-      // for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) { // get current proc p
+      // Get currently running proc p
+      // If not currently running proc p, then keep looping through ptable
+      int pidNow = peek(&pq[maxPri]); 
       if (p->pid != pidNow) {
         continue;
       }
-      // }
       
       p->ticks[p->pri] += 1;
-      
+      // Run for full time slice
       if (p->pri == 3 &&
             (p->ticks[p->pri] == 0 || (p->ticks[p->pri] % PQ3_TICKS) != 0)) {
         continue;
@@ -323,111 +323,25 @@ scheduler(void)
              (p->ticks[p->pri] == 0 || (p->ticks[p->pri] % PQ1_TICKS) != 0)) {
         continue;
       }
-      if (p->pri == 0) { // if PQ0, we're FIFO so keep running it.???
+      if (p->pri == 0) { // if PQ0, we're FIFO so keep running it.
         continue;
-      } else {
+      } else { // PQ1-3 are RR
         dequeue(&pq[p->pri]);
         p->qtail[p->pri] += 1;
         enqueue(&pq[p->pri], p->pid);
       }
-      
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
       proc = p;
       switchuvm(p);
       p->state = RUNNING;
       swtch(&cpu->scheduler, proc->context);
       switchkvm();
-
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       proc = 0;
     }
-    
-    // for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    //   if(p->state != RUNNABLE)
-    //     continue;
-        
-    //   // cprintf("scheduler() %s [pid %d] [pri %d] [ticks %d] [qtail %d]\n", p->name, p->pid, p->pri, p->ticks[p->pri], p->qtail[p->pri]);
-          
-    //   // P2B - Process is not the front of the line and all queues are not empty
-    //   // look for the front of the line, starting with highest pri
-    //   // int currPid = p->pid;
-    //   // int frontPid = -1;
-    //   int maxPri = -1;
-    //   for (int i = NUM_PQ - 1; i >= 0; i--) {
-    //     if (!isEmpty(&pq[i])) {
-    //       maxPri = i;
-    //       break;
-    //     }
-    //     // if ((frontPid = peek(&pq[i])) != -1) {
-    //     //   // cprintf("PQ%d: %d, frnt %d, curr %d\n", i, peek(&pq[i]), frontPid, currPid);
-    //     //   break;
-    //     // }
-    //   }
-    //   // if (frontPid != currPid) continue;
-      
-    //   if (maxPri != p->pri)
-    //     continue;
-            
-    //   p->ticks[p->pri] += 1;
-      
-    //   // P2B - Process is not done with time slice for PQ1-3
-    //   // int currPri = p->pri;
-    //   if (p->pri == 3) {
-    //     if (p->ticks[p->pri] == 0 || (p->ticks[p->pri] % PQ3_TICKS) != 0) {
-    //       // p->ticks[p->pri] += 1;
-    //       continue;
-    //     } else {
-    //       // p->ticks[p->pri] += 1;
-    //       dequeue(&pq[p->pri]);
-    //       p->qtail[p->pri] += 1;
-    //       enqueue(&pq[p->pri], p->pid);
-    //     }
-    //   } 
-    //   if (p->pri == 2) {
-    //     if (p->ticks[p->pri] == 0 || ((p->ticks[p->pri] % PQ2_TICKS) != 0)) {
-    //       // p->ticks[p->pri] += 1;
-    //       continue;
-    //     } else {
-    //       // p->ticks[p->pri] += 1;
-    //       dequeue(&pq[p->pri]);
-    //       p->qtail[p->pri] += 1;
-    //       enqueue(&pq[p->pri], p->pid);
-    //     }
-    //   }
-    //   if (p->pri == 1) {
-    //     if (p->ticks[p->pri] == 0 || (p->ticks[p->pri] % PQ1_TICKS) != 0) {
-    //       // p->ticks[p->pri] += 1;
-    //       continue;
-    //     } else {
-    //       // p->ticks[p->pri] += 1;
-    //       dequeue(&pq[p->pri]);
-    //       p->qtail[p->pri] += 1;
-    //       enqueue(&pq[p->pri], p->pid);
-    //     }
-    //   } 
-    //   if (p->pri == 0) { // if PQ0, we're FIFO so keep running it.???
-    //     // p->ticks[p->pri] += 1;
-    //     continue;
-    //   }
-      
-    //   // cprintf("hello\n");
-    //   // cprintf("dq() proc %s [pid %d] [pri %d] [ticks %d] [qtail %d]\n", proc->name, proc->pid, proc->pri, proc->ticks[proc->pri], proc->qtail[proc->pri]);
-      
-    //   // // P2B - dequeue
-    //   // (void) dequeue(pq[currPri]);
-    //   // Switch to chosen process.  It is the process's job
-    //   // to release ptable.lock and then reacquire it
-    //   // before jumping back to us.
-    //   proc = p;
-    //   switchuvm(p);
-    //   p->state = RUNNING;
-    //   swtch(&cpu->scheduler, proc->context);
-    //   switchkvm();
-
-    //   // Process is done running for now.
-    //   // It should have changed its p->state before coming back.
-    //   proc = 0;
-    // }
     release(&ptable.lock);
   }
 }
