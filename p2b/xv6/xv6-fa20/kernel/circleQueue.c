@@ -18,29 +18,20 @@ char isEmpty(circleQueue *pq) { return (pq->head == -1 || pq->tail == -1); }
  * Add to the back of the queue by inserting after tail node
  */
 int enqueue(circleQueue *pq, int pid) {
-  cprintf("pid %d\n", pid);
-  cprintf("pq.size %d\n", pq->size);
-  
   if (pq->size >= NPROC) {
     return -1;
   }
   
-  cprintf("pid %d\n", pid);
-  cprintf("h: %d, t: %d\n", pq->head, pq->tail);
   if (isEmpty(pq)) {
     pq->head++;
     pq->tail++;
   } else {
     pq->tail = (pq->tail + 1) % NPROC;
-    cprintf("!!!!!!h: %d, t: %d\n", pq->head, pq->tail);
   }
-  
-  cprintf("h: %d, t: %d\n", pq->head, pq->tail);
-  cprintf("pid %d\n", pid);
     
   pq->pid[pq->tail] = pid;
-  cprintf("tail: %d\n", pq->pid[pq->tail]);
   pq->size++;
+  cprintf("enqueue() h %d t %d s %d hpid %d tpid %d\n", pq->head, pq->tail, pq->size, pq->pid[pq->head], pq->pid[pq->tail]);
   return pid;
 }
 
@@ -48,6 +39,7 @@ int enqueue(circleQueue *pq, int pid) {
  * Remove from the front of the queue by removing the head node
  */
 int dequeue(circleQueue *pq) {
+  cprintf("dequeue() h %d t %d s %d pid %d\n", pq->head, pq->tail, pq->size, pq->pid[pq->head]);
   if (isEmpty(pq)) {
     return -1;
   }
@@ -57,6 +49,7 @@ int dequeue(circleQueue *pq) {
 
   if (pq->head == pq->tail) {
     setQueueEmpty(pq);
+    cprintf("setQueueEmpty() h %d t %d s %d pid %d\n", pq->head, pq->tail, pq->size, pq->pid[pq->head]);
   } else {
     pq->head = (pq->head + 1) % NPROC;
   }
