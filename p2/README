@@ -1,17 +1,44 @@
 Garrett Low
 low
 
-Description for P2B: xv6 MLQ scheduler
+=====================
+P2A: Shell
+=====================
+Parent process - before command:
+  * display shell
+  * read and parse user input - readCmd, parseCmd
+      * the parsing is not pretty
+  * execute built-in commands - handleExit, handlePwd, handleCd
+  * loop forever
 
-MLQ behavior:
+Child process - Pipe:
+  * Fork two child proc. 
+  * First child exec first command and writes to pipe.
+  * Second child exec second command using the first child's output as input
+  * Close pipe in parent before waiting so output goes to stdout
+
+Child process - Everything else:
+  * A bunch of if conditions for input and output redirection
+  * Exec command
+  * Return to parent process
+  * If not background job, wait for the child process
+  * If background job, add to array containing background proc PID
+  * Before looping back to start, check for zombie processes. If background proc
+      has exited, then clean it up with waitpid
+
+======================
+P2B: xv6 MLQ scheduler
+======================
+
+MLQ behavior overview:
 Modified functions:
-* circleQueue.c, circleQueue.h
-* proc.c - userinit()
-* proc.c - fork()
-* proc.c - scheduler()
-* proc.c - getpri(), sys_getpri()
-* proc.c - setpri(), sys_setpri()
-* proc.c - getpinfo(), sys_getpinfo()
+  * circleQueue.c, circleQueue.h
+  * proc.c - userinit()
+  * proc.c - fork()
+  * proc.c - scheduler()
+  * proc.c - getpri(), sys_getpri()
+  * proc.c - setpri(), sys_setpri()
+  * proc.c - getpinfo(), sys_getpinfo()
 
 * Four priority queues PQ0-PQ3 are implemented as circular array queues.
     * Queue of PIDs
@@ -51,24 +78,24 @@ Modified functions:
     arg* functions from syscall.c
 
 State/Definitions:
-* proc.c
-    * declare constants: timer ticks, number of queues
-* pstat.h
-    * move enum procstate to pstat.h and #include pstat.h in proc.h
-* proc.h
-    * new members: prio, ticks[4], qtail[4]
-* proc.c
-    * new global static members: pq0, pq1, pq2, pq3
-* syscall.c
-    * map function pointer: sys_getpri, sys_setpri, sys_getpinfo
-* syscall.h
-    * new sys call number: sys_getpri(22), sys_setpri(23), sys_getpinfo(24)
-* sysfunc.h
-    * new sys call handler: sys_getpri, sys_setpri, sys_getpinfo
-* usys.S
-    * add SYSCALL: getpri, setpri, getpinfo
-* user.h
-    * add function prototype: getpri, setpri, getpinfo
-* kernel/Makefile.mk
-    * add *.o files
-* Confirm CPUS in Makefile set to 1. Only consider 1 CPU for this prj.
+  * proc.c
+      * declare constants: timer ticks, number of queues
+  * pstat.h
+      * move enum procstate to pstat.h and #include pstat.h in proc.h
+  * proc.h
+      * new members: prio, ticks[4], qtail[4]
+  * proc.c
+      * new global static members: pq0, pq1, pq2, pq3
+  * syscall.c
+      * map function pointer: sys_getpri, sys_setpri, sys_getpinfo
+  * syscall.h
+      * new sys call number: sys_getpri(22), sys_setpri(23), sys_getpinfo(24)
+  * sysfunc.h
+      * new sys call handler: sys_getpri, sys_setpri, sys_getpinfo
+  * usys.S
+      * add SYSCALL: getpri, setpri, getpinfo
+  * user.h
+      * add function prototype: getpri, setpri, getpinfo
+  * kernel/Makefile.mk
+      * add *.o files
+  * Confirm CPUS in Makefile set to 1. Only consider 1 CPU for this prj.
