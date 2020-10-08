@@ -544,6 +544,10 @@ int setpri(int pid, int pri) {
   int found = 0;
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if (p->pid == pid) {
+      // do we need to check state of proc?
+      if (p->state == UNUSED) {
+        return -1;
+      }
       // Dequeue (after swapping to head) from existing PQ, if any
       if (swapHead(&pq[p->pri], pid) != -1) {
         (void) dequeue(&pq[p->pri]);
@@ -580,11 +584,14 @@ int sys_getpri(void) {
 }
 
 int getpri(int pid) {
-    struct proc *p;
+  struct proc *p;
   
   int found = 0;
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if (p->pid == pid) {
+      if (p->state == UNUSED) {
+        return -1;
+      }
       found = 1;
       break;
     }
