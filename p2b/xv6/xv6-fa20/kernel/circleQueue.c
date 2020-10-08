@@ -31,7 +31,7 @@ int enqueue(circleQueue *pq, int pid) {
     
   pq->pid[pq->tail] = pid;
   pq->size++;
-  // cprintf("enqueue() h %d t %d s %d hpid %d tpid %d\n", pq->head, pq->tail, pq->size, pq->pid[pq->head], pq->pid[pq->tail]);
+  cprintf("enqueue() h %d t %d s %d hpid %d tpid %d\n", pq->head, pq->tail, pq->size, pq->pid[pq->head], pq->pid[pq->tail]);
   return pid;
 }
 
@@ -39,7 +39,7 @@ int enqueue(circleQueue *pq, int pid) {
  * Remove from the front of the queue by removing the head node
  */
 int dequeue(circleQueue *pq) {
-  // cprintf("dequeue() h %d t %d s %d pid %d\n", pq->head, pq->tail, pq->size, pq->pid[pq->head]);
+  cprintf("dequeue() h %d t %d s %d pid %d\n", pq->head, pq->tail, pq->size, pq->pid[pq->head]);
   if (isEmpty(pq)) {
     return -1;
   }
@@ -49,7 +49,7 @@ int dequeue(circleQueue *pq) {
 
   if (pq->head == pq->tail) {
     setQueueEmpty(pq);
-    // cprintf("setQueueEmpty() h %d t %d s %d pid %d\n", pq->head, pq->tail, pq->size, pq->pid[pq->head]);
+    cprintf("setQueueEmpty() h %d t %d s %d pid %d\n", pq->head, pq->tail, pq->size, pq->pid[pq->head]);
   } else {
     pq->head = (pq->head + 1) % NPROC;
   }
