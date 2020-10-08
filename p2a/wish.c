@@ -56,7 +56,8 @@ int main(int argc, char *argv[]) {
   int historyLine = 0;
   int bgPids[MAX_BACKGROUND_PROC];
   for (int i = 0; i < MAX_BACKGROUND_PROC; i++) {
-    bgPids[i] = -1;
+    bgPids[i] = 0;
+    // debugPrintf("bg pid [%d]\n", bgPids[i]);
   }
 
   while (1) {
@@ -164,16 +165,26 @@ int main(int argc, char *argv[]) {
           waitpid(pid, NULL, 0);
         } else {
           for (int i = 0; i < MAX_BACKGROUND_PROC; i++) {
-            if (bgPids[i] == -1) {
+            if (bgPids[i] == 0) {
               bgPids[i] = pid;
+              // debugPrintf("bg pid [%d]\n", bgPids[i]);
+              break;
             }
           }
-
-          for (int i = 0; i < MAX_BACKGROUND_PROC; i++) {
-            if (bgPids[i] != -1) {
-              if (waitpid(bgPids[i], NULL, WNOHANG) == bgPids[i]) {
-                bgPids[i] = -1;
-              }
+        }
+        for (int i = 0; i < MAX_BACKGROUND_PROC; i++) {
+          if (bgPids[i] != 0) {
+            debugPrintf("check bg pid [%d]\n", bgPids[i]);
+            // if (kill(bgPids[i], 0) != 0) {
+            // if (bgPids[i] != 0) {
+            // int status;
+            //   waitpid(bgPids[i], &status, WNOHANG);
+            if (waitpid(bgPids[i], NULL, WNOHANG) != 0) {
+              // if (status == WIFEXITED) {
+              debugPrintf("zombie bg pid [%d]\n", bgPids[i]);
+              waitpid(bgPids[i], NULL, 0);
+              bgPids[i] = 0;
+              // }
             }
           }
         }
@@ -363,22 +374,32 @@ static int parseCmd(char *cmd, char **cmdArg, char **cmdArgIn, char **cmdArgOut,
     }
   } else if (*hasPipe) {
     cmdArg[pipeArgIndex] = NULL;
+    if (cmdArg[pipeArgIndex + 1] == NULL) {
+      write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
+      return -1;
+    }
+
     for (i = 0; cmdArg[pipeArgIndex + i + 1] != NULL; i++) {
       cmdArgPipe[i] = cmdArg[pipeArgIndex + i + 1];
     }
     cmdArgPipe[i] = NULL;
   }
 
-  debugParse(cmd, cmdArg, cmdArgIn, cmdArgOut, cmdArgPipe, hasOut, hasIn,
-             hasPipe, isBackground);
+  if (*isBackground) {
+    cmdArg[ampArgIndex] = NULL;
+  }
+
+  // debugParse(cmd, cmdArg, cmdArgIn, cmdArgOut, cmdArgPipe, hasOut, hasIn,
+  //  hasPipe, isBackground);
 
   return 0;
 }
 
 static void handleExit(int *bgPids) {
   for (int i = 0; i < MAX_BACKGROUND_PROC; i++) {
-    if (bgPids[i] != -1) {
-      kill(bgPids[i], SIGTERM);
+    if (bgPids[i] != 0) {
+      debugPrintf("kill bg pid [%d]\n", bgPids[i]);
+      kill(bgPids[i], SIGKILL);
     }
   }
   exit(0);
