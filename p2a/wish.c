@@ -40,6 +40,8 @@ static void handleExit(int *bgPids);
 static void handlePwd();
 static void handleCd(char *path);
 static void errorAndEndProcess();
+static void outToFile(char *outPath);
+static void inFromFile(char *inPath);
 
 // debug
 static void debugParse(char *cmd, char **cmdArg, char **cmdArgIn,
@@ -95,108 +97,67 @@ int main(int argc, char *argv[]) {
         continue;
       }
       handleCd(cmdArg[1]);
-    }
-    // non-built-in commands
-    else {
-      int pid = fork();
+    } else if (hasPipe) {
+      // pipe commands
+      int pipes[2];
+      int stdinCpy = dup(STDIN_FILENO);
+      int stdoutCpy = dup(STDOUT_FILENO);
+      if (pipe(pipes) == -1) {
+        errorAndEndProcess();
+      }
 
-      // child
-      if (pid == 0) {
-        if (hasPipe) {
-          int pipes[2], pidPipe;
-          if (pipe(pipes) == -1) {
-            errorAndEndProcess();
-          }
+      int pidPipe = fork();
+      if (pidPipe == 0) {
+        if (close(pipes[0]) == -1) {
+          errorAndEndProcess();
+        }
 
-          pidPipe = fork();
-          if (pidPipe == 0) {
-            if (close(pipes[0]) == -1) {
-              errorAndEndProcess();
-            }
+        if (dup2(pipes[1], STDOUT_FILENO) == -1) {
+          errorAndEndProcess();
+        }
 
-            if (dup2(pipes[1], STDOUT_FILENO) == -1) {
-              errorAndEndProcess();
-            }
-
-            if (execvp(cmdArg[0], cmdArg) == -1) {
-              errorAndEndProcess();
-            }
-          }
-          pidPipe = fork();
-          if (pidPipe == 0) {
-            if (close(pipes[1]) == -1) {
-              errorAndEndProcess();
-            }
-
-            if (dup2(pipes[0], STDIN_FILENO) == -1) {
-              errorAndEndProcess();
-            }
-
-            if (execvp(cmdArgPipe[0], cmdArgPipe) == -1) {
-              errorAndEndProcess();
-            }
-          } else {
-            waitpid(-1, NULL, 0);
-            exit(0);
-          }
-        } else {
-          if (hasOut && !hasIn) {
-            char *path = cmdArgOut[0];
-
-            int retVal;
-            if ((retVal = open(path, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU)) ==
-                -1) {
-              errorAndEndProcess();
-            }
-
-            if (dup2(retVal, STDOUT_FILENO) == -1) {
-              errorAndEndProcess();
-            }
-          } else if (hasIn && !hasOut) {
-            char *path = cmdArgIn[0];
-
-            int retVal;
-            if ((retVal = open(path, O_RDONLY)) == -1) {
-              errorAndEndProcess();
-            }
-
-            if (dup2(retVal, STDIN_FILENO) == -1) {
-              errorAndEndProcess();
-            }
-          } else if (hasIn && hasOut) {
-            char *inPath = cmdArgIn[0];
-            char *outPath = cmdArgOut[0];
-            
-            debugPrintf("1\n");
-
-            int retVal;
-            if ((retVal = open(inPath, O_RDONLY)) == -1) {
-              errorAndEndProcess();
-            }
-            debugPrintf("2\n");
-
-            if (dup2(retVal, STDIN_FILENO) == -1) {
-              errorAndEndProcess();
-            }
-            debugPrintf("3\n");
-            
-            if ((retVal = open(outPath, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU)) ==
-                -1) {
-              errorAndEndProcess();
-            }
-            debugPrintf("4\n");
-
-            if (dup2(retVal, STDOUT_FILENO) == -1) {
-              errorAndEndProcess();
-            }
-            debugPrintf("5\n");
-          }
-
-          if (execvp(cmdArg[0], cmdArg) == -1) {
-            errorAndEndProcess();
-          }
+        if (execvp(cmdArg[0], cmdArg) == -1) {
+          errorAndEndProcess();
         }
       }
+
+      int pidPipe2 = fork();
+      if (pidPipe2 == 0) {
+        if (close(pipes[1]) == -1) {
+          errorAndEndProcess();
+        }
+
+        if (dup2(pipes[0], STDIN_FILENO) == -1) {
+          errorAndEndProcess();
+        }
+
+        if (execvp(cmdArgPipe[0], cmdArgPipe) == -1) {
+          errorAndEndProcess();
+        }
+      } else {
+        close(pipes[0]);
+        close(pipes[1]);
+        waitpid(pidPipe2, NULL, 0);
+      }
+    } else {
+      // other non-pipe commands
+      int pid = fork();
+      // child
+      if (pid == 0) {
+        if (hasOut && !hasIn) {
+          outToFile(cmdArgOut[0]);
+        } else if (hasIn && !hasOut) {
+          inFromFile(cmdArgIn[0]);
+        } else if (hasIn && hasOut) {
+          inFromFile(cmdArgIn[0]);
+          outToFile(cmdArgOut[0]);
+        }
+
+        if (execvp(cmdArg[0], cmdArg) == -1) {
+          errorAndEndProcess();
+        }
+      }
+
       // parent
       else if (pid > 0) {
         if (!isBackground) {
@@ -411,24 +372,6 @@ static int parseCmd(char *cmd, char **cmdArg, char **cmdArgIn, char **cmdArgOut,
   debugParse(cmd, cmdArg, cmdArgIn, cmdArgOut, cmdArgPipe, hasOut, hasIn,
              hasPipe, isBackground);
 
-  // if (anglePipeArgIndex != -1) {
-  //   cmdArg[anglePipeArgIndex] = NULL;
-
-  //   for (i = 0; cmdArg[anglePipeArgIndex + i + 1] != NULL; i++) {
-  //     cmdArg2[i] = cmdArg[anglePipeArgIndex + i + 1];
-  //   }
-  //   cmdArg2[i] = NULL;  // set last argv to NULL
-
-  //   // we expect exactly one word after redirector or ampersand for bg exec
-  //   if ((*hasOut || *hasIn) &&
-  //       !(*hasOut && *hasIn) &&
-  //       (cmdArg2[0] == NULL || cmdArg2[1] != NULL) &&
-  //       (cmdArg2[1][0] != '&')) {
-  //     write(STDERR_FILENO, GENERIC_ERROR, strlen(GENERIC_ERROR));
-  //     return -1;
-  //   }
-  // }
-
   return 0;
 }
 
@@ -507,5 +450,27 @@ static void debugParse(char *cmd, char **cmdArg, char **cmdArgIn,
       i++;
     }
     debugPrintf("\"%s\" [%p] - arg%i\n", cmdArgPipe[i], &cmdArgPipe[i], i);
+  }
+}
+
+static void outToFile(char *outPath) {
+  int retVal;
+  if ((retVal = open(outPath, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU)) == -1) {
+    errorAndEndProcess();
+  }
+
+  if (dup2(retVal, STDOUT_FILENO) == -1) {
+    errorAndEndProcess();
+  }
+}
+
+static void inFromFile(char *inPath) {
+  int retVal;
+  if ((retVal = open(inPath, O_RDONLY)) == -1) {
+    errorAndEndProcess();
+  }
+
+  if (dup2(retVal, STDIN_FILENO) == -1) {
+    errorAndEndProcess();
   }
 }
