@@ -87,6 +87,9 @@ class Test8(Xv6Test):
 
 
 all_tests = [Test0, Test1, Test2, Test3, Test4, Test5, Test6, Test7, Test8]
+# all_tests = [Test8]
+# all_tests = [Test7]
+# all_tests = [Test6, Test7, Test8]
 
 # import toolspath
 main(Xv6Build, all_tests)

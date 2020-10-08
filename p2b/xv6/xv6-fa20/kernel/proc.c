@@ -7,13 +7,20 @@
 #include "spinlock.h"
 #include "circleQueue.h"
 
+// P2B constants
+#define PQ3_TICKS 8
+#define PQ2_TICKS 12
+#define PQ1_TICKS 16
+#define PQ0_TICKS 0
+#define NUM_PQ 4
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
 } ptable;
 
 // P2B - add queue arrays
-static circleQueue pq[4];
+static circleQueue pq[NUM_PQ];
 
 static struct proc *initproc;
 
@@ -105,7 +112,7 @@ userinit(void)
   
   //P2B
   // Initialize priority queues to empty
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < NUM_PQ; i++) {
     setQueueEmpty(&pq[i]);
   }
   // Set initial process to highest priority and enqueue
@@ -285,72 +292,45 @@ scheduler(void)
     
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
-        
-      // cprintf("scheduler() %s [pid %d] [pri %d] [ticks %d] [qtail %d]\n", p->name, p->pid, p->pri, p->ticks[p->pri], p->qtail[p->pri]);
-          
-      // P2B - Process is not the front of the line and all queues are not empty
-      // look for the front of the line, starting with highest pri
-      // int currPid = p->pid;
-      // int frontPid = -1;
-      int maxPri = 0;
-      for (int i = 3; i >= 0; i--) {
+    // P2B - rewrite scheduler
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+      int maxPri = -1;
+      for (int i = NUM_PQ - 1; i >= 0; i--) {
         if (!isEmpty(&pq[i])) {
           maxPri = i;
           break;
         }
-        // if ((frontPid = peek(&pq[i])) != -1) {
-        //   // cprintf("PQ%d: %d, frnt %d, curr %d\n", i, peek(&pq[i]), frontPid, currPid);
-        //   break;
-        // }
       }
-      // if (frontPid != currPid) continue;
       
-      if (maxPri != p->pri)
+      int pidNow = peek(&pq[maxPri]); // Currently running PID
+      // for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) { // get current proc p
+      if (p->pid != pidNow) {
         continue;
-
-      // P2B - Process is not done with time slice for PQ1-3
-      // int currPri = p->pri;
-      if (p->pri == 3) {
-        if ((p->ticks[p->pri] % PQ3_TICKS) != 0) {
-          p->ticks[p->pri] += 1;
-          continue;
-        } else {
-          dequeue(&pq[p->pri]);
-        }
-      } 
-      if (p->pri == 2) {
-        if (((p->ticks[p->pri] % PQ2_TICKS) != 0)) {
-          p->ticks[p->pri] += 1;
-          continue;
-        } else {
-          dequeue(&pq[p->pri]);
-        }
       }
-      if (p->pri == 1) {
-        if ((p->ticks[p->pri] % PQ1_TICKS) != 0) {
-          p->ticks[p->pri] += 1;
-          continue;
-        } else {
-          dequeue(&pq[p->pri]);
-        }
-      } 
+      // }
+      
+      p->ticks[p->pri] += 1;
+      
+      if (p->pri == 3 &&
+            (p->ticks[p->pri] == 0 || (p->ticks[p->pri] % PQ3_TICKS) != 0)) {
+        continue;
+      }
+      if (p->pri == 2 &&
+            (p->ticks[p->pri] == 0 || (p->ticks[p->pri] % PQ2_TICKS) != 0)) {
+        continue;
+      }
+      if (p->pri == 1 &&
+             (p->ticks[p->pri] == 0 || (p->ticks[p->pri] % PQ1_TICKS) != 0)) {
+        continue;
+      }
       if (p->pri == 0) { // if PQ0, we're FIFO so keep running it.???
-        p->ticks[p->pri] += 1;
         continue;
+      } else {
+        dequeue(&pq[p->pri]);
+        p->qtail[p->pri] += 1;
+        enqueue(&pq[p->pri], p->pid);
       }
       
-      // cprintf("hello\n");
-      // cprintf("dq() proc %s [pid %d] [pri %d] [ticks %d] [qtail %d]\n", proc->name, proc->pid, proc->pri, proc->ticks[proc->pri], proc->qtail[proc->pri]);
-      enqueue(&pq[p->pri], p->pid);
-      
-      // // P2B - dequeue
-      // (void) dequeue(pq[currPri]);
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
       proc = p;
       switchuvm(p);
       p->state = RUNNING;
@@ -361,6 +341,93 @@ scheduler(void)
       // It should have changed its p->state before coming back.
       proc = 0;
     }
+    
+    // for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    //   if(p->state != RUNNABLE)
+    //     continue;
+        
+    //   // cprintf("scheduler() %s [pid %d] [pri %d] [ticks %d] [qtail %d]\n", p->name, p->pid, p->pri, p->ticks[p->pri], p->qtail[p->pri]);
+          
+    //   // P2B - Process is not the front of the line and all queues are not empty
+    //   // look for the front of the line, starting with highest pri
+    //   // int currPid = p->pid;
+    //   // int frontPid = -1;
+    //   int maxPri = -1;
+    //   for (int i = NUM_PQ - 1; i >= 0; i--) {
+    //     if (!isEmpty(&pq[i])) {
+    //       maxPri = i;
+    //       break;
+    //     }
+    //     // if ((frontPid = peek(&pq[i])) != -1) {
+    //     //   // cprintf("PQ%d: %d, frnt %d, curr %d\n", i, peek(&pq[i]), frontPid, currPid);
+    //     //   break;
+    //     // }
+    //   }
+    //   // if (frontPid != currPid) continue;
+      
+    //   if (maxPri != p->pri)
+    //     continue;
+            
+    //   p->ticks[p->pri] += 1;
+      
+    //   // P2B - Process is not done with time slice for PQ1-3
+    //   // int currPri = p->pri;
+    //   if (p->pri == 3) {
+    //     if (p->ticks[p->pri] == 0 || (p->ticks[p->pri] % PQ3_TICKS) != 0) {
+    //       // p->ticks[p->pri] += 1;
+    //       continue;
+    //     } else {
+    //       // p->ticks[p->pri] += 1;
+    //       dequeue(&pq[p->pri]);
+    //       p->qtail[p->pri] += 1;
+    //       enqueue(&pq[p->pri], p->pid);
+    //     }
+    //   } 
+    //   if (p->pri == 2) {
+    //     if (p->ticks[p->pri] == 0 || ((p->ticks[p->pri] % PQ2_TICKS) != 0)) {
+    //       // p->ticks[p->pri] += 1;
+    //       continue;
+    //     } else {
+    //       // p->ticks[p->pri] += 1;
+    //       dequeue(&pq[p->pri]);
+    //       p->qtail[p->pri] += 1;
+    //       enqueue(&pq[p->pri], p->pid);
+    //     }
+    //   }
+    //   if (p->pri == 1) {
+    //     if (p->ticks[p->pri] == 0 || (p->ticks[p->pri] % PQ1_TICKS) != 0) {
+    //       // p->ticks[p->pri] += 1;
+    //       continue;
+    //     } else {
+    //       // p->ticks[p->pri] += 1;
+    //       dequeue(&pq[p->pri]);
+    //       p->qtail[p->pri] += 1;
+    //       enqueue(&pq[p->pri], p->pid);
+    //     }
+    //   } 
+    //   if (p->pri == 0) { // if PQ0, we're FIFO so keep running it.???
+    //     // p->ticks[p->pri] += 1;
+    //     continue;
+    //   }
+      
+    //   // cprintf("hello\n");
+    //   // cprintf("dq() proc %s [pid %d] [pri %d] [ticks %d] [qtail %d]\n", proc->name, proc->pid, proc->pri, proc->ticks[proc->pri], proc->qtail[proc->pri]);
+      
+    //   // // P2B - dequeue
+    //   // (void) dequeue(pq[currPri]);
+    //   // Switch to chosen process.  It is the process's job
+    //   // to release ptable.lock and then reacquire it
+    //   // before jumping back to us.
+    //   proc = p;
+    //   switchuvm(p);
+    //   p->state = RUNNING;
+    //   swtch(&cpu->scheduler, proc->context);
+    //   switchkvm();
+
+    //   // Process is done running for now.
+    //   // It should have changed its p->state before coming back.
+    //   proc = 0;
+    // }
     release(&ptable.lock);
   }
 }
@@ -384,11 +451,11 @@ sched(void)
   
   // P2B - enqueue currently running process and set qtail for pstat
   // cprintf("sched %s [pid %d] [pri %d] [ticks %d] [qtail %d]\n", proc->name, proc->pid, proc->pri, proc->ticks[proc->pri], proc->qtail[proc->pri]);
-  if (proc->state == ZOMBIE || proc->state == UNUSED) {
-    if (swapHead(&pq[proc->pri], proc->pid) != -1) {
-      (void) dequeue(&pq[proc->pri]);
-    }
-  }
+  // if (proc->state == ZOMBIE || proc->state == UNUSED) {
+  //   if (swapHead(&pq[proc->pri], proc->pid) != -1) {
+  //     (void) dequeue(&pq[proc->pri]);
+  //   }
+  // }
   
   swtch(&proc->context, cpu->scheduler);
   cpu->intena = intena;
@@ -636,15 +703,18 @@ int getpinfo(struct pstat * status) {
   for(p = ptable.proc, i = 0; p < &ptable.proc[NPROC]; p++, i++){
     status->inuse[i] = (p->state != UNUSED);
     status->pid[i] = p->pid;
-    status->state[i] = p->state;
     status->priority[i] = p->pri;
-    // cprintf("p - pid %d, state %d\n", p->pid, p->state);
-    // cprintf("pstat - use: %d, pid %d, state %d\n", status->inuse[i], status->pid[i], status->state[i]); // debug
-    for (int j = 0; j < 4; j++) {
+    status->state[i] = p->state;
+    for (int j = 0; j < NUM_PQ; j++) {
       status->ticks[i][j] = p->ticks[j];
       status->qtail[i][j] = p->qtail[j];
-      // cprintf("p - pri %d, ticks %d, qtail %d\n", j, p->ticks[j], p->qtail[j]);
+      // cprintf("p - pri %d, ticks %d, qtail %d\n", p, p->ticks[j], p->qtail[j]); // debug
       // cprintf("pstat - pri %d, ticks %d, qtail %d\n", j, status->ticks[i][j], status->qtail[i][j]); // debug
+    }
+    if (status->inuse[i]) {
+      // cprintf("p - pid %d, state %d\n", p->pid, p->state); // debug
+      // cprintf("pstat - use: %d, pid %d, pri %d, state %d\n", status->inuse[i], status->pid[i], status->priority[i], status->state[i]); // debug    
+      // cprintf("pstat - ticks %d, qtail %d\n", status->ticks[i][status->priority[i]], status->qtail[i][status->priority[i]]); // debug
     }
   }
   

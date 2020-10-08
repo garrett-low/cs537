@@ -289,15 +289,15 @@ ld  -m    elf_i386 -nostdlib --omagic \
 dd if=/dev/zero of=xv6.img count=10000
 10000+0 records in
 10000+0 records out
-5120000 bytes (5.1 MB, 4.9 MiB) copied, 0.0204341 s, 251 MB/s
+5120000 bytes (5.1 MB, 4.9 MiB) copied, 0.0238825 s, 214 MB/s
 dd if=kernel/bootblock of=xv6.img conv=notrunc
 1+0 records in
 1+0 records out
-512 bytes copied, 5.3724e-05 s, 9.5 MB/s
+512 bytes copied, 5.826e-05 s, 8.8 MB/s
 dd if=kernel/kernel of=xv6.img seek=1 conv=notrunc
 297+1 records in
 297+1 records out
-152092 bytes (152 kB, 149 KiB) copied, 0.000542041 s, 281 MB/s
+152108 bytes (152 kB, 149 KiB) copied, 0.000573103 s, 265 MB/s
 gcc -c  -iquote include -Wall -Werror -ggdb  -o tools/mkfs.o tools/mkfs.c
 gcc  tools/mkfs.o -o tools/mkfs
 mkdir -p fs
@@ -442,9 +442,15 @@ cpu0: starting
 init: starting sh
 $ tester
 tester
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6328, qtail 792
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6192, qtail 775
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 80, qtail 11
 pid: 1 priority: 3
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 1
+ 	 level 3 ticks used 6328
+	 level 3 times moved to tail 792
 	 level 2 ticks used 0
 	 level 2 times moved to tail 0
 	 level 1 ticks used 0
@@ -452,8 +458,8 @@ pid: 1 priority: 3
 	 level 0 ticks used 0
 	 level 0 times moved to tail 0
 pid: 2 priority: 3
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 1
+ 	 level 3 ticks used 6192
+	 level 3 times moved to tail 775
 	 level 2 ticks used 0
 	 level 2 times moved to tail 0
 	 level 1 ticks used 0
@@ -461,8 +467,8 @@ pid: 2 priority: 3
 	 level 0 ticks used 0
 	 level 0 times moved to tail 0
 pid: 3 priority: 3
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 1
+ 	 level 3 ticks used 80
+	 level 3 times moved to tail 11
 	 level 2 ticks used 0
 	 level 2 times moved to tail 0
 	 level 1 ticks used 0
@@ -535,21 +541,27 @@ cpu0: starting
 init: starting sh
 $ tester
 tester
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6336, qtail 793
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6200, qtail 776
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 80, qtail 11
 pid: 1 priority: 3
  	 level 0 ticks used 0
 	 level 1 ticks used 0
 	 level 2 ticks used 0
-	 level 3 ticks used 0
+	 level 3 ticks used 6336
 pid: 2 priority: 3
  	 level 0 ticks used 0
 	 level 1 ticks used 0
 	 level 2 ticks used 0
-	 level 3 ticks used 0
+	 level 3 ticks used 6200
 pid: 3 priority: 3
  	 level 0 ticks used 0
 	 level 1 ticks used 0
 	 level 2 ticks used 0
-	 level 3 ticks used 0
+	 level 3 ticks used 80
 TEST PASSED
 
 test test_ptable PASSED (5 of 5)
@@ -880,13 +892,181 @@ cpu0: starting
 init: starting sh
 $ tester
 tester
-user/tester.c:34 check (st.ticks[j][3] != 0 && st.ticks[j][3] % 8 == 0) failed: child doesn't run full slices
-$ 
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6272, qtail 785
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6144, qtail 769
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 96, qtail 13
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 8, qtail 2
+child pid: 4 priority: 3
+ 	 level 3 ticks used 8
+	 level 3 times moved to tail 2
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6288, qtail 787
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6160, qtail 771
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 112, qtail 15
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 24, qtail 4
+child pid: 4 priority: 3
+ 	 level 3 ticks used 24
+	 level 3 times moved to tail 4
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6304, qtail 789
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6176, qtail 773
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 128, qtail 17
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 40, qtail 6
+child pid: 4 priority: 3
+ 	 level 3 ticks used 40
+	 level 3 times moved to tail 6
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6320, qtail 791
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6192, qtail 775
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 144, qtail 19
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 56, qtail 8
+child pid: 4 priority: 3
+ 	 level 3 ticks used 56
+	 level 3 times moved to tail 8
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6336, qtail 793
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6208, qtail 777
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 160, qtail 21
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 72, qtail 10
+child pid: 4 priority: 3
+ 	 level 3 ticks used 72
+	 level 3 times moved to tail 10
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6352, qtail 795
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6224, qtail 779
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 176, qtail 23
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 88, qtail 12
+child pid: 4 priority: 3
+ 	 level 3 ticks used 88
+	 level 3 times moved to tail 12
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6368, qtail 797
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6240, qtail 781
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 192, qtail 25
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 104, qtail 14
+child pid: 4 priority: 3
+ 	 level 3 ticks used 104
+	 level 3 times moved to tail 14
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6384, qtail 799
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6256, qtail 783
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 208, qtail 27
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 120, qtail 16
+child pid: 4 priority: 3
+ 	 level 3 ticks used 120
+	 level 3 times moved to tail 16
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6400, qtail 801
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6272, qtail 785
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 224, qtail 29
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 136, qtail 18
+child pid: 4 priority: 3
+ 	 level 3 ticks used 136
+	 level 3 times moved to tail 18
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6416, qtail 803
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6288, qtail 787
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 240, qtail 31
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 152, qtail 20
+child pid: 4 priority: 3
+ 	 level 3 ticks used 152
+	 level 3 times moved to tail 20
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+TEST PASSED
 
-test test_fullslice FAILED (0 of 10)
+test test_fullslice PASSED (10 of 10)
  (Workload: Checks whether a process is given full slices
     Expected: tester's child should always run full slices)
- tester failed
 
 starting test_qtail
 
@@ -948,90 +1128,170 @@ cpu0: starting
 init: starting sh
 $ tester
 tester
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6336, qtail 793
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6200, qtail 776
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 104, qtail 14
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 8, qtail 2
 child pid: 4 priority: 3
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 1
+ 	 level 3 ticks used 8
+	 level 3 times moved to tail 2
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6352, qtail 795
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6216, qtail 778
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 120, qtail 16
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 24, qtail 4
 child pid: 4 priority: 3
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 1
+ 	 level 3 ticks used 24
+	 level 3 times moved to tail 4
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6368, qtail 797
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6232, qtail 780
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 136, qtail 18
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 40, qtail 6
 child pid: 4 priority: 3
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 1
+ 	 level 3 ticks used 40
+	 level 3 times moved to tail 6
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6384, qtail 799
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6248, qtail 782
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 152, qtail 20
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 56, qtail 8
 child pid: 4 priority: 3
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 1
+ 	 level 3 ticks used 56
+	 level 3 times moved to tail 8
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6400, qtail 801
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6264, qtail 784
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 168, qtail 22
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 72, qtail 10
 child pid: 4 priority: 3
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 1
+ 	 level 3 ticks used 72
+	 level 3 times moved to tail 10
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6416, qtail 803
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6280, qtail 786
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 184, qtail 24
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 88, qtail 12
 child pid: 4 priority: 3
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 1
+ 	 level 3 ticks used 88
+	 level 3 times moved to tail 12
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6432, qtail 805
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6296, qtail 788
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 200, qtail 26
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 104, qtail 14
 child pid: 4 priority: 3
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 1
+ 	 level 3 ticks used 104
+	 level 3 times moved to tail 14
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6448, qtail 807
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6312, qtail 790
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 216, qtail 28
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 120, qtail 16
 child pid: 4 priority: 3
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 1
+ 	 level 3 ticks used 120
+	 level 3 times moved to tail 16
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6464, qtail 809
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6328, qtail 792
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 232, qtail 30
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 136, qtail 18
 child pid: 4 priority: 3
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 1
+ 	 level 3 ticks used 136
+	 level 3 times moved to tail 18
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6480, qtail 811
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6344, qtail 794
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 248, qtail 32
+pstat - use: 1, pid 4, pri 3, state 3
+pstat - ticks 152, qtail 20
 child pid: 4 priority: 3
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 1
+ 	 level 3 ticks used 152
+	 level 3 times moved to tail 20
 	 level 3 ticks used 0
 	 level 3 times moved to tail 0
 	 level 3 ticks used 0
@@ -1104,6 +1364,106 @@ cpu0: starting
 init: starting sh
 $ tester
 tester
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6272, qtail 785
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6152, qtail 770
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 96, qtail 13
+pstat - use: 1, pid 4, pri 2, state 3
+pstat - ticks 0, qtail 1
+pstat - use: 1, pid 5, pri 3, state 3
+pstat - ticks 8, qtail 2
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6280, qtail 786
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6160, qtail 771
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 104, qtail 14
+pstat - use: 1, pid 4, pri 2, state 3
+pstat - ticks 0, qtail 1
+pstat - use: 1, pid 5, pri 3, state 3
+pstat - ticks 16, qtail 3
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6288, qtail 787
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6168, qtail 772
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 112, qtail 15
+pstat - use: 1, pid 4, pri 2, state 3
+pstat - ticks 0, qtail 1
+pstat - use: 1, pid 5, pri 3, state 3
+pstat - ticks 24, qtail 4
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6296, qtail 788
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6176, qtail 773
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 120, qtail 16
+pstat - use: 1, pid 4, pri 2, state 3
+pstat - ticks 0, qtail 1
+pstat - use: 1, pid 5, pri 3, state 3
+pstat - ticks 32, qtail 5
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6304, qtail 789
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6184, qtail 774
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 128, qtail 17
+pstat - use: 1, pid 4, pri 2, state 3
+pstat - ticks 0, qtail 1
+pstat - use: 1, pid 5, pri 3, state 3
+pstat - ticks 40, qtail 6
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6312, qtail 790
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6192, qtail 775
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 136, qtail 18
+pstat - use: 1, pid 4, pri 2, state 3
+pstat - ticks 0, qtail 1
+pstat - use: 1, pid 5, pri 3, state 3
+pstat - ticks 48, qtail 7
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6320, qtail 791
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6200, qtail 776
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 144, qtail 19
+pstat - use: 1, pid 4, pri 2, state 3
+pstat - ticks 0, qtail 1
+pstat - use: 1, pid 5, pri 3, state 3
+pstat - ticks 56, qtail 8
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6328, qtail 792
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6208, qtail 777
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 152, qtail 20
+pstat - use: 1, pid 4, pri 2, state 3
+pstat - ticks 0, qtail 1
+pstat - use: 1, pid 5, pri 3, state 3
+pstat - ticks 64, qtail 9
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6336, qtail 793
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6216, qtail 778
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 160, qtail 21
+pstat - use: 1, pid 4, pri 2, state 3
+pstat - ticks 0, qtail 1
+pstat - use: 1, pid 5, pri 3, state 3
+pstat - ticks 72, qtail 10
+pstat - use: 1, pid 1, pri 3, state 2
+pstat - ticks 6344, qtail 794
+pstat - use: 1, pid 2, pri 3, state 2
+pstat - ticks 6224, qtail 779
+pstat - use: 1, pid 3, pri 3, state 4
+pstat - ticks 168, qtail 22
+pstat - use: 1, pid 4, pri 2, state 3
+pstat - ticks 0, qtail 1
+pstat - use: 1, pid 5, pri 3, state 3
+pstat - ticks 80, qtail 11
 TEST PASSED
 
 test test_starve PASSED (10 of 10)
@@ -1139,10 +1499,9 @@ test test_invalidarg PASSED (10 of 10)
  (Workload: Checks invalid argument handling
     Expected: getpinfo/getpri/setpri return -1 when arguments are invalid)
 
-test test_fullslice FAILED (0 of 10)
+test test_fullslice PASSED (10 of 10)
  (Workload: Checks whether a process is given full slices
     Expected: tester's child should always run full slices)
- tester failed
 
 test test_qtail PASSED (10 of 10)
  (Workload: Checks whether a process's qtail match ticks
@@ -1152,6 +1511,6 @@ test test_starve PASSED (10 of 10)
  (Workload: Checks always the highest priority processes run
     Expected: one test's child is running on priority 3 and the other child in priority 2 should starve)
 
-Passed 9 of 10 tests.
-Overall 9 of 10
-Points 60 of 70
+Passed 10 of 10 tests.
+Overall 10 of 10
+Points 70 of 70

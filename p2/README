@@ -6,8 +6,8 @@ Description for P2B: xv6 MLQ scheduler
 * Confirm CPUS in Makefile set to 1. Only consider 1 CPU for this prj.
 
 State/Definitions:
-* param.h
-    * declare constants for timer ticks of different queues
+* proc.c
+    * declare constants: timer ticks, number of queues
 * pstat.h
     * move enum procstate to pstat.h and #include pstat.h in proc.h
 * proc.h
@@ -25,7 +25,7 @@ State/Definitions:
 * user.h
     * add function prototype: getpri, setpri, getpinfo
 * kernel/Makefile.mk
-    * add files
+    * add *.o files
 
 Implementation:
 * circleQueue.c, circleQueue.h
