@@ -108,6 +108,7 @@ userinit(void)
   for (int i = 0; i < 4; i++) {
     setQueueEmpty(&pq[i]);
   }
+  // Set initial process to highest priority and enqueue
   p->pri = 3;
   p->qtail[p->pri] += 1;
   enqueue(&pq[p->pri], p->pid);
@@ -171,10 +172,10 @@ fork(void)
   np->state = RUNNABLE;
   safestrcpy(np->name, proc->name, sizeof(proc->name));
   
-  //P2B
+  //P2B - child proc gets parent proc and enqueue
   np->pri = proc->pri;
   np->qtail[np->pri] += 1;
-  cprintf("fork() pid %d pri %d\n", np->pid, np->pri);
+  // cprintf("fork() pid %d pri %d\n", np->pid, np->pri);
   enqueue(&pq[np->pri], np->pid);
   
   return pid;
@@ -630,15 +631,20 @@ int getpinfo(struct pstat * status) {
   }
   
   struct proc *p;
+  int i;
   
-  for (int i = 0; i < NPROC; i++) {
-    p = &ptable.proc[i];
+  for(p = ptable.proc, i = 0; p < &ptable.proc[NPROC]; p++, i++){
     status->inuse[i] = (p->state != UNUSED);
     status->pid[i] = p->pid;
     status->state[i] = p->state;
-    for (int j = 0; j < 3; j++) {
+    status->priority[i] = p->pri;
+    // cprintf("p - pid %d, state %d\n", p->pid, p->state);
+    // cprintf("pstat - use: %d, pid %d, state %d\n", status->inuse[i], status->pid[i], status->state[i]); // debug
+    for (int j = 0; j < 4; j++) {
       status->ticks[i][j] = p->ticks[j];
       status->qtail[i][j] = p->qtail[j];
+      // cprintf("p - pri %d, ticks %d, qtail %d\n", j, p->ticks[j], p->qtail[j]);
+      // cprintf("pstat - pri %d, ticks %d, qtail %d\n", j, status->ticks[i][j], status->qtail[i][j]); // debug
     }
   }
   
