@@ -289,15 +289,15 @@ ld  -m    elf_i386 -nostdlib --omagic \
 dd if=/dev/zero of=xv6.img count=10000
 10000+0 records in
 10000+0 records out
-5120000 bytes (5.1 MB, 4.9 MiB) copied, 0.0219894 s, 233 MB/s
+5120000 bytes (5.1 MB, 4.9 MiB) copied, 0.0204341 s, 251 MB/s
 dd if=kernel/bootblock of=xv6.img conv=notrunc
 1+0 records in
 1+0 records out
-512 bytes copied, 5.1447e-05 s, 10.0 MB/s
+512 bytes copied, 5.3724e-05 s, 9.5 MB/s
 dd if=kernel/kernel of=xv6.img seek=1 conv=notrunc
 297+1 records in
 297+1 records out
-152116 bytes (152 kB, 149 KiB) copied, 0.000575455 s, 264 MB/s
+152092 bytes (152 kB, 149 KiB) copied, 0.000542041 s, 281 MB/s
 gcc -c  -iquote include -Wall -Werror -ggdb  -o tools/mkfs.o tools/mkfs.c
 gcc  tools/mkfs.o -o tools/mkfs
 mkdir -p fs
@@ -439,176 +439,30 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 
 Booting from Hard Disk..xv6...
 cpu0: starting
-enqueue() h 0 t 0 s 1 hpid 1 tpid 1
-dequeue() h 0 t 0 s 1 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
 init: starting sh
-fork() pid 2 pri 3
-enqueue() h 0 t 1 s 1 hpid 1 tpid 2
-dequeue() h 0 t 1 s 1 pid 1
-enqueue() h 1 t 2 s 1 hpid 2 tpid 2
-dequeue() h 1 t 2 s 1 pid 2
-enqueue() h 2 t 3 s 1 hpid 2 tpid 2
-dequeue() h 2 t 3 s 1 pid 2
-enqueue() h 3 t 4 s 1 hpid 2 tpid 2
-dequeue() h 3 t 4 s 1 pid 2
-enqueue() h 4 t 5 s 1 hpid 2 tpid 2
-dequeue() h 4 t 5 s 1 pid 2
-enqueue() h 5 t 6 s 1 hpid 2 tpid 2
-dequeue() h 5 t 6 s 1 pid 2
-enqueue() h 6 t 7 s 1 hpid 2 tpid 2
-dequeue() h 6 t 7 s 1 pid 2
-enqueue() h 7 t 8 s 1 hpid 2 tpid 2
-dequeue() h 7 t 8 s 1 pid 2
-enqueue() h 8 t 9 s 1 hpid 2 tpid 2
-dequeue() h 8 t 9 s 1 pid 2
-enqueue() h 9 t 10 s 1 hpid 2 tpid 2
-dequeue() h 9 t 10 s 1 pid 2
-enqueue() h 10 t 11 s 1 hpid 2 tpid 2
-dequeue() h 10 t 11 s 1 pid 2
-enqueue() h 11 t 12 s 1 hpid 2 tpid 2
-dequeue() h 11 t 12 s 1 pid 2
-enqueue() h 12 t 13 s 1 hpid 2 tpid 2
-dequeue() h 12 t 13 s 1 pid 2
-enqueue() h 13 t 14 s 1 hpid 2 tpid 2
-dequeue() h 13 t 14 s 1 pid 2
-enqueue() h 14 t 15 s 1 hpid 2 tpid 2
-dequeue() h 14 t 15 s 1 pid 2
-enqueue() h 15 t 16 s 1 hpid 2 tpid 2
-dequeue() h 15 t 16 s 1 pid 2
-enqueue() h 16 t 17 s 1 hpid 2 tpid 2
-dequeue() h 16 t 17 s 1 pid 2
-enqueue() h 17 t 18 s 1 hpid 2 tpid 2
-dequeue() h 17 t 18 s 1 pid 2
-enqueue() h 18 t 19 s 1 hpid 2 tpid 2
-dequeue() h 18 t 19 s 1 pid 2
-enqueue() h 19 t 20 s 1 hpid 2 tpid 2
-dequeue() h 19 t 20 s 1 pid 2
-enqueue() h 20 t 21 s 1 hpid 2 tpid 2
-dequeue() h 20 t 21 s 1 pid 2
-enqueue() h 21 t 22 s 1 hpid 2 tpid 2
-dequeue() h 21 t 22 s 1 pid 2
-enqueue() h 22 t 23 s 1 hpid 2 tpid 2
-dequeue() h 22 t 23 s 1 pid 2
-enqueue() h 23 t 24 s 1 hpid 2 tpid 2
 $ tester
 tester
-dequeue() h 23 t 24 s 1 pid 2
-enqueue() h 24 t 25 s 1 hpid 2 tpid 2
-fork() pid 3 pri 3
-enqueue() h 24 t 26 s 2 hpid 2 tpid 3
-dequeue() h 24 t 26 s 2 pid 2
-enqueue() h 25 t 27 s 2 hpid 2 tpid 3
-dequeue() h 25 t 27 s 2 pid 2
-enqueue() h 26 t 28 s 2 hpid 3 tpid 3
-dequeue() h 26 t 28 s 2 pid 3
-enqueue() h 27 t 29 s 2 hpid 3 tpid 3
-dequeue() h 27 t 29 s 2 pid 3
-enqueue() h 28 t 30 s 2 hpid 3 tpid 3
-dequeue() h 28 t 30 s 2 pid 3
-enqueue() h 29 t 31 s 2 hpid 3 tpid 3
-dequeue() h 29 t 31 s 2 pid 3
-enqueue() h 30 t 32 s 2 hpid 3 tpid 3
-dequeue() h 30 t 32 s 2 pid 3
-enqueue() h 31 t 33 s 2 hpid 3 tpid 3
-dequeue() h 31 t 33 s 2 pid 3
-enqueue() h 32 t 34 s 2 hpid 3 tpid 3
-dequeue() h 32 t 34 s 2 pid 3
-enqueue() h 33 t 35 s 2 hpid 3 tpid 3
-dequeue() h 33 t 35 s 2 pid 3
-enqueue() h 34 t 36 s 2 hpid 3 tpid 3
-dequeue() h 34 t 36 s 2 pid 3
-enqueue() h 35 t 37 s 2 hpid 3 tpid 3
-dequeue() h 35 t 37 s 2 pid 3
-enqueue() h 36 t 38 s 2 hpid 3 tpid 3
-pid: 1 priority: 0
+pid: 1 priority: 3
  	 level 3 ticks used 0
-	 level 3 times moved to tail 0
+	 level 3 times moved to tail 1
 	 level 2 ticks used 0
-	 level 2 times moved to tdequeue() h 36 t 38 s 2 pid 3
-enqueue() h 37 t 39 s 2 hpid 3 tpid 3
-ail 0
-	 level 1 ticks used 0
-	 level 1 times moved to tail 0
-	 level 0 ticks used 0
-	 level 0 times moved to tail 0
-pid: 2 priority: 0
- 	 level 3 ticks used 0
-	 level 3 times moved to tail 0
-	 level dequeue() h 37 t 39 s 2 pid 3
-enqueue() h 38 t 40 s 2 hpid 3 tpid 3
-2 ticks used 0
 	 level 2 times moved to tail 0
 	 level 1 ticks used 0
 	 level 1 times moved to tail 0
 	 level 0 ticks used 0
 	 level 0 times moved to tail 0
-pid: 3 priority: 0
+pid: 2 priority: 3
  	 level 3 ticks used 0
-	 levedequeue() h 38 t 40 s 2 pid 3
-enqueue() h 39 t 41 s 2 hpid 3 tpid 3
-l 3 times moved to tail 0
+	 level 3 times moved to tail 1
+	 level 2 ticks used 0
+	 level 2 times moved to tail 0
+	 level 1 ticks used 0
+	 level 1 times moved to tail 0
+	 level 0 ticks used 0
+	 level 0 times moved to tail 0
+pid: 3 priority: 3
+ 	 level 3 ticks used 0
+	 level 3 times moved to tail 1
 	 level 2 ticks used 0
 	 level 2 times moved to tail 0
 	 level 1 ticks used 0
@@ -678,160 +532,29 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 
 Booting from Hard Disk..xv6...
 cpu0: starting
-enqueue() h 0 t 0 s 1 hpid 1 tpid 1
-dequeue() h 0 t 0 s 1 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
 init: starting sh
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-fork() pid 2 pri 3
-enqueue() h 0 t 1 s 1 hpid 1 tpid 2
-dequeue() h 0 t 1 s 1 pid 1
-enqueue() h 1 t 2 s 1 hpid 2 tpid 2
-dequeue() h 1 t 2 s 1 pid 2
-enqueue() h 2 t 3 s 1 hpid 2 tpid 2
-dequeue() h 2 t 3 s 1 pid 2
-enqueue() h 3 t 4 s 1 hpid 2 tpid 2
-dequeue() h 3 t 4 s 1 pid 2
-enqueue() h 4 t 5 s 1 hpid 2 tpid 2
-dequeue() h 4 t 5 s 1 pid 2
-enqueue() h 5 t 6 s 1 hpid 2 tpid 2
-dequeue() h 5 t 6 s 1 pid 2
-enqueue() h 6 t 7 s 1 hpid 2 tpid 2
-dequeue() h 6 t 7 s 1 pid 2
-enqueue() h 7 t 8 s 1 hpid 2 tpid 2
-dequeue() h 7 t 8 s 1 pid 2
-enqueue() h 8 t 9 s 1 hpid 2 tpid 2
-dequeue() h 8 t 9 s 1 pid 2
-enqueue() h 9 t 10 s 1 hpid 2 tpid 2
-dequeue() h 9 t 10 s 1 pid 2
-enqueue() h 10 t 11 s 1 hpid 2 tpid 2
-dequeue() h 10 t 11 s 1 pid 2
-enqueue() h 11 t 12 s 1 hpid 2 tpid 2
-dequeue() h 11 t 12 s 1 pid 2
-enqueue() h 12 t 13 s 1 hpid 2 tpid 2
-dequeue() h 12 t 13 s 1 pid 2
-enqueue() h 13 t 14 s 1 hpid 2 tpid 2
-dequeue() h 13 t 14 s 1 pid 2
-enqueue() h 14 t 15 s 1 hpid 2 tpid 2
-dequeue() h 14 t 15 s 1 pid 2
-enqueue() h 15 t 16 s 1 hpid 2 tpid 2
-dequeue() h 15 t 16 s 1 pid 2
-enqueue() h 16 t 17 s 1 hpid 2 tpid 2
-dequeue() h 16 t 17 s 1 pid 2
-enqueue() h 17 t 18 s 1 hpid 2 tpid 2
-dequeue() h 17 t 18 s 1 pid 2
-enqueue() h 18 t 19 s 1 hpid 2 tpid 2
-dequeue() h 18 t 19 s 1 pid 2
-enqueue() h 19 t 20 s 1 hpid 2 tpid 2
-dequeue() h 19 t 20 s 1 pid 2
-enqueue() h 20 t 21 s 1 hpid 2 tpid 2
-dequeue() h 20 t 21 s 1 pid 2
-enqueue() h 21 t 22 s 1 hpid 2 tpid 2
-dequeue() h 21 t 22 s 1 pid 2
-enqueue() h 22 t 23 s 1 hpid 2 tpid 2
 $ tester
 tester
-dequeue() h 22 t 23 s 1 pid 2
-enqueue() h 23 t 24 s 1 hpid 2 tpid 2
-dequeue() h 23 t 24 s 1 pid 2
-enqueue() h 24 t 25 s 1 hpid 2 tpid 2
-fork() pid 3 pri 3
-enqueue() h 24 t 26 s 2 hpid 2 tpid 3
-dequeue() h 24 t 26 s 2 pid 2
-enqueue() h 25 t 27 s 2 hpid 2 tpid 3
-dequeue() h 25 t 27 s 2 pid 2
-enqueue() h 26 t 28 s 2 hpid 3 tpid 3
-dequeue() h 26 t 28 s 2 pid 3
-enqueue() h 27 t 29 s 2 hpid 3 tpid 3
-dequeue() h 27 t 29 s 2 pid 3
-enqueue() h 28 t 30 s 2 hpid 3 tpid 3
-dequeue() h 28 t 30 s 2 pid 3
-enqueue() h 29 t 31 s 2 hpid 3 tpid 3
-dequeue() h 29 t 31 s 2 pid 3
-enqueue() h 30 t 32 s 2 hpid 3 tpid 3
-dequeue() h 30 t 32 s 2 pid 3
-enqueue() h 31 t 33 s 2 hpid 3 tpid 3
-dequeue() h 31 t 33 s 2 pid 3
-enqueue() h 32 t 34 s 2 hpid 3 tpid 3
-dequeue() h 32 t 34 s 2 pid 3
-enqueue() h 33 t 35 s 2 hpid 3 tpid 3
-dequeue() h 33 t 35 s 2 pid 3
-enqueue() h 34 t 36 s 2 hpid 3 tpid 3
-dequeue() h 34 t 36 s 2 pid 3
-enqueue() h 35 t 37 s 2 hpid 3 tpid 3
-pid: dequeue() h 35 t 37 s 2 pid 3
-enqueue() h 36 t 38 s 2 hpid 3 tpid 3
-1 priority: 0
- user/tester.c:22 check (st.priority[i] == 3) failed: should be in highest priority
-dequeue() h 36 t 38 s 2 pid 3
-dequeue() h 37 t 38 s 1 pid 3
-enqueue() h 38 t 39 s 1 hpid 3 tpid 2
-$ 
+pid: 1 priority: 3
+ 	 level 0 ticks used 0
+	 level 1 ticks used 0
+	 level 2 ticks used 0
+	 level 3 ticks used 0
+pid: 2 priority: 3
+ 	 level 0 ticks used 0
+	 level 1 ticks used 0
+	 level 2 ticks used 0
+	 level 3 ticks used 0
+pid: 3 priority: 3
+ 	 level 0 ticks used 0
+	 level 1 ticks used 0
+	 level 2 ticks used 0
+	 level 3 ticks used 0
+TEST PASSED
 
-test test_ptable FAILED (0 of 5)
+test test_ptable PASSED (5 of 5)
  (Workload: Checks getpinfo mirrors ptable
     Expected: init, sh, tester are in the ptable)
- tester failed
 
 starting test_getpri
 
@@ -890,148 +613,9 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 
 Booting from Hard Disk..xv6...
 cpu0: starting
-enqueue() h 0 t 0 s 1 hpid 1 tpid 1
-dequeue() h 0 t 0 s 1 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
 init: starting sh
-fork() pid 2 pri 3
-enqueue() h 0 t 1 s 1 hpid 1 tpid 2
-dequeue() h 0 t 1 s 1 pid 1
-enqueue() h 1 t 2 s 1 hpid 2 tpid 2
-dequeue() h 1 t 2 s 1 pid 2
-enqueue() h 2 t 3 s 1 hpid 2 tpid 2
-dequeue() h 2 t 3 s 1 pid 2
-enqueue() h 3 t 4 s 1 hpid 2 tpid 2
-dequeue() h 3 t 4 s 1 pid 2
-enqueue() h 4 t 5 s 1 hpid 2 tpid 2
-dequeue() h 4 t 5 s 1 pid 2
-enqueue() h 5 t 6 s 1 hpid 2 tpid 2
-dequeue() h 5 t 6 s 1 pid 2
-enqueue() h 6 t 7 s 1 hpid 2 tpid 2
-dequeue() h 6 t 7 s 1 pid 2
-enqueue() h 7 t 8 s 1 hpid 2 tpid 2
-dequeue() h 7 t 8 s 1 pid 2
-enqueue() h 8 t 9 s 1 hpid 2 tpid 2
-dequeue() h 8 t 9 s 1 pid 2
-enqueue() h 9 t 10 s 1 hpid 2 tpid 2
-dequeue() h 9 t 10 s 1 pid 2
-enqueue() h 10 t 11 s 1 hpid 2 tpid 2
-dequeue() h 10 t 11 s 1 pid 2
-enqueue() h 11 t 12 s 1 hpid 2 tpid 2
-dequeue() h 11 t 12 s 1 pid 2
-enqueue() h 12 t 13 s 1 hpid 2 tpid 2
-dequeue() h 12 t 13 s 1 pid 2
-enqueue() h 13 t 14 s 1 hpid 2 tpid 2
-dequeue() h 13 t 14 s 1 pid 2
-enqueue() h 14 t 15 s 1 hpid 2 tpid 2
-dequeue() h 14 t 15 s 1 pid 2
-enqueue() h 15 t 16 s 1 hpid 2 tpid 2
-dequeue() h 15 t 16 s 1 pid 2
-enqueue() h 16 t 17 s 1 hpid 2 tpid 2
-dequeue() h 16 t 17 s 1 pid 2
-enqueue() h 17 t 18 s 1 hpid 2 tpid 2
-dequeue() h 17 t 18 s 1 pid 2
-enqueue() h 18 t 19 s 1 hpid 2 tpid 2
-dequeue() h 18 t 19 s 1 pid 2
-enqueue() h 19 t 20 s 1 hpid 2 tpid 2
-dequeue() h 19 t 20 s 1 pid 2
-enqueue() h 20 t 21 s 1 hpid 2 tpid 2
-dequeue() h 20 t 21 s 1 pid 2
-enqueue() h 21 t 22 s 1 hpid 2 tpid 2
-dequeue() h 21 t 22 s 1 pid 2
-enqueue() h 22 t 23 s 1 hpid 2 tpid 2
 $ tester
 tester
-dequeue() h 22 t 23 s 1 pid 2
-enqueue() h 23 t 24 s 1 hpid 2 tpid 2
-dequeue() h 23 t 24 s 1 pid 2
-enqueue() h 24 t 25 s 1 hpid 2 tpid 2
-fork() pid 3 pri 3
-enqueue() h 24 t 26 s 2 hpid 2 tpid 3
-dequeue() h 24 t 26 s 2 pid 2
-enqueue() h 25 t 27 s 2 hpid 2 tpid 3
-dequeue() h 25 t 27 s 2 pid 2
-enqueue() h 26 t 28 s 2 hpid 3 tpid 3
-dequeue() h 26 t 28 s 2 pid 3
-enqueue() h 27 t 29 s 2 hpid 3 tpid 3
-dequeue() h 27 t 29 s 2 pid 3
-enqueue() h 28 t 30 s 2 hpid 3 tpid 3
-dequeue() h 28 t 30 s 2 pid 3
-enqueue() h 29 t 31 s 2 hpid 3 tpid 3
-dequeue() h 29 t 31 s 2 pid 3
-enqueue() h 30 t 32 s 2 hpid 3 tpid 3
-dequeue() h 30 t 32 s 2 pid 3
-enqueue() h 31 t 33 s 2 hpid 3 tpid 3
-dequeue() h 31 t 33 s 2 pid 3
-enqueue() h 32 t 34 s 2 hpid 3 tpid 3
-dequeue() h 32 t 34 s 2 pid 3
-enqueue() h 33 t 35 s 2 hpid 3 tpid 3
-dequeue() h 33 t 35 s 2 pid 3
-enqueue() h 34 t 36 s 2 hpid 3 tpid 3
 TEST PASSED
 
 test test_getpri PASSED (10 of 10)
@@ -1095,169 +679,9 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 
 Booting from Hard Disk..xv6...
 cpu0: starting
-enqueue() h 0 t 0 s 1 hpid 1 tpid 1
-dequeue() h 0 t 0 s 1 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
 init: starting sh
-fork() pid 2 pri 3
-enqueue() h 0 t 1 s 1 hpid 1 tpid 2
-dequeue() h 0 t 1 s 1 pid 1
-enqueue() h 1 t 2 s 1 hpid 2 tpid 2
-dequeue() h 1 t 2 s 1 pid 2
-enqueue() h 2 t 3 s 1 hpid 2 tpid 2
-dequeue() h 2 t 3 s 1 pid 2
-enqueue() h 3 t 4 s 1 hpid 2 tpid 2
-dequeue() h 3 t 4 s 1 pid 2
-enqueue() h 4 t 5 s 1 hpid 2 tpid 2
-dequeue() h 4 t 5 s 1 pid 2
-enqueue() h 5 t 6 s 1 hpid 2 tpid 2
-dequeue() h 5 t 6 s 1 pid 2
-enqueue() h 6 t 7 s 1 hpid 2 tpid 2
-dequeue() h 6 t 7 s 1 pid 2
-enqueue() h 7 t 8 s 1 hpid 2 tpid 2
-dequeue() h 7 t 8 s 1 pid 2
-enqueue() h 8 t 9 s 1 hpid 2 tpid 2
-dequeue() h 8 t 9 s 1 pid 2
-enqueue() h 9 t 10 s 1 hpid 2 tpid 2
-dequeue() h 9 t 10 s 1 pid 2
-enqueue() h 10 t 11 s 1 hpid 2 tpid 2
-dequeue() h 10 t 11 s 1 pid 2
-enqueue() h 11 t 12 s 1 hpid 2 tpid 2
-dequeue() h 11 t 12 s 1 pid 2
-enqueue() h 12 t 13 s 1 hpid 2 tpid 2
-dequeue() h 12 t 13 s 1 pid 2
-enqueue() h 13 t 14 s 1 hpid 2 tpid 2
-dequeue() h 13 t 14 s 1 pid 2
-enqueue() h 14 t 15 s 1 hpid 2 tpid 2
-dequeue() h 14 t 15 s 1 pid 2
-enqueue() h 15 t 16 s 1 hpid 2 tpid 2
-dequeue() h 15 t 16 s 1 pid 2
-enqueue() h 16 t 17 s 1 hpid 2 tpid 2
-dequeue() h 16 t 17 s 1 pid 2
-enqueue() h 17 t 18 s 1 hpid 2 tpid 2
-dequeue() h 17 t 18 s 1 pid 2
-enqueue() h 18 t 19 s 1 hpid 2 tpid 2
-dequeue() h 18 t 19 s 1 pid 2
-enqueue() h 19 t 20 s 1 hpid 2 tpid 2
-dequeue() h 19 t 20 s 1 pid 2
-enqueue() h 20 t 21 s 1 hpid 2 tpid 2
-dequeue() h 20 t 21 s 1 pid 2
-enqueue() h 21 t 22 s 1 hpid 2 tpid 2
-dequeue() h 21 t 22 s 1 pid 2
-enqueue() h 22 t 23 s 1 hpid 2 tpid 2
 $ tester
 tester
-dequeue() h 22 t 23 s 1 pid 2
-enqueue() h 23 t 24 s 1 hpid 2 tpid 2
-dequeue() h 23 t 24 s 1 pid 2
-enqueue() h 24 t 25 s 1 hpid 2 tpid 2
-fork() pid 3 pri 3
-enqueue() h 24 t 26 s 2 hpid 2 tpid 3
-dequeue() h 24 t 26 s 2 pid 2
-enqueue() h 25 t 27 s 2 hpid 2 tpid 3
-dequeue() h 25 t 27 s 2 pid 2
-enqueue() h 26 t 28 s 2 hpid 3 tpid 3
-dequeue() h 26 t 28 s 2 pid 3
-enqueue() h 27 t 29 s 2 hpid 3 tpid 3
-dequeue() h 27 t 29 s 2 pid 3
-enqueue() h 28 t 30 s 2 hpid 3 tpid 3
-dequeue() h 28 t 30 s 2 pid 3
-enqueue() h 29 t 31 s 2 hpid 3 tpid 3
-dequeue() h 29 t 31 s 2 pid 3
-enqueue() h 30 t 32 s 2 hpid 3 tpid 3
-dequeue() h 30 t 32 s 2 pid 3
-enqueue() h 31 t 33 s 2 hpid 3 tpid 3
-dequeue() h 31 t 33 s 2 pid 3
-enqueue() h 32 t 34 s 2 hpid 3 tpid 3
-dequeue() h 32 t 34 s 2 pid 3
-enqueue() h 33 t 35 s 2 hpid 3 tpid 3
-dequeue() h 33 t 35 s 2 pid 3
-enqueue() h 34 t 36 s 2 hpid 3 tpid 3
-dequeue() h 34 t 36 s 2 pid 3
-enqueue() h 35 t 37 s 2 hpid 3 tpid 3
-dequeue() h 35 t 37 s 2 pid 3
-enqueue() h 36 t 38 s 2 hpid 3 tpid 3
-dequeue() h 36 t 38 s 2 pid 3
-enqueue() h 37 t 39 s 2 hpid 3 tpid 3
-fork() pid 4 pri 3
-enqueue() h 37 t 40 s 3 hpid 3 tpid 4
-dequeue() h 37 t 40 s 3 pid 4
-enqueue() h 0 t 0 s 1 hpid 4 tpid 4
-dequeue() h 0 t 0 s 1 pid 4
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 1 hpid 4 tpid 4
-dequeue() h 38 t 40 s 2 pid 3
-enqueue() h 39 t 41 s 2 hpid 3 tpid 3
-dequeue() h 0 t 0 s 1 pid 4
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 1 hpid 4 tpid 4
-dequeue() h 0 t 0 s 1 pid 4
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 39 t 42 s 3 hpid 3 tpid 4
 TEST PASSED
 
 test test_setpri PASSED (5 of 5)
@@ -1321,124 +745,14 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 
 Booting from Hard Disk..xv6...
 cpu0: starting
-enqueue() h 0 t 0 s 1 hpid 1 tpid 1
-dequeue() h 0 t 0 s 1 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-idequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-nit: starting sh
-fork() pid 2 pri 3
-enqueue() h 0 t 1 s 1 hpid 1 tpid 2
-dequeue() h 0 t 1 s 1 pid 1
-enqueue() h 1 t 2 s 1 hpid 2 tpid 2
-dequeue() h 1 t 2 s 1 pid 2
-enqueue() h 2 t 3 s 1 hpid 2 tpid 2
-dequeue() h 2 t 3 s 1 pid 2
-enqueue() h 3 t 4 s 1 hpid 2 tpid 2
-dequeue() h 3 t 4 s 1 pid 2
-enqueue() h 4 t 5 s 1 hpid 2 tpid 2
-dequeue() h 4 t 5 s 1 pid 2
-enqueue() h 5 t 6 s 1 hpid 2 tpid 2
-dequeue() h 5 t 6 s 1 pid 2
-enqueue() h 6 t 7 s 1 hpid 2 tpid 2
-dequeue() h 6 t 7 s 1 pid 2
-enqueue() h 7 t 8 s 1 hpid 2 tpid 2
-dequeue() h 7 t 8 s 1 pid 2
-enqueue() h 8 t 9 s 1 hpid 2 tpid 2
-dequeue() h 8 t 9 s 1 pid 2
-enqueue() h 9 t 10 s 1 hpid 2 tpid 2
-dequeue() h 9 t 10 s 1 pid 2
-enqueue() h 10 t 11 s 1 hpid 2 tpid 2
-dequeue() h 10 t 11 s 1 pid 2
-enqueue() h 11 t 12 s 1 hpid 2 tpid 2
-dequeue() h 11 t 12 s 1 pid 2
-enqueue() h 12 t 13 s 1 hpid 2 tpid 2
-dequeue() h 12 t 13 s 1 pid 2
-enqueue() h 13 t 14 s 1 hpid 2 tpid 2
-dequeue() h 13 t 14 s 1 pid 2
-enqueue() h 14 t 15 s 1 hpid 2 tpid 2
-dequeue() h 14 t 15 s 1 pid 2
-enqueue() h 15 t 16 s 1 hpid 2 tpid 2
-dequeue() h 15 t 16 s 1 pid 2
-enqueue() h 16 t 17 s 1 hpid 2 tpid 2
-dequeue() h 16 t 17 s 1 pid 2
-enqueue() h 17 t 18 s 1 hpid 2 tpid 2
-dequeue() h 17 t 18 s 1 pid 2
-enqueue() h 18 t 19 s 1 hpid 2 tpid 2
-dequeue() h 18 t 19 s 1 pid 2
-enqueue() h 19 t 20 s 1 hpid 2 tpid 2
-dequeue() h 19 t 20 s 1 pid 2
-enqueue() h 20 t 21 s 1 hpid 2 tpid 2
-dequeue() h 20 t 21 s 1 pid 2
-enqueue() h 21 t 22 s 1 hpid 2 tpid 2
-$ 
+init: starting sh
+$ tester
+tester
+TEST PASSED
 
-test test_setpri_samelevel FAILED (0 of 5)
+test test_setpri_samelevel PASSED (5 of 5)
  (Workload: Checks setpri works when set to the same level
     Expected: tester's child should be set to the corresponding priority level)
- Timelimit (30.0s) exceeded
 
 starting test_invalidarg
 
@@ -1497,154 +811,9 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 
 Booting from Hard Disk..xv6...
 cpu0: starting
-enqueue() h 0 t 0 s 1 hpid 1 tpid 1
-dequeue() h 0 t 0 s 1 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
 init: starting sh
-fork() pid 2 pri 3
-enqueue() h 0 t 1 s 1 hpid 1 tpid 2
-dequeue() h 0 t 1 s 1 pid 1
-enqueue() h 1 t 2 s 1 hpid 2 tpid 2
-dequeue() h 1 t 2 s 1 pid 2
-enqueue() h 2 t 3 s 1 hpid 2 tpid 2
-dequeue() h 2 t 3 s 1 pid 2
-enqueue() h 3 t 4 s 1 hpid 2 tpid 2
-dequeue() h 3 t 4 s 1 pid 2
-enqueue() h 4 t 5 s 1 hpid 2 tpid 2
-dequeue() h 4 t 5 s 1 pid 2
-enqueue() h 5 t 6 s 1 hpid 2 tpid 2
-dequeue() h 5 t 6 s 1 pid 2
-enqueue() h 6 t 7 s 1 hpid 2 tpid 2
-dequeue() h 6 t 7 s 1 pid 2
-enqueue() h 7 t 8 s 1 hpid 2 tpid 2
-dequeue() h 7 t 8 s 1 pid 2
-enqueue() h 8 t 9 s 1 hpid 2 tpid 2
-dequeue() h 8 t 9 s 1 pid 2
-enqueue() h 9 t 10 s 1 hpid 2 tpid 2
-dequeue() h 9 t 10 s 1 pid 2
-enqueue() h 10 t 11 s 1 hpid 2 tpid 2
-dequeue() h 10 t 11 s 1 pid 2
-enqueue() h 11 t 12 s 1 hpid 2 tpid 2
-dequeue() h 11 t 12 s 1 pid 2
-enqueue() h 12 t 13 s 1 hpid 2 tpid 2
-dequeue() h 12 t 13 s 1 pid 2
-enqueue() h 13 t 14 s 1 hpid 2 tpid 2
-dequeue() h 13 t 14 s 1 pid 2
-enqueue() h 14 t 15 s 1 hpid 2 tpid 2
-dequeue() h 14 t 15 s 1 pid 2
-enqueue() h 15 t 16 s 1 hpid 2 tpid 2
-dequeue() h 15 t 16 s 1 pid 2
-enqueue() h 16 t 17 s 1 hpid 2 tpid 2
-dequeue() h 16 t 17 s 1 pid 2
-enqueue() h 17 t 18 s 1 hpid 2 tpid 2
-dequeue() h 17 t 18 s 1 pid 2
-enqueue() h 18 t 19 s 1 hpid 2 tpid 2
-dequeue() h 18 t 19 s 1 pid 2
-enqueue() h 19 t 20 s 1 hpid 2 tpid 2
-dequeue() h 19 t 20 s 1 pid 2
-enqueue() h 20 t 21 s 1 hpid 2 tpid 2
-dequeue() h 20 t 21 s 1 pid 2
-enqueue() h 21 t 22 s 1 hpid 2 tpid 2
-dequeue() h 21 t 22 s 1 pid 2
-enqueue() h 22 t 23 s 1 hpid 2 tpid 2
 $ tester
 tester
-dequeue() h 22 t 23 s 1 pid 2
-enqueue() h 23 t 24 s 1 hpid 2 tpid 2
-dequeue() h 23 t 24 s 1 pid 2
-enqueue() h 24 t 25 s 1 hpid 2 tpid 2
-fork() pid 3 pri 3
-enqueue() h 24 t 26 s 2 hpid 2 tpid 3
-dequeue() h 24 t 26 s 2 pid 2
-enqueue() h 25 t 27 s 2 hpid 2 tpid 3
-dequeue() h 25 t 27 s 2 pid 2
-enqueue() h 26 t 28 s 2 hpid 3 tpid 3
-dequeue() h 26 t 28 s 2 pid 3
-enqueue() h 27 t 29 s 2 hpid 3 tpid 3
-dequeue() h 27 t 29 s 2 pid 3
-enqueue() h 28 t 30 s 2 hpid 3 tpid 3
-dequeue() h 28 t 30 s 2 pid 3
-enqueue() h 29 t 31 s 2 hpid 3 tpid 3
-dequeue() h 29 t 31 s 2 pid 3
-enqueue() h 30 t 32 s 2 hpid 3 tpid 3
-dequeue() h 30 t 32 s 2 pid 3
-enqueue() h 31 t 33 s 2 hpid 3 tpid 3
-dequeue() h 31 t 33 s 2 pid 3
-enqueue() h 32 t 34 s 2 hpid 3 tpid 3
-dequeue() h 32 t 34 s 2 pid 3
-enqueue() h 33 t 35 s 2 hpid 3 tpid 3
-dequeue() h 33 t 35 s 2 pid 3
-enqueue() h 34 t 36 s 2 hpid 3 tpid 3
-dequeue() h 34 t 36 s 2 pid 3
-enqueue() h 35 t 37 s 2 hpid 3 tpid 3
-dequeue() h 35 t 37 s 2 pid 3
-enqueue() h 36 t 38 s 2 hpid 3 tpid 3
-fork() pid 4 pri 3
-enqueue() h 36 t 39 s 3 hpid 3 tpid 4
 TEST PASSED
 
 test test_invalidarg PASSED (10 of 10)
@@ -1708,126 +877,16 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 
 Booting from Hard Disk..xv6...
 cpu0: starting
-enqueue() h 0 t 0 s 1 hpid 1 tpid 1
-dequeue() h 0 t 0 s 1 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-init: stdequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-arting sh
-fork() pid 2 pri 3
-enqueue() h 0 t 1 s 1 hpid 1 tpid 2
-dequeue() h 0 t 1 s 1 pid 1
-enqueue() h 1 t 2 s 1 hpid 2 tpid 2
-dequeue() h 1 t 2 s 1 pid 2
-enqueue() h 2 t 3 s 1 hpid 2 tpid 2
-dequeue() h 2 t 3 s 1 pid 2
-enqueue() h 3 t 4 s 1 hpid 2 tpid 2
-dequeue() h 3 t 4 s 1 pid 2
-enqueue() h 4 t 5 s 1 hpid 2 tpid 2
-dequeue() h 4 t 5 s 1 pid 2
-enqueue() h 5 t 6 s 1 hpid 2 tpid 2
-dequeue() h 5 t 6 s 1 pid 2
-enqueue() h 6 t 7 s 1 hpid 2 tpid 2
-dequeue() h 6 t 7 s 1 pid 2
-enqueue() h 7 t 8 s 1 hpid 2 tpid 2
-dequeue() h 7 t 8 s 1 pid 2
-enqueue() h 8 t 9 s 1 hpid 2 tpid 2
-dequeue() h 8 t 9 s 1 pid 2
-enqueue() h 9 t 10 s 1 hpid 2 tpid 2
-dequeue() h 9 t 10 s 1 pid 2
-enqueue() h 10 t 11 s 1 hpid 2 tpid 2
-dequeue() h 10 t 11 s 1 pid 2
-enqueue() h 11 t 12 s 1 hpid 2 tpid 2
-dequeue() h 11 t 12 s 1 pid 2
-enqueue() h 12 t 13 s 1 hpid 2 tpid 2
-dequeue() h 12 t 13 s 1 pid 2
-enqueue() h 13 t 14 s 1 hpid 2 tpid 2
-dequeue() h 13 t 14 s 1 pid 2
-enqueue() h 14 t 15 s 1 hpid 2 tpid 2
-dequeue() h 14 t 15 s 1 pid 2
-enqueue() h 15 t 16 s 1 hpid 2 tpid 2
-dequeue() h 15 t 16 s 1 pid 2
-enqueue() h 16 t 17 s 1 hpid 2 tpid 2
-dequeue() h 16 t 17 s 1 pid 2
-enqueue() h 17 t 18 s 1 hpid 2 tpid 2
-dequeue() h 17 t 18 s 1 pid 2
-enqueue() h 18 t 19 s 1 hpid 2 tpid 2
-dequeue() h 18 t 19 s 1 pid 2
-enqueue() h 19 t 20 s 1 hpid 2 tpid 2
-dequeue() h 19 t 20 s 1 pid 2
-enqueue() h 20 t 21 s 1 hpid 2 tpid 2
-dequeue() h 20 t 21 s 1 pid 2
-enqueue() h 21 t 22 s 1 hpid 2 tpid 2
-dequeue() h 21 t 22 s 1 pid 2
-enqueue() h 22 t 23 s 1 hpid 2 tpid 2
+init: starting sh
+$ tester
+tester
+user/tester.c:34 check (st.ticks[j][3] != 0 && st.ticks[j][3] % 8 == 0) failed: child doesn't run full slices
 $ 
 
 test test_fullslice FAILED (0 of 10)
  (Workload: Checks whether a process is given full slices
     Expected: tester's child should always run full slices)
- Timelimit (30.0s) exceeded
+ tester failed
 
 starting test_qtail
 
@@ -1886,172 +945,104 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 
 Booting from Hard Disk..xv6...
 cpu0: starting
-enqueue() h 0 t 0 s 1 hpid 1 tpid 1
-dequeue() h 0 t 0 s 1 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
 init: starting sh
-fork() pid 2 pri 3
-enqueue() h 0 t 1 s 1 hpid 1 tpid 2
-dequeue() h 0 t 1 s 1 pid 1
-enqueue() h 1 t 2 s 1 hpid 2 tpid 2
-dequeue() h 1 t 2 s 1 pid 2
-enqueue() h 2 t 3 s 1 hpid 2 tpid 2
-dequeue() h 2 t 3 s 1 pid 2
-enqueue() h 3 t 4 s 1 hpid 2 tpid 2
-dequeue() h 3 t 4 s 1 pid 2
-enqueue() h 4 t 5 s 1 hpid 2 tpid 2
-dequeue() h 4 t 5 s 1 pid 2
-enqueue() h 5 t 6 s 1 hpid 2 tpid 2
-dequeue() h 5 t 6 s 1 pid 2
-enqueue() h 6 t 7 s 1 hpid 2 tpid 2
-dequeue() h 6 t 7 s 1 pid 2
-enqueue() h 7 t 8 s 1 hpid 2 tpid 2
-dequeue() h 7 t 8 s 1 pid 2
-enqueue() h 8 t 9 s 1 hpid 2 tpid 2
-dequeue() h 8 t 9 s 1 pid 2
-enqueue() h 9 t 10 s 1 hpid 2 tpid 2
-dequeue() h 9 t 10 s 1 pid 2
-enqueue() h 10 t 11 s 1 hpid 2 tpid 2
-dequeue() h 10 t 11 s 1 pid 2
-enqueue() h 11 t 12 s 1 hpid 2 tpid 2
-dequeue() h 11 t 12 s 1 pid 2
-enqueue() h 12 t 13 s 1 hpid 2 tpid 2
-dequeue() h 12 t 13 s 1 pid 2
-enqueue() h 13 t 14 s 1 hpid 2 tpid 2
-dequeue() h 13 t 14 s 1 pid 2
-enqueue() h 14 t 15 s 1 hpid 2 tpid 2
-dequeue() h 14 t 15 s 1 pid 2
-enqueue() h 15 t 16 s 1 hpid 2 tpid 2
-dequeue() h 15 t 16 s 1 pid 2
-enqueue() h 16 t 17 s 1 hpid 2 tpid 2
-dequeue() h 16 t 17 s 1 pid 2
-enqueue() h 17 t 18 s 1 hpid 2 tpid 2
-dequeue() h 17 t 18 s 1 pid 2
-enqueue() h 18 t 19 s 1 hpid 2 tpid 2
-dequeue() h 18 t 19 s 1 pid 2
-enqueue() h 19 t 20 s 1 hpid 2 tpid 2
-dequeue() h 19 t 20 s 1 pid 2
-enqueue() h 20 t 21 s 1 hpid 2 tpid 2
-dequeue() h 20 t 21 s 1 pid 2
-enqueue() h 21 t 22 s 1 hpid 2 tpid 2
-dequeue() h 21 t 22 s 1 pid 2
-enqueue() h 22 t 23 s 1 hpid 2 tpid 2
 $ tester
 tester
-dequeue() h 22 t 23 s 1 pid 2
-enqueue() h 23 t 24 s 1 hpid 2 tpid 2
-dequeue() h 23 t 24 s 1 pid 2
-enqueue() h 24 t 25 s 1 hpid 2 tpid 2
-fork() pid 3 pri 3
-enqueue() h 24 t 26 s 2 hpid 2 tpid 3
-dequeue() h 24 t 26 s 2 pid 2
-enqueue() h 25 t 27 s 2 hpid 2 tpid 3
-dequeue() h 25 t 27 s 2 pid 2
-enqueue() h 26 t 28 s 2 hpid 3 tpid 3
-dequeue() h 26 t 28 s 2 pid 3
-enqueue() h 27 t 29 s 2 hpid 3 tpid 3
-dequeue() h 27 t 29 s 2 pid 3
-enqueue() h 28 t 30 s 2 hpid 3 tpid 3
-dequeue() h 28 t 30 s 2 pid 3
-enqueue() h 29 t 31 s 2 hpid 3 tpid 3
-dequeue() h 29 t 31 s 2 pid 3
-enqueue() h 30 t 32 s 2 hpid 3 tpid 3
-dequeue() h 30 t 32 s 2 pid 3
-enqueue() h 31 t 33 s 2 hpid 3 tpid 3
-dequeue() h 31 t 33 s 2 pid 3
-enqueue() h 32 t 34 s 2 hpid 3 tpid 3
-dequeue() h 32 t 34 s 2 pid 3
-enqueue() h 33 t 35 s 2 hpid 3 tpid 3
-dequeue() h 33 t 35 s 2 pid 3
-enqueue() h 34 t 36 s 2 hpid 3 tpid 3
-dequeue() h 34 t 36 s 2 pid 3
-enqueue() h 35 t 37 s 2 hpid 3 tpid 3
-dequeue() h 35 t 37 s 2 pid 3
-enqueue() h 36 t 38 s 2 hpid 3 tpid 3
-dequeue() h 36 t 38 s 2 pid 3
-enqueue() h 37 t 39 s 2 hpid 3 tpid 3
-fork() pid 4 pri 3
-enqueue() h 37 t 40 s 3 hpid 3 tpid 4
-dequeue() h 37 t 40 s 3 pid 3
-enqueue() h 38 t 41 s 3 hpid 3 tpid 4
-dequeue() h 38 t 41 s 3 pid 3
-enqueue() h 39 t 42 s 3 hpid 3 tpid 3
-user/tester.c:33 check (j < NPROC) failed: cannot find child
-dequeue() h 39 t 42 s 3 pid 3
-dequeue() h 40 t 42 s 2 pid 4
-enqueue() h 41 t 43 s 2 hpid 4 tpid 4
-dequeue() h 41 t 43 s 2 pid 4
-enqueue() h 42 t 44 s 2 hpid 3 tpid 2
-$ 
+child pid: 4 priority: 3
+ 	 level 3 ticks used 0
+	 level 3 times moved to tail 1
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+child pid: 4 priority: 3
+ 	 level 3 ticks used 0
+	 level 3 times moved to tail 1
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+child pid: 4 priority: 3
+ 	 level 3 ticks used 0
+	 level 3 times moved to tail 1
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+child pid: 4 priority: 3
+ 	 level 3 ticks used 0
+	 level 3 times moved to tail 1
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+child pid: 4 priority: 3
+ 	 level 3 ticks used 0
+	 level 3 times moved to tail 1
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+child pid: 4 priority: 3
+ 	 level 3 ticks used 0
+	 level 3 times moved to tail 1
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+child pid: 4 priority: 3
+ 	 level 3 ticks used 0
+	 level 3 times moved to tail 1
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+child pid: 4 priority: 3
+ 	 level 3 ticks used 0
+	 level 3 times moved to tail 1
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+child pid: 4 priority: 3
+ 	 level 3 ticks used 0
+	 level 3 times moved to tail 1
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+child pid: 4 priority: 3
+ 	 level 3 ticks used 0
+	 level 3 times moved to tail 1
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+	 level 3 ticks used 0
+	 level 3 times moved to tail 0
+TEST PASSED
 
-test test_qtail FAILED (0 of 10)
+test test_qtail PASSED (10 of 10)
  (Workload: Checks whether a process's qtail match ticks
     Expected: tester's child: (qtail[3] - 1) * 8 == ticks[3])
- tester failed
 
 starting test_starve
 
@@ -2110,183 +1101,14 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 
 Booting from Hard Disk..xv6...
 cpu0: starting
-enqueue() h 0 t 0 s 1 hpid 1 tpid 1
-dequeue() h 0 t 0 s 1 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
-dequeue() h 0 t 0 s 0 pid 1
-setQueueEmpty() h -1 t -1 s 0 pid 0
-enqueue() h 0 t 0 s 0 hpid 1 tpid 1
 init: starting sh
-fork() pid 2 pri 3
-enqueue() h 0 t 1 s 1 hpid 1 tpid 2
-dequeue() h 0 t 1 s 1 pid 1
-enqueue() h 1 t 2 s 1 hpid 2 tpid 2
-dequeue() h 1 t 2 s 1 pid 2
-enqueue() h 2 t 3 s 1 hpid 2 tpid 2
-dequeue() h 2 t 3 s 1 pid 2
-enqueue() h 3 t 4 s 1 hpid 2 tpid 2
-dequeue() h 3 t 4 s 1 pid 2
-enqueue() h 4 t 5 s 1 hpid 2 tpid 2
-dequeue() h 4 t 5 s 1 pid 2
-enqueue() h 5 t 6 s 1 hpid 2 tpid 2
-dequeue() h 5 t 6 s 1 pid 2
-enqueue() h 6 t 7 s 1 hpid 2 tpid 2
-dequeue() h 6 t 7 s 1 pid 2
-enqueue() h 7 t 8 s 1 hpid 2 tpid 2
-dequeue() h 7 t 8 s 1 pid 2
-enqueue() h 8 t 9 s 1 hpid 2 tpid 2
-dequeue() h 8 t 9 s 1 pid 2
-enqueue() h 9 t 10 s 1 hpid 2 tpid 2
-dequeue() h 9 t 10 s 1 pid 2
-enqueue() h 10 t 11 s 1 hpid 2 tpid 2
-dequeue() h 10 t 11 s 1 pid 2
-enqueue() h 11 t 12 s 1 hpid 2 tpid 2
-dequeue() h 11 t 12 s 1 pid 2
-enqueue() h 12 t 13 s 1 hpid 2 tpid 2
-dequeue() h 12 t 13 s 1 pid 2
-enqueue() h 13 t 14 s 1 hpid 2 tpid 2
-dequeue() h 13 t 14 s 1 pid 2
-enqueue() h 14 t 15 s 1 hpid 2 tpid 2
-dequeue() h 14 t 15 s 1 pid 2
-enqueue() h 15 t 16 s 1 hpid 2 tpid 2
-dequeue() h 15 t 16 s 1 pid 2
-enqueue() h 16 t 17 s 1 hpid 2 tpid 2
-dequeue() h 16 t 17 s 1 pid 2
-enqueue() h 17 t 18 s 1 hpid 2 tpid 2
-dequeue() h 17 t 18 s 1 pid 2
-enqueue() h 18 t 19 s 1 hpid 2 tpid 2
-dequeue() h 18 t 19 s 1 pid 2
-enqueue() h 19 t 20 s 1 hpid 2 tpid 2
-dequeue() h 19 t 20 s 1 pid 2
-enqueue() h 20 t 21 s 1 hpid 2 tpid 2
-dequeue() h 20 t 21 s 1 pid 2
-enqueue() h 21 t 22 s 1 hpid 2 tpid 2
-dequeue() h 21 t 22 s 1 pid 2
-enqueue() h 22 t 23 s 1 hpid 2 tpid 2
 $ tester
 tester
-dequeue() h 22 t 23 s 1 pid 2
-enqueue() h 23 t 24 s 1 hpid 2 tpid 2
-dequeue() h 23 t 24 s 1 pid 2
-enqueue() h 24 t 25 s 1 hpid 2 tpid 2
-fork() pid 3 pri 3
-enqueue() h 24 t 26 s 2 hpid 2 tpid 3
-dequeue() h 24 t 26 s 2 pid 2
-enqueue() h 25 t 27 s 2 hpid 2 tpid 3
-dequeue() h 25 t 27 s 2 pid 2
-enqueue() h 26 t 28 s 2 hpid 3 tpid 3
-dequeue() h 26 t 28 s 2 pid 3
-enqueue() h 27 t 29 s 2 hpid 3 tpid 3
-dequeue() h 27 t 29 s 2 pid 3
-enqueue() h 28 t 30 s 2 hpid 3 tpid 3
-dequeue() h 28 t 30 s 2 pid 3
-enqueue() h 29 t 31 s 2 hpid 3 tpid 3
-dequeue() h 29 t 31 s 2 pid 3
-enqueue() h 30 t 32 s 2 hpid 3 tpid 3
-dequeue() h 30 t 32 s 2 pid 3
-enqueue() h 31 t 33 s 2 hpid 3 tpid 3
-dequeue() h 31 t 33 s 2 pid 3
-enqueue() h 32 t 34 s 2 hpid 3 tpid 3
-dequeue() h 32 t 34 s 2 pid 3
-enqueue() h 33 t 35 s 2 hpid 3 tpid 3
-dequeue() h 33 t 35 s 2 pid 3
-enqueue() h 34 t 36 s 2 hpid 3 tpid 3
-dequeue() h 34 t 36 s 2 pid 3
-enqueue() h 35 t 37 s 2 hpid 3 tpid 3
-dequeue() h 35 t 37 s 2 pid 3
-enqueue() h 36 t 38 s 2 hpid 3 tpid 3
-dequeue() h 36 t 38 s 2 pid 3
-enqueue() h 37 t 39 s 2 hpid 3 tpid 3
-fork() pid 4 pri 3
-enqueue() h 37 t 40 s 3 hpid 3 tpid 4
-fork() pid 5 pri 3
-enqueue() h 37 t 41 s 4 hpid 3 tpid 5
-dequeue() h 37 t 41 s 4 pid 3
-enqueue() h 38 t 42 s 4 hpid 3 tpid 4
-dequeue() h 38 t 42 s 4 pid 3
-enqueue() h 39 t 43 s 4 hpid 3 tpid 5
-dequeue() h 39 t 43 s 4 pid 3
-enqueue() h 40 t 44 s 4 hpid 4 tpid 3
-dequeue() h 40 t 44 s 4 pid 4
-enqueue() h 0 t 0 s 1 hpid 4 tpid 4
-dequeue() h 41 t 44 s 3 pid 5
-enqueue() h 42 t 45 s 3 hpid 4 tpid 5
-dequeue() h 42 t 45 s 3 pid 4
-enqueue() h 43 t 46 s 3 hpid 5 tpid 3
-user/tester.c:44 check (j < NPROC) failed: cannot find child 1
-dequeue() h 43 t 46 s 3 pid 3
-dequeue() h 44 t 46 s 2 pid 5
-enqueue() h 45 t 47 s 2 hpid 5 tpid 5
-dequeue() h 45 t 47 s 2 pid 5
-enqueue() h 46 t 48 s 2 hpid 3 tpid 2
-$ dequeue() h 46 t 48 s 2 pid 3
+TEST PASSED
 
-
-test test_starve FAILED (0 of 10)
+test test_starve PASSED (10 of 10)
  (Workload: Checks always the highest priority processes run
     Expected: one test's child is running on priority 3 and the other child in priority 2 should starve)
- tester failed
 
 **********************************************************************
 Summary:
@@ -2297,10 +1119,9 @@ test test_getpinfo PASSED (5 of 5)
  (Workload: Check getpinfo works
     Expected: pstat fields filled by getpinfo)
 
-test test_ptable FAILED (0 of 5)
+test test_ptable PASSED (5 of 5)
  (Workload: Checks getpinfo mirrors ptable
     Expected: init, sh, tester are in the ptable)
- tester failed
 
 test test_getpri PASSED (10 of 10)
  (Workload: Checks getpri works
@@ -2310,10 +1131,9 @@ test test_setpri PASSED (5 of 5)
  (Workload: Checks setpri works
     Expected: tester's child should be set to the corresponding priority level)
 
-test test_setpri_samelevel FAILED (0 of 5)
+test test_setpri_samelevel PASSED (5 of 5)
  (Workload: Checks setpri works when set to the same level
     Expected: tester's child should be set to the corresponding priority level)
- Timelimit (30.0s) exceeded
 
 test test_invalidarg PASSED (10 of 10)
  (Workload: Checks invalid argument handling
@@ -2322,18 +1142,16 @@ test test_invalidarg PASSED (10 of 10)
 test test_fullslice FAILED (0 of 10)
  (Workload: Checks whether a process is given full slices
     Expected: tester's child should always run full slices)
- Timelimit (30.0s) exceeded
+ tester failed
 
-test test_qtail FAILED (0 of 10)
+test test_qtail PASSED (10 of 10)
  (Workload: Checks whether a process's qtail match ticks
     Expected: tester's child: (qtail[3] - 1) * 8 == ticks[3])
- tester failed
 
-test test_starve FAILED (0 of 10)
+test test_starve PASSED (10 of 10)
  (Workload: Checks always the highest priority processes run
     Expected: one test's child is running on priority 3 and the other child in priority 2 should starve)
- tester failed
 
-Passed 5 of 10 tests.
-Overall 5 of 10
-Points 30 of 70
+Passed 9 of 10 tests.
+Overall 9 of 10
+Points 60 of 70
