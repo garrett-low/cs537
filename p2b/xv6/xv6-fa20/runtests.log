@@ -289,15 +289,15 @@ ld  -m    elf_i386 -nostdlib --omagic \
 dd if=/dev/zero of=xv6.img count=10000
 10000+0 records in
 10000+0 records out
-5120000 bytes (5.1 MB, 4.9 MiB) copied, 0.0199773 s, 256 MB/s
+5120000 bytes (5.1 MB, 4.9 MiB) copied, 0.0249094 s, 206 MB/s
 dd if=kernel/bootblock of=xv6.img conv=notrunc
 1+0 records in
 1+0 records out
-512 bytes copied, 5.505e-05 s, 9.3 MB/s
+512 bytes copied, 5.2509e-05 s, 9.8 MB/s
 dd if=kernel/kernel of=xv6.img seek=1 conv=notrunc
 297+1 records in
 297+1 records out
-152092 bytes (152 kB, 149 KiB) copied, 0.000554035 s, 275 MB/s
+152108 bytes (152 kB, 149 KiB) copied, 0.000577444 s, 263 MB/s
 gcc -c  -iquote include -Wall -Werror -ggdb  -o tools/mkfs.o tools/mkfs.c
 gcc  tools/mkfs.o -o tools/mkfs
 mkdir -p fs
@@ -357,23 +357,23 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/zombie fs/zombie
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-init
-tester
-sh
-cat
 echo
-kill
-zombie
+tester
+wc
+usertests
+init
+stressfs
+rm
 forktest
 ls
-grep
-ln
-wc
-rm
-README
+cat
+sh
+kill
 mkdir
-stressfs
-usertests
+README
+grep
+zombie
+ln
 balloc: first 444 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/ls user/bin/stressfs user/bin/grep user/bin/tester user/bin/kill user/bin/cat user/bin/mkdir user/bin/init user/bin/rm user/bin/echo user/bin/ln user/bin/usertests user/bin/sh user/bin/wc user/bin/zombie
@@ -391,7 +391,7 @@ Workload: Check getpinfo works
     Expected: pstat fields filled by getpinfo
 
 **********************************************************************
-Running xv6 user progam tests/test_getpinfo.c
+Running xv6 user progam /u/c/s/cs537-10/ta/tests/p2b/tests/test_getpinfo.c
 Trying to build project using make
 make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
@@ -401,23 +401,23 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-init
-tester
-sh
-cat
 echo
-kill
-zombie
+tester
+wc
+usertests
+init
+stressfs
+rm
 forktest
 ls
-grep
-ln
-wc
-rm
-README
+cat
+sh
+kill
 mkdir
-stressfs
-usertests
+README
+grep
+zombie
+ln
 balloc: first 446 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -440,11 +440,13 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 Booting from Hard Disk..xv6...
 cpu0: starting
 init: starting sh
+fork() pid: 2, np->name: init, np->tf->eax: 0
 $ tester
 tester
+fork() pid: 3, np->name: sh, np->tf->eax: 0
 pid: 1 priority: 3
- 	 level 3 ticks used 6368
-	 level 3 times moved to tail 797
+ 	 level 3 ticks used 6152
+	 level 3 times moved to tail 770
 	 level 2 ticks used 0
 	 level 2 times moved to tail 0
 	 level 1 ticks used 0
@@ -452,8 +454,8 @@ pid: 1 priority: 3
 	 level 0 ticks used 0
 	 level 0 times moved to tail 0
 pid: 2 priority: 3
- 	 level 3 ticks used 6240
-	 level 3 times moved to tail 781
+ 	 level 3 ticks used 6016
+	 level 3 times moved to tail 753
 	 level 2 ticks used 0
 	 level 2 times moved to tail 0
 	 level 1 ticks used 0
@@ -461,8 +463,8 @@ pid: 2 priority: 3
 	 level 0 ticks used 0
 	 level 0 times moved to tail 0
 pid: 3 priority: 3
- 	 level 3 ticks used 72
-	 level 3 times moved to tail 10
+ 	 level 3 ticks used 80
+	 level 3 times moved to tail 11
 	 level 2 ticks used 0
 	 level 2 times moved to tail 0
 	 level 1 ticks used 0
@@ -484,7 +486,7 @@ Workload: Checks getpinfo mirrors ptable
     Expected: init, sh, tester are in the ptable
 
 **********************************************************************
-Running xv6 user progam tests/test_ptable.c
+Running xv6 user progam /u/c/s/cs537-10/ta/tests/p2b/tests/test_ptable.c
 Trying to build project using make
 make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
@@ -494,23 +496,23 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-init
-tester
-sh
-cat
 echo
-kill
-zombie
+tester
+wc
+usertests
+init
+stressfs
+rm
 forktest
 ls
-grep
-ln
-wc
-rm
-README
+cat
+sh
+kill
 mkdir
-stressfs
-usertests
+README
+grep
+zombie
+ln
 balloc: first 446 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -533,23 +535,25 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 Booting from Hard Disk..xv6...
 cpu0: starting
 init: starting sh
+fork() pid: 2, np->name: init, np->tf->eax: 0
 $ tester
 tester
+fork() pid: 3, np->name: sh, np->tf->eax: 0
 pid: 1 priority: 3
  	 level 0 ticks used 0
 	 level 1 ticks used 0
 	 level 2 ticks used 0
-	 level 3 ticks used 6400
+	 level 3 ticks used 6176
 pid: 2 priority: 3
  	 level 0 ticks used 0
 	 level 1 ticks used 0
 	 level 2 ticks used 0
-	 level 3 ticks used 6264
+	 level 3 ticks used 6048
 pid: 3 priority: 3
  	 level 0 ticks used 0
 	 level 1 ticks used 0
 	 level 2 ticks used 0
-	 level 3 ticks used 80
+	 level 3 ticks used 72
 TEST PASSED
 
 test test_ptable PASSED (5 of 5)
@@ -565,7 +569,7 @@ Workload: Checks getpri works
     Expected: tester should in priority 3
 
 **********************************************************************
-Running xv6 user progam tests/test_getpri.c
+Running xv6 user progam /u/c/s/cs537-10/ta/tests/p2b/tests/test_getpri.c
 Trying to build project using make
 make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
@@ -575,23 +579,23 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-init
-tester
-sh
-cat
 echo
-kill
-zombie
+tester
+wc
+usertests
+init
+stressfs
+rm
 forktest
 ls
-grep
-ln
-wc
-rm
-README
+cat
+sh
+kill
 mkdir
-stressfs
-usertests
+README
+grep
+zombie
+ln
 balloc: first 444 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -614,8 +618,10 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 Booting from Hard Disk..xv6...
 cpu0: starting
 init: starting sh
+fork() pid: 2, np->name: init, np->tf->eax: 0
 $ tester
 tester
+fork() pid: 3, np->name: sh, np->tf->eax: 0
 TEST PASSED
 
 test test_getpri PASSED (10 of 10)
@@ -631,7 +637,7 @@ Workload: Checks setpri works
     Expected: tester's child should be set to the corresponding priority level
 
 **********************************************************************
-Running xv6 user progam tests/test_setpri.c
+Running xv6 user progam /u/c/s/cs537-10/ta/tests/p2b/tests/test_setpri.c
 Trying to build project using make
 make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
@@ -641,23 +647,23 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-init
-tester
-sh
-cat
 echo
-kill
-zombie
+tester
+wc
+usertests
+init
+stressfs
+rm
 forktest
 ls
-grep
-ln
-wc
-rm
-README
+cat
+sh
+kill
 mkdir
-stressfs
-usertests
+README
+grep
+zombie
+ln
 balloc: first 446 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -680,8 +686,11 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 Booting from Hard Disk..xv6...
 cpu0: starting
 init: starting sh
+fork() pid: 2, np->name: init, np->tf->eax: 0
 $ tester
 tester
+fork() pid: 3, np->name: sh, np->tf->eax: 0
+fork() pid: 4, np->name: tester, np->tf->eax: 0
 TEST PASSED
 
 test test_setpri PASSED (5 of 5)
@@ -697,7 +706,7 @@ Workload: Checks setpri works when set to the same level
     Expected: tester's child should be set to the corresponding priority level
 
 **********************************************************************
-Running xv6 user progam tests/test_setpri_samelevel.c
+Running xv6 user progam /u/c/s/cs537-10/ta/tests/p2b/tests/test_setpri_samelevel.c
 Trying to build project using make
 make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
@@ -707,23 +716,23 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-init
-tester
-sh
-cat
 echo
-kill
-zombie
+tester
+wc
+usertests
+init
+stressfs
+rm
 forktest
 ls
-grep
-ln
-wc
-rm
-README
+cat
+sh
+kill
 mkdir
-stressfs
-usertests
+README
+grep
+zombie
+ln
 balloc: first 445 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -746,8 +755,11 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 Booting from Hard Disk..xv6...
 cpu0: starting
 init: starting sh
+fork() pid: 2, np->name: init, np->tf->eax: 0
 $ tester
 tester
+fork() pid: 3, np->name: sh, np->tf->eax: 0
+fork() pid: 4, np->name: tester, np->tf->eax: 0
 TEST PASSED
 
 test test_setpri_samelevel PASSED (5 of 5)
@@ -763,7 +775,7 @@ Workload: Checks invalid argument handling
     Expected: getpinfo/getpri/setpri return -1 when arguments are invalid
 
 **********************************************************************
-Running xv6 user progam tests/test_invalidarg.c
+Running xv6 user progam /u/c/s/cs537-10/ta/tests/p2b/tests/test_invalidarg.c
 Trying to build project using make
 make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
@@ -773,23 +785,23 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-init
-tester
-sh
-cat
 echo
-kill
-zombie
+tester
+wc
+usertests
+init
+stressfs
+rm
 forktest
 ls
-grep
-ln
-wc
-rm
-README
+cat
+sh
+kill
 mkdir
-stressfs
-usertests
+README
+grep
+zombie
+ln
 balloc: first 445 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -812,8 +824,11 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 Booting from Hard Disk..xv6...
 cpu0: starting
 init: starting sh
+fork() pid: 2, np->name: init, np->tf->eax: 0
 $ tester
 tester
+fork() pid: 3, np->name: sh, np->tf->eax: 0
+fork() pid: 4, np->name: tester, np->tf->eax: 0
 TEST PASSED
 
 test test_invalidarg PASSED (10 of 10)
@@ -829,7 +844,7 @@ Workload: Checks whether a process is given full slices
     Expected: tester's child should always run full slices
 
 **********************************************************************
-Running xv6 user progam tests/test_fullslice.c
+Running xv6 user progam /u/c/s/cs537-10/ta/tests/p2b/tests/test_fullslice.c
 Trying to build project using make
 make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
@@ -839,23 +854,23 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-init
-tester
-sh
-cat
 echo
-kill
-zombie
+tester
+wc
+usertests
+init
+stressfs
+rm
 forktest
 ls
-grep
-ln
-wc
-rm
-README
+cat
+sh
+kill
 mkdir
-stressfs
-usertests
+README
+grep
+zombie
+ln
 balloc: first 447 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -878,8 +893,11 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 Booting from Hard Disk..xv6...
 cpu0: starting
 init: starting sh
+fork() pid: 2, np->name: init, np->tf->eax: 0
 $ tester
 tester
+fork() pid: 3, np->name: sh, np->tf->eax: 0
+fork() pid: 4, np->name: tester, np->tf->eax: 0
 child pid: 4 priority: 3
  	 level 3 ticks used 8
 	 level 3 times moved to tail 2
@@ -985,7 +1003,7 @@ Workload: Checks whether a process's qtail match ticks
     Expected: tester's child: (qtail[3] - 1) * 8 == ticks[3]
 
 **********************************************************************
-Running xv6 user progam tests/test_qtail.c
+Running xv6 user progam /u/c/s/cs537-10/ta/tests/p2b/tests/test_qtail.c
 Trying to build project using make
 make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
@@ -995,23 +1013,23 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-init
-tester
-sh
-cat
 echo
-kill
-zombie
+tester
+wc
+usertests
+init
+stressfs
+rm
 forktest
 ls
-grep
-ln
-wc
-rm
-README
+cat
+sh
+kill
 mkdir
-stressfs
-usertests
+README
+grep
+zombie
+ln
 balloc: first 447 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -1034,8 +1052,11 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 Booting from Hard Disk..xv6...
 cpu0: starting
 init: starting sh
+fork() pid: 2, np->name: init, np->tf->eax: 0
 $ tester
 tester
+fork() pid: 3, np->name: sh, np->tf->eax: 0
+fork() pid: 4, np->name: tester, np->tf->eax: 0
 child pid: 4 priority: 3
  	 level 3 ticks used 8
 	 level 3 times moved to tail 2
@@ -1141,7 +1162,7 @@ Workload: Checks always the highest priority processes run
     Expected: one test's child is running on priority 3 and the other child in priority 2 should starve
 
 **********************************************************************
-Running xv6 user progam tests/test_starve.c
+Running xv6 user progam /u/c/s/cs537-10/ta/tests/p2b/tests/test_starve.c
 Trying to build project using make
 make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
@@ -1151,23 +1172,23 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-init
-tester
-sh
-cat
 echo
-kill
-zombie
+tester
+wc
+usertests
+init
+stressfs
+rm
 forktest
 ls
-grep
-ln
-wc
-rm
-README
+cat
+sh
+kill
 mkdir
-stressfs
-usertests
+README
+grep
+zombie
+ln
 balloc: first 448 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -1190,13 +1211,306 @@ Press Ctrl-B to configure iPXE (PCI 00:03.0)...
 Booting from Hard Disk..xv6...
 cpu0: starting
 init: starting sh
+fork() pid: 2, np->name: init, np->tf->eax: 0
 $ tester
 tester
+fork() pid: 3, np->name: sh, np->tf->eax: 0
+fork() pid: 4, np->name: tester, np->tf->eax: 0
+fork() pid: 5, np->name: tester, np->tf->eax: 0
 TEST PASSED
 
 test test_starve PASSED (10 of 10)
  (Workload: Checks always the highest priority processes run
     Expected: one test's child is running on priority 3 and the other child in priority 2 should starve)
+
+starting test_qtail_setpri
+
+**********************************************************************
+
+Test test_qtail_setpri
+Workload: Checks setpri() correctly change qtail
+    Expected: tester's child: setpri() should trigger moving process to the tail
+
+**********************************************************************
+Running xv6 user progam /u/c/s/cs537-10/ta/tests/p2b/tests/test_qtail_setpri.c
+Trying to build project using make
+make
+gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
+	-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
+gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+echo
+tester
+wc
+usertests
+init
+stressfs
+rm
+forktest
+ls
+cat
+sh
+kill
+mkdir
+README
+grep
+zombie
+ln
+balloc: first 447 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox CPUS=1
+Ctrl+a h for help
+timeout --foreground --preserve-status 900 /p/course/cs537-remzi/ta/tools/qemu -nographic -hdb fs.img xv6.img -smp 1
+WARNING: Image format was not specified for 'fs.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+WARNING: Image format was not specified for 'xv6.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+c[?7l[2J[0mSeaBIOS (version 1.13.0-1ubuntu1)
+
+
+iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+07F8CA10+07ECCA10 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..xv6...
+cpu0: starting
+init: starting sh
+fork() pid: 2, np->name: init, np->tf->eax: 0
+$ tester
+tester
+fork() pid: 3, np->name: sh, np->tf->eax: 0
+fork() pid: 4, np->name: tester, np->tf->eax: 0
+fork() pid: 5, np->name: tester, np->tf->eax: 0
+qtail: 2
+qtail: 3
+qtail: 4
+qtail: 5
+qtail: 6
+TEST PASSED
+
+test test_qtail_setpri PASSED (10 of 10)
+ (Workload: Checks setpri() correctly change qtail
+    Expected: tester's child: setpri() should trigger moving process to the tail)
+
+starting test_qtail_setpri_crosslevel
+
+**********************************************************************
+
+Test test_qtail_setpri_crosslevel
+Workload: Checks setpri() correctly change qtail when moving across level
+    Expected: tester's child: when setpri() moves the child from level 3 to 2, it should increase qtail[2] by 1
+
+**********************************************************************
+Running xv6 user progam /u/c/s/cs537-10/ta/tests/p2b/tests/test_qtail_setpri_crosslevel.c
+Trying to build project using make
+make
+gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
+	-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
+gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+echo
+tester
+wc
+usertests
+init
+stressfs
+rm
+forktest
+ls
+cat
+sh
+kill
+mkdir
+README
+grep
+zombie
+ln
+balloc: first 447 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox CPUS=1
+Ctrl+a h for help
+timeout --foreground --preserve-status 900 /p/course/cs537-remzi/ta/tools/qemu -nographic -hdb fs.img xv6.img -smp 1
+WARNING: Image format was not specified for 'fs.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+WARNING: Image format was not specified for 'xv6.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+c[?7l[2J[0mSeaBIOS (version 1.13.0-1ubuntu1)
+
+
+iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+07F8CA10+07ECCA10 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..xv6...
+cpu0: starting
+init: starting sh
+fork() pid: 2, np->name: init, np->tf->eax: 0
+$ tester
+tester
+fork() pid: 3, np->name: sh, np->tf->eax: 0
+fork() pid: 4, np->name: tester, np->tf->eax: 0
+fork() pid: 5, np->name: tester, np->tf->eax: 0
+TEST PASSED
+
+test test_qtail_setpri_crosslevel PASSED (5 of 5)
+ (Workload: Checks setpri() correctly change qtail when moving across level
+    Expected: tester's child: when setpri() moves the child from level 3 to 2, it should increase qtail[2] by 1)
+
+starting test_pri_inherit
+
+**********************************************************************
+
+Test test_pri_inherit
+Workload: Checks whether child process inherts its parent priority
+    Expected: there should be two processes in priority 2 (child and gradchild)
+
+**********************************************************************
+Running xv6 user progam /u/c/s/cs537-10/ta/tests/p2b/tests/test_pri_inherit.c
+Trying to build project using make
+make
+gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
+	-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
+gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+echo
+tester
+wc
+usertests
+init
+stressfs
+rm
+forktest
+ls
+cat
+sh
+kill
+mkdir
+README
+grep
+zombie
+ln
+balloc: first 447 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox CPUS=1
+Ctrl+a h for help
+timeout --foreground --preserve-status 900 /p/course/cs537-remzi/ta/tools/qemu -nographic -hdb fs.img xv6.img -smp 1
+WARNING: Image format was not specified for 'fs.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+WARNING: Image format was not specified for 'xv6.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+c[?7l[2J[0mSeaBIOS (version 1.13.0-1ubuntu1)
+
+
+iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+07F8CA10+07ECCA10 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..xv6...
+cpu0: starting
+init: starting sh
+fork() pid: 2, np->name: init, np->tf->eax: 0
+$ tester
+tester
+fork() pid: 3, np->name: sh, np->tf->eax: 0
+fork() pid: 4, np->name: tester, np->tf->eax: 0
+count: 1
+user/tester.c:47 check (count == 2) failed: there should be two processes in priority 2 (child and gradchild)
+$ 
+
+test test_pri_inherit FAILED (0 of 5)
+ (Workload: Checks whether child process inherts its parent priority
+    Expected: there should be two processes in priority 2 (child and gradchild))
+ tester failed
+
+starting test_fifo
+
+**********************************************************************
+
+Test test_fifo
+Workload: Checks the last level should be FIFO scheduling
+    Expected: the tester's child2 should starve as child1 never finish its work
+
+**********************************************************************
+Running xv6 user progam /u/c/s/cs537-10/ta/tests/p2b/tests/test_fifo.c
+Trying to build project using make
+make
+gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
+	-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
+gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+echo
+tester
+wc
+usertests
+init
+stressfs
+rm
+forktest
+ls
+cat
+sh
+kill
+mkdir
+README
+grep
+zombie
+ln
+balloc: first 448 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox CPUS=1
+Ctrl+a h for help
+timeout --foreground --preserve-status 900 /p/course/cs537-remzi/ta/tools/qemu -nographic -hdb fs.img xv6.img -smp 1
+WARNING: Image format was not specified for 'fs.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+WARNING: Image format was not specified for 'xv6.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+c[?7l[2J[0mSeaBIOS (version 1.13.0-1ubuntu1)
+
+
+iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+07F8CA10+07ECCA10 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..xv6...
+cpu0: starting
+init: starting sh
+fork() pid: 2, np->name: init, np->tf->eax: 0
+$ tester
+tester
+fork() pid: 3, np->name: sh, np->tf->eax: 0
+fork() pid: 4, np->name: tester, np->tf->eax: 0
+fork() pid: 5, np->name: tester, np->tf->eax: 0
+user/tester.c:51 check (st.ticks[j][0] > child1_last_ticks) failed: child 1 should make some progress
+$ 
+
+test test_fifo FAILED (0 of 10)
+ (Workload: Checks the last level should be FIFO scheduling
+    Expected: the tester's child2 should starve as child1 never finish its work)
+ tester failed
 
 **********************************************************************
 Summary:
@@ -1239,6 +1553,24 @@ test test_starve PASSED (10 of 10)
  (Workload: Checks always the highest priority processes run
     Expected: one test's child is running on priority 3 and the other child in priority 2 should starve)
 
-Passed 10 of 10 tests.
-Overall 10 of 10
-Points 70 of 70
+test test_qtail_setpri PASSED (10 of 10)
+ (Workload: Checks setpri() correctly change qtail
+    Expected: tester's child: setpri() should trigger moving process to the tail)
+
+test test_qtail_setpri_crosslevel PASSED (5 of 5)
+ (Workload: Checks setpri() correctly change qtail when moving across level
+    Expected: tester's child: when setpri() moves the child from level 3 to 2, it should increase qtail[2] by 1)
+
+test test_pri_inherit FAILED (0 of 5)
+ (Workload: Checks whether child process inherts its parent priority
+    Expected: there should be two processes in priority 2 (child and gradchild))
+ tester failed
+
+test test_fifo FAILED (0 of 10)
+ (Workload: Checks the last level should be FIFO scheduling
+    Expected: the tester's child2 should starve as child1 never finish its work)
+ tester failed
+
+Passed 12 of 14 tests.
+Overall 12 of 14
+Points 85 of 100

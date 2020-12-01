@@ -5,22 +5,11 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
-#include "circleQueue.h"
-
-// P2B constants
-#define PQ3_TICKS 8
-#define PQ2_TICKS 12
-#define PQ1_TICKS 16
-#define PQ0_TICKS 0
-#define NUM_PQ 4
 
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
 } ptable;
-
-// P2B - add queue arrays
-static circleQueue pq[NUM_PQ];
 
 static struct proc *initproc;
 
@@ -109,17 +98,6 @@ userinit(void)
   p->cwd = namei("/");
 
   p->state = RUNNABLE;
-  
-  //P2B
-  // Initialize priority queues to empty
-  for (int i = 0; i < NUM_PQ; i++) {
-    setQueueEmpty(&pq[i]);
-  }
-  // Set initial process to highest priority and enqueue
-  p->pri = 3;
-  p->qtail[p->pri] += 1;
-  enqueue(&pq[p->pri], p->pid);
-  
   release(&ptable.lock);
 }
 
@@ -178,15 +156,6 @@ fork(void)
   pid = np->pid;
   np->state = RUNNABLE;
   safestrcpy(np->name, proc->name, sizeof(proc->name));
-  
-  //P2B - child proc gets parent proc and enqueue
-  np->pri = proc->pri;
-  np->qtail[np->pri] += 1;
-  enqueue(&pq[np->pri], np->pid);
-  // cprintf("fork() pid %d pri %d\n", np->pid, np->pri);
-  
-  cprintf("fork() pid: %d, np->name: %s, np->tf->eax: %d\n", pid, np->name, np->tf->eax); // P3 debug
-  
   return pid;
 }
 
@@ -291,47 +260,13 @@ scheduler(void)
   for(;;){
     // Enable interrupts on this processor.
     sti();
-    
+
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    // P2B - rewrite scheduler
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-      // Get max priority
-      int maxPri = -1;
-      for (int i = NUM_PQ - 1; i >= 0; i--) {
-        if (!isEmpty(&pq[i])) {
-          maxPri = i;
-          break;
-        }
-      }
-      // Get currently running proc p
-      // If not currently running proc p, then keep looping through ptable
-      int pidNow = peek(&pq[maxPri]); 
-      if (p->pid != pidNow) {
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state != RUNNABLE)
         continue;
-      }
-      
-      p->ticks[p->pri] += 1;
-      // Run for full time slice
-      if (p->pri == 3 &&
-            (p->ticks[p->pri] == 0 || (p->ticks[p->pri] % PQ3_TICKS) != 0)) {
-        continue;
-      }
-      if (p->pri == 2 &&
-            (p->ticks[p->pri] == 0 || (p->ticks[p->pri] % PQ2_TICKS) != 0)) {
-        continue;
-      }
-      if (p->pri == 1 &&
-             (p->ticks[p->pri] == 0 || (p->ticks[p->pri] % PQ1_TICKS) != 0)) {
-        continue;
-      }
-      if (p->pri == 0) { // if PQ0, we're FIFO so keep running it.
-        continue;
-      } else { // PQ1-3 are RR
-        dequeue(&pq[p->pri]);
-        p->qtail[p->pri] += 1;
-        enqueue(&pq[p->pri], p->pid);
-      }
+
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
@@ -340,11 +275,13 @@ scheduler(void)
       p->state = RUNNING;
       swtch(&cpu->scheduler, proc->context);
       switchkvm();
+
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       proc = 0;
     }
     release(&ptable.lock);
+
   }
 }
 
@@ -364,15 +301,6 @@ sched(void)
   if(readeflags()&FL_IF)
     panic("sched interruptible");
   intena = cpu->intena;
-  
-  // P2B - enqueue currently running process and set qtail for pstat
-  // cprintf("sched %s [pid %d] [pri %d] [ticks %d] [qtail %d]\n", proc->name, proc->pid, proc->pri, proc->ticks[proc->pri], proc->qtail[proc->pri]);
-  // if (proc->state == ZOMBIE || proc->state == UNUSED) {
-  //   if (swapHead(&pq[proc->pri], proc->pid) != -1) {
-  //     (void) dequeue(&pq[proc->pri]);
-  //   }
-  // }
-  
   swtch(&proc->context, cpu->scheduler);
   cpu->intena = intena;
 }
@@ -515,131 +443,4 @@ procdump(void)
   }
 }
 
-// P2B - new system calls for MLQ implementation and testing
 
-/**
- * Given the pid, set the priority of the process
- * 
- * Returns:
- * -1 if pid or pri are invalid
- * 0 if priority set successfully
- */
-int sys_setpri(void) {
-  int pid;
-  int pri;
-  
-  if (argint(0, &pid) < 0 || argint(1, &pri)) {
-    return -1;
-  }
-  
-  return setpri(pid, pri);
-}
-
-int setpri(int pid, int pri) {
-  struct proc *p;
-  
-  // Check for valid priority
-  if (pri < 0 || pri > 3) {
-    return -1;
-  }
-  
-  int found = 0;
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if (p->pid == pid) {
-      // do we need to check state of proc?
-      if (p->state == UNUSED) {
-        return -1;
-      }
-      // Dequeue (after swapping to head) from existing PQ, if any
-      if (swapHead(&pq[p->pri], pid) != -1) {
-        (void) dequeue(&pq[p->pri]);
-      }
-      
-      // Enqueue on new PQ
-      p->pri = pri;
-      p->qtail[pri] += 1;
-      (void) enqueue(&pq[pri], pid);
-      
-      found = 1;
-      break; 
-    }
-  }
-  if (found == 0) {
-    return -1;
-  }
-  
-  return 0;
-}
-
-/**
- * Returns priority of specified process
- * Returns -1 if pid is invalid
- */
-int sys_getpri(void) {
-  int pid;
-  
-  if (argint(0, &pid) < 0) {
-    return -1;
-  }
-  
-  return getpri(pid);
-}
-
-int getpri(int pid) {
-  struct proc *p;
-  
-  int found = 0;
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if (p->pid == pid) {
-      if (p->state == UNUSED) {
-        return -1;
-      }
-      found = 1;
-      break;
-    }
-  }
-  if (found == 0) {
-    return -1;
-  }
-  
-  return p->pri;
-}
-
-int sys_getpinfo(void) {
-  struct pstat *status;
-  
-  if (argptr(0, (void*) &status, sizeof(*status)) < 0) {
-    return -1;
-  }
-  
-  return getpinfo(status);
-}
-
-int getpinfo(struct pstat * status) {
-  if (status == NULL) {
-    return -1;
-  }
-  
-  struct proc *p;
-  int i;
-  
-  for(p = ptable.proc, i = 0; p < &ptable.proc[NPROC]; p++, i++){
-    status->inuse[i] = (p->state != UNUSED);
-    status->pid[i] = p->pid;
-    status->priority[i] = p->pri;
-    status->state[i] = p->state;
-    for (int j = 0; j < NUM_PQ; j++) {
-      status->ticks[i][j] = p->ticks[j];
-      status->qtail[i][j] = p->qtail[j];
-      // cprintf("p - pri %d, ticks %d, qtail %d\n", p, p->ticks[j], p->qtail[j]); // debug
-      // cprintf("pstat - pri %d, ticks %d, qtail %d\n", j, status->ticks[i][j], status->qtail[i][j]); // debug
-    }
-    if (status->inuse[i]) {
-      // cprintf("p - pid %d, state %d\n", p->pid, p->state); // debug
-      // cprintf("pstat - use: %d, pid %d, pri %d, state %d\n", status->inuse[i], status->pid[i], status->priority[i], status->state[i]); // debug    
-      // cprintf("pstat - ticks %d, qtail %d\n", status->ticks[i][status->priority[i]], status->qtail[i][status->priority[i]]); // debug
-    }
-  }
-  
-  return 0;
-}

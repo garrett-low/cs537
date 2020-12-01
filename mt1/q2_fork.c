@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+
 int value = 5;
 
 int main(int argc, char* argv[]) {
