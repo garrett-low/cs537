@@ -1,0 +1,4 @@
+#!/bin/bash
+base=~cs537-10/ta/tests/p5a
+python $base/test_p5a.py --test-path $base $@  | tee runtests.log
+exit $?
