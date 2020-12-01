@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -58,6 +59,11 @@ struct dinode {
 // Directory is a file containing a sequence of dirent structures.
 #define DIRSIZ 14
 
+struct dirent {
+  ushort inum;
+  char name[DIRSIZ];
+};
+
 // P5 - My globals/constants
 void *fsPtr;
 // Debug preprocessor directives
@@ -67,12 +73,15 @@ void *fsPtr;
 #define debugPrintf(...) ((void)0)
 #endif
 
+#define MAXDIR_PER_BLOCK (BSIZE / sizeof(struct dirent))
+
 // Errors
 #define USAGE_ERROR "Usage: xv6_fsck <file_system_image>.\n"
 #define FSIMAGE_ERROR "image not found.\n"
 #define ERROR1_BAD_INODE "ERROR: bad inode.\n"
 #define ERROR2_BAD_DIRECT_DATA "ERROR: bad direct address in inode.\n"
 #define ERROR2_BAD_INDIRECT_DATA "ERROR: bad indirect address in inode.\n"
+#define ERROR3_BAD_ROOT "ERROR: root directory does not exist.\n"
 
 void test1(uint i, short type);
 void test2(uint i, struct dinode *);
@@ -115,16 +124,53 @@ int main(int argc, char *argv[]) {
               sBlock->nblocks, sBlock->ninodes);
 
   // Traverse inodes - start at second block
-  struct dinode *dinodePtr = (struct dinode *)(fsPtr + (2 * BSIZE));
-  for (uint i = 0; i < sBlock->ninodes; i++, dinodePtr++) {
+  struct dinode *inodePtr = (struct dinode *)(fsPtr + (2 * BSIZE));
+  for (uint i = 0; i < sBlock->ninodes; i++, inodePtr++) {
     // Test 1 - each inode is either unallocated or one of the valid types
-    test1(i, dinodePtr->type);
+    test1(i, inodePtr->type);
 
     // Test 2 - for inuse inodes, points to valid datablock address
-    test2(i, dinodePtr);
+    test2(i, inodePtr);
 
-    // Test 3 - root dir exists, inode num 1, parent is itself
-    
+    // if (i == 1) {
+    //   if (inodePtr->type != T_DIR) {
+    //     fprintf(stderr, ERROR3_BAD_ROOT);
+    //     exit(1);
+    //   }
+    //   struct dirent *rootDirent =
+    //       (struct dirent *)(fsPtr + (inodePtr->addrs[0] * BSIZE));
+    //   if (!(rootDirent->inum == 1 && strcmp(rootDirent->name, ".") == 0)) {
+    //     fprintf(stderr, ERROR3_BAD_ROOT);
+    //     exit(1);
+    //   }
+    //   rootDirent++;
+    //   if (!(rootDirent->inum == 1 && strcmp(rootDirent->name, "..") == 0)) {
+    //     fprintf(stderr, ERROR3_BAD_ROOT);
+    //     exit(1);
+    //   }
+    // }
+  }
+
+  // Test 3 - root dir exists, inode num 1, parent is itself
+  struct dinode *rootInodePtr =
+      (struct dinode *)(fsPtr + (2 * BSIZE) + (1 * sizeof(struct dinode)));
+  if (rootInodePtr->type != T_DIR) {
+    debugPrintf("ERROR: type of inum 1 (root) not T_DIR\n");
+    fprintf(stderr, ERROR3_BAD_ROOT);
+    exit(1);
+  }
+  struct dirent *rootDirent =
+      (struct dirent *)(fsPtr + (rootInodePtr->addrs[0] * BSIZE));
+  if (!(rootDirent->inum == 1 && strcmp(rootDirent->name, ".") == 0)) {
+    debugPrintf("ERROR: root not inum 1\n");
+    fprintf(stderr, ERROR3_BAD_ROOT);
+    exit(1);
+  }
+  rootDirent++;
+  if (!(rootDirent->inum == 1 && strcmp(rootDirent->name, "..") == 0)) {
+    debugPrintf("ERROR: root not parent of itself\n");
+    fprintf(stderr, ERROR3_BAD_ROOT);
+    exit(1);
   }
 
   // figure out bitmap
@@ -142,26 +188,26 @@ void test1(uint i, short type) {
   }
 }
 
-void test2(uint i, struct dinode *dinodePtr) {
-  if (dinodePtr->type != T_FILE) {
+void test2(uint i, struct dinode *inodePtr) {
+  if (inodePtr->type != T_FILE) {
     return;
   }
-  
+
   // Direct block number invalid
-  debugPrintf("file inode %d: ", i);
+  // debugPrintf("file inode %d: ", i);
   for (int j = 0; j < NDIRECT; j++) {
-    uint dblockNum = dinodePtr->addrs[j];
-    debugPrintf("dblockNum %d, ", dblockNum);
+    uint dblockNum = inodePtr->addrs[j];
+    // debugPrintf("dblockNum %d, ", dblockNum);
     if (!(dblockNum == 0 || ((dblockNum >= 29) && (dblockNum < 995 + 28)))) {
       debugPrintf("\nERROR: inode %d: dblockNum: %d\n", i, dblockNum);
       fprintf(stderr, ERROR2_BAD_DIRECT_DATA);
       exit(1);
     }
   }
-  debugPrintf("\n");
+  // debugPrintf("\n");
 
   // Indirect block number invalid
-  uint indirectBlockNum = dinodePtr->addrs[NDIRECT];
+  uint indirectBlockNum = inodePtr->addrs[NDIRECT];
   if (!(indirectBlockNum == 0 ||
         ((indirectBlockNum >= 29) && (indirectBlockNum < 995 + 28)))) {
     debugPrintf("ERROR: inode %d: indirectBlockNum %d \n", i, indirectBlockNum);
@@ -171,7 +217,7 @@ void test2(uint i, struct dinode *dinodePtr) {
   if (indirectBlockNum == 0) {
     return;
   }
-  
+
   // Traverse indirect blocks for invalid datablock address
   uint *indirectAddr = (uint *)(fsPtr + (indirectBlockNum * BSIZE));
   for (int j = 0; j < 128; j++, indirectAddr++) {
