@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <fcntl.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -82,9 +83,12 @@ void *fsPtr;
 #define ERROR2_BAD_DIRECT_DATA "ERROR: bad direct address in inode.\n"
 #define ERROR2_BAD_INDIRECT_DATA "ERROR: bad indirect address in inode.\n"
 #define ERROR3_BAD_ROOT "ERROR: root directory does not exist.\n"
+#define ERROR4_BAD_DIR_FORMAT "ERROR: directory not properly formatted.\n"
 
 void test1(uint i, short type);
-void test2(uint i, struct dinode *);
+void test2(uint i, struct dinode *inodePtr);
+void test3();
+void test4(uint i, struct dinode *inodePtr);
 
 int main(int argc, char *argv[]) {
   debugPrintf("constants: IPB %ld, BPB %d\n", IPB, BPB);
@@ -129,49 +133,15 @@ int main(int argc, char *argv[]) {
     // Test 1 - each inode is either unallocated or one of the valid types
     test1(i, inodePtr->type);
 
-    // Test 2 - for inuse inodes, points to valid datablock address
+    // Test 2 - for inuse inodes; points to valid datablock address
     test2(i, inodePtr);
 
-    // if (i == 1) {
-    //   if (inodePtr->type != T_DIR) {
-    //     fprintf(stderr, ERROR3_BAD_ROOT);
-    //     exit(1);
-    //   }
-    //   struct dirent *rootDirent =
-    //       (struct dirent *)(fsPtr + (inodePtr->addrs[0] * BSIZE));
-    //   if (!(rootDirent->inum == 1 && strcmp(rootDirent->name, ".") == 0)) {
-    //     fprintf(stderr, ERROR3_BAD_ROOT);
-    //     exit(1);
-    //   }
-    //   rootDirent++;
-    //   if (!(rootDirent->inum == 1 && strcmp(rootDirent->name, "..") == 0)) {
-    //     fprintf(stderr, ERROR3_BAD_ROOT);
-    //     exit(1);
-    //   }
-    // }
+    // Test 4 - each dir contains . and ..; . points to dir itself
+    test4(i, inodePtr);
   }
 
-  // Test 3 - root dir exists, inode num 1, parent is itself
-  struct dinode *rootInodePtr =
-      (struct dinode *)(fsPtr + (2 * BSIZE) + (1 * sizeof(struct dinode)));
-  if (rootInodePtr->type != T_DIR) {
-    debugPrintf("ERROR: type of inum 1 (root) not T_DIR\n");
-    fprintf(stderr, ERROR3_BAD_ROOT);
-    exit(1);
-  }
-  struct dirent *rootDirent =
-      (struct dirent *)(fsPtr + (rootInodePtr->addrs[0] * BSIZE));
-  if (!(rootDirent->inum == 1 && strcmp(rootDirent->name, ".") == 0)) {
-    debugPrintf("ERROR: root not inum 1\n");
-    fprintf(stderr, ERROR3_BAD_ROOT);
-    exit(1);
-  }
-  rootDirent++;
-  if (!(rootDirent->inum == 1 && strcmp(rootDirent->name, "..") == 0)) {
-    debugPrintf("ERROR: root not parent of itself\n");
-    fprintf(stderr, ERROR3_BAD_ROOT);
-    exit(1);
-  }
+  // Test 3 - root dir exists; inode num 1; parent is itself
+  test3();
 
   // figure out bitmap
 
@@ -180,6 +150,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
+// Test 1 - each inode is either unallocated or one of the valid types
 void test1(uint i, short type) {
   if (!(type == 0 || type == T_FILE || type == T_DIR || type == T_DEV)) {
     debugPrintf("ERROR: inode %d, type %d\n", i, type);
@@ -188,6 +159,7 @@ void test1(uint i, short type) {
   }
 }
 
+// Test 2 - for inuse inodes; points to valid datablock address
 void test2(uint i, struct dinode *inodePtr) {
   if (inodePtr->type != T_FILE) {
     return;
@@ -226,6 +198,78 @@ void test2(uint i, struct dinode *inodePtr) {
       debugPrintf("inode %d: indirectBlockNum %d, dblockNum: %d \n", i,
                   indirectBlockNum, dblockNum);
       fprintf(stderr, ERROR2_BAD_INDIRECT_DATA);
+      exit(1);
+    }
+  }
+}
+
+// Test 3 - root dir exists; inode num 1; parent is itself
+void test3() {
+  struct dinode *rootInodePtr =
+      (struct dinode *)(fsPtr + (2 * BSIZE) + (1 * sizeof(struct dinode)));
+  if (rootInodePtr->type != T_DIR) {
+    debugPrintf("ERROR: type of inum 1 (root) not T_DIR\n");
+    fprintf(stderr, ERROR3_BAD_ROOT);
+    exit(1);
+  }
+  struct dirent *rootDirent =
+      (struct dirent *)(fsPtr + (rootInodePtr->addrs[0] * BSIZE));
+  if (!(rootDirent->inum == 1 && strcmp(rootDirent->name, ".") == 0)) {
+    debugPrintf("ERROR: root not inum 1\n");
+    fprintf(stderr, ERROR3_BAD_ROOT);
+    exit(1);
+  }
+  rootDirent++;
+  if (!(rootDirent->inum == 1 && strcmp(rootDirent->name, "..") == 0)) {
+    debugPrintf("ERROR: root not parent of itself\n");
+    fprintf(stderr, ERROR3_BAD_ROOT);
+    exit(1);
+  }
+}
+
+void test4(uint i, struct dinode *inodePtr) {
+  if (inodePtr->type == T_FILE || inodePtr->type == T_DEV) {
+    return;
+  }
+  if (i == 1 || i == 0) {
+    return;
+  }
+
+  bool foundCurrDot = false;
+  bool foundParentDot = false;
+  bool isDirUsed = false;
+  for (int j = 0; j < NDIRECT; j++) {
+    struct dirent *dirEntPtr =
+        (struct dirent *)(fsPtr + (inodePtr->addrs[j] * BSIZE));
+    for (int k = 0; k < MAXDIR_PER_BLOCK; k++, dirEntPtr++) {
+      if (foundCurrDot && foundParentDot) {
+        break;
+      }
+      if (dirEntPtr->inum == 0) {
+        continue;
+      }
+      debugPrintf("inode %d: dir->inum %d, dir->name %s\n", i, dirEntPtr->inum,
+                  dirEntPtr->name);
+      isDirUsed = true;
+
+      if (strcmp(dirEntPtr->name, ".") == 0) {
+        foundCurrDot = true;
+        debugPrintf("found current dot\n");
+        if (dirEntPtr->inum != i) {
+          fprintf(stderr, ERROR4_BAD_DIR_FORMAT);
+          exit(1);
+        }
+        continue;
+      } else if (strcmp(dirEntPtr->name, "..") == 0) {
+        debugPrintf("found parent dot\n");
+        foundParentDot = true;
+        continue;
+      }
+    }
+    if (isDirUsed && !(foundCurrDot && foundParentDot)) {
+      debugPrintf("ERROR: . check %i, .. check %i, used check %i\n",
+                  foundCurrDot, foundParentDot, isDirUsed);
+      fprintf(stderr, ERROR4_BAD_DIR_FORMAT);
       exit(1);
     }
   }
