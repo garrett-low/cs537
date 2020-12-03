@@ -58,6 +58,20 @@ struct dirent {
   char name[DIRSIZ];
 };
 
+void printBits(size_t const size, void const *const ptr) {
+  unsigned char *b = (unsigned char *)ptr;
+  unsigned char byte;
+  int i, j;
+
+  for (i = size - 1; i >= 0; i--) {
+    for (j = 7; j >= 0; j--) {
+      byte = (b[i] >> j) & 1;
+      printf("%u", byte);
+    }
+  }
+  // puts("");
+}
+
 // xv6 fs img
 // similar to vsfs
 // superblock | inode table | bitmap (data) | data blocks
@@ -89,19 +103,43 @@ int main(int argc, char *argv[]) {
   struct dinode *dinodePtr = (struct dinode *)(fsPtr + (2 * BSIZE));
   for (uint i = 0; i < sBlock->ninodes; i++, dinodePtr++) {
     printf("inode %d: type: %d\n", i, dinodePtr->type);
-    
+
     // Test 3 testing
     if (i == 1) {
-      struct dirent *rootDir = (struct dirent *)(fsPtr + (dinodePtr->addrs[0] * BSIZE));
-      for (int j = 0; j < (BSIZE / sizeof (struct dirent)); j++, rootDir++)
-      {
-      printf("rootdir: inum %d, name %s\n", rootDir->inum, rootDir->name);
+      struct dirent *rootDir =
+          (struct dirent *)(fsPtr + (dinodePtr->addrs[0] * BSIZE));
+      for (int j = 0; j < (BSIZE / sizeof(struct dirent)); j++, rootDir++) {
+        printf("rootdir: inum %d, name %s\n", rootDir->inum, rootDir->name);
       }
-      
+
     } else {
       continue;
     }
   }
+
+  printf("BBLOCK(1,200): %ld\n", BBLOCK(1, sBlock->ninodes));
+  printf("BBLOCK(5,200): %ld\n", BBLOCK(5, sBlock->ninodes));
+  unsigned char *bitmap = (unsigned char *)(fsPtr + (BBLOCK(0, sBlock->ninodes) * BSIZE));
+  printf("bitmap: 0x");
+  for (int i = 0; i < 512; i++) {
+    printf("%x", bitmap[i]);
+    // printf("%p, ", &bitmap[i]);
+    // printBits(sizeof(bitmap[i]), &bitmap[i]);
+  }
+  printf("\n");
+  printf("bitmap again: 0x");
+  for (int i = 0; i < 512; i++) {
+    if (bitmap[i] == 0xff) {
+      printf("%x", bitmap[i]);
+    }
+    // printf("%p, ", &bitmap[i]);
+    // printBits(sizeof(bitmap[i]), &bitmap[i]);
+  }
+  printf("\n");
+  
+  uint bitblocks = sBlock->size/(512*8) + 1;
+  uint usedblocks = sBlock->ninodes / IPB + 3 + bitblocks;
+  printf("initial used blocks: %d\n", usedblocks);
 
   return 0;
 }

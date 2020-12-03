@@ -142,8 +142,26 @@ int main(int argc, char *argv[]) {
 
   // Test 3 - root dir exists; inode num 1; parent is itself
   test3();
+  
+  // Test 5 - 
 
-  // figure out bitmap
+  // Test 6 - bitmap as source of truth
+  unsigned char *bitmap =
+      (unsigned char *)(fsPtr + (BBLOCK(0, sBlock->ninodes) * BSIZE));
+  int usedBlocks[sBlock->size];
+  int blockNum = 0;
+  int index = 0;
+  for (int i = 0; i < BSIZE; i++) {
+    for (int j = 7; j >= 0; j--) {
+      uint bit = (bitmap[i] >> j) & 1;
+      if (bit == 1) {
+        usedBlocks[index] = blockNum;
+        index++;
+        debugPrintf("dblock %u: used\n", blockNum);
+      }
+      blockNum++;
+    }
+  }
 
   // do rest of P5
 
@@ -181,7 +199,7 @@ void test2(uint i, struct dinode *inodePtr) {
   // Indirect block number invalid
   uint indirectBlockNum = inodePtr->addrs[NDIRECT];
   if (!(indirectBlockNum == 0 ||
-        ((indirectBlockNum >= 29) && (indirectBlockNum < 995 + 28)))) {
+        ((indirectBlockNum >= 29) && (indirectBlockNum < 995 + 29)))) {
     debugPrintf("ERROR: inode %d: indirectBlockNum %d \n", i, indirectBlockNum);
     fprintf(stderr, ERROR2_BAD_INDIRECT_DATA);
     exit(1);
@@ -227,6 +245,7 @@ void test3() {
   }
 }
 
+// Test 4 - each dir contains . and ..; . points to dir itself
 void test4(uint i, struct dinode *inodePtr) {
   if (inodePtr->type == T_FILE || inodePtr->type == T_DEV) {
     return;
@@ -254,14 +273,12 @@ void test4(uint i, struct dinode *inodePtr) {
 
       if (strcmp(dirEntPtr->name, ".") == 0) {
         foundCurrDot = true;
-        debugPrintf("found current dot\n");
         if (dirEntPtr->inum != i) {
           fprintf(stderr, ERROR4_BAD_DIR_FORMAT);
           exit(1);
         }
         continue;
       } else if (strcmp(dirEntPtr->name, "..") == 0) {
-        debugPrintf("found parent dot\n");
         foundParentDot = true;
         continue;
       }

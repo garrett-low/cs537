@@ -25,7 +25,7 @@ Test Good
 run on a good filesystem
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Good
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Good
 
 
 test Good PASSED (5 of 5)
@@ -39,7 +39,7 @@ Test Goodrefcnt
 run on fs with only good reference counts
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Goodrefcnt
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Goodrefcnt
 
 
 test Goodrefcnt PASSED (2 of 2)
@@ -53,7 +53,7 @@ Test Nonexistant
 run on a nonexistant filesystem
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Nonexistant
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Nonexistant
 
 
 test Nonexistant PASSED (2 of 2)
@@ -67,7 +67,7 @@ Test Badroot
 run on a filesystem with a root directory in bad location
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badroot
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badroot
 
 
 test Badroot PASSED (5 of 5)
@@ -81,7 +81,7 @@ Test Badinode
 run on a filesystem with a bad type in an inode
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badinode
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badinode
 
 
 test Badinode PASSED (5 of 5)
@@ -95,7 +95,7 @@ Test Badaddr
 run on a filesystem with a bad direct address in an inode
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badaddr
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badaddr
 
 
 test Badaddr PASSED (5 of 5)
@@ -109,7 +109,7 @@ Test Badindir1
 run on a filesystem with a bad indirect address in an inode
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badindir1
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badindir1
 
 
 test Badindir1 PASSED (5 of 5)
@@ -123,7 +123,7 @@ Test Badroot2
 run on a filesystem with a bad root directory in good location
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badroot2
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badroot2
 
 
 test Badroot2 PASSED (5 of 5)
@@ -137,7 +137,7 @@ Test Badfmt
 run on a filesystem without . or .. directories
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badfmt
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badfmt
 
 
 test Badfmt PASSED (5 of 5)
@@ -151,7 +151,7 @@ Test Mrkfree
 run on a filesystem with an inuse direct block marked free
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Mrkfree
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Mrkfree
 Failure: ./xv6_fsck returned incorrect status code. Expected 1 got 0
 
 
@@ -167,7 +167,7 @@ Test Indirfree
 run on a filesystem with an inuse indirect block marked free
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Indirfree
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Indirfree
 Failure: ./xv6_fsck returned incorrect status code. Expected 1 got 0
 
 
@@ -183,7 +183,7 @@ Test Mrkused
 run on a filesystem with a free block marked used
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Mrkused
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Mrkused
 Failure: ./xv6_fsck returned incorrect status code. Expected 1 got 0
 
 
@@ -199,7 +199,7 @@ Test Addronce
 run on a filesystem with an address used more than once
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Addronce
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Addronce
 Failure: ./xv6_fsck returned incorrect status code. Expected 1 got 0
 
 
@@ -215,7 +215,7 @@ Test Imrkused
 run with inode marked used, but not referenced in a directory
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Imrkused
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Imrkused
 Failure: ./xv6_fsck returned incorrect status code. Expected 1 got 0
 
 
@@ -231,7 +231,7 @@ Test Imrkfree
 run with inode marked free, but referenced in a directory
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Imrkfree
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Imrkfree
 Failure: ./xv6_fsck returned incorrect status code. Expected 1 got 0
 
 
@@ -247,7 +247,7 @@ Test Badrefcnt
 run on fs which has an inode with a bad reference count
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badrefcnt
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badrefcnt
 Failure: ./xv6_fsck returned incorrect status code. Expected 1 got 0
 
 
@@ -263,7 +263,7 @@ Test Badindir2
 run on a filesystem with a bad indirect address in an inode
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badindir2
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Badindir2
 
 
 test Badindir2 PASSED (5 of 5)
@@ -277,7 +277,7 @@ Test Dironce
 run on fs with a directory appearing more than once
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Dironce
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Dironce
 Failure: ./xv6_fsck returned incorrect status code. Expected 1 got 0
 
 
@@ -293,7 +293,7 @@ Test Goodrm
 run on good fs with a file removed and a new directory created
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Goodrm
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Goodrm
 
 
 test Goodrm PASSED (5 of 5)
@@ -307,7 +307,7 @@ Test Goodrm2
 run on good fs with a new directory created and then a file removed
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Goodrm2
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Goodrm2
 
 
 test Goodrm2 PASSED (3 of 3)
@@ -321,7 +321,7 @@ Test Goodlink
 run on good fs with some hard links and a linked file removed
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Goodlink
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Goodlink
 
 
 test Goodlink PASSED (3 of 3)
@@ -335,7 +335,7 @@ Test Goodlarge
 run on large good fs
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Goodlarge
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Goodlarge
 
 
 test Goodlarge PASSED (5 of 5)
@@ -349,7 +349,7 @@ Test Mismatch
 **extra** run on a filesystem with .. pointing to the wrong directory
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Mismatch
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Mismatch
 Failure: ./xv6_fsck returned incorrect status code. Expected 1 got 0
 
 
@@ -365,7 +365,7 @@ Test Loop
 **extra**  run on a filesystem with a loop in directory tree
 
 **********************************************************************
-/tmp/tmpLaL9Sq/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Loop
+/tmp/tmpbh1pND/p/./xv6_fsck /u/c/s/cs537-10/ta/tests/p5a/images/Loop
 Failure: ./xv6_fsck returned incorrect status code. Expected 1 got 0
 
 
