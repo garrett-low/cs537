@@ -98,6 +98,10 @@ void test4(uint i, struct dinode *inodePtr);
 void collectInodeUsed(struct dinode *inodePtr, uint *inodeUsed,
                       int *inodeUsedCount);
 void collectBitmapUsed(uint *bitmapUsed, int *bitmapUsedCount);
+void test5(uint *inodeUsed, int inodeUsedCount, uint *bitmapUsed,
+           int bitmapUsedCount);
+void test6(uint *inodeUsed, int inodeUsedCount, uint *bitmapUsed,
+           int bitmapUsedCount);
 
 int main(int argc, char *argv[]) {
   debugPrintf("constants: IPB %ld, BPB %d\n", IPB, BPB);
@@ -168,55 +172,11 @@ int main(int argc, char *argv[]) {
   int bitmapUsedCount = 0;
   collectBitmapUsed(bitmapUsed, &bitmapUsedCount);
 
-  debugPrintf("inode block count: %d, bitmap block count: %d\n", inodeUsedCount,
-              bitmapUsedCount);
-  debugPrintf("inode used data blocks: ");
-  for (int i = 0; i < inodeUsedCount; i++) {
-    debugPrintf("%d, ", inodeUsed[i]);
-  }
-  debugPrintf("\n");
-
-  debugPrintf("bitmap used data blocks: ");
-  for (int i = 0; i < bitmapUsedCount; i++) {
-    debugPrintf("%d, ", bitmapUsed[i]);
-  }
-  debugPrintf("\n");
-
   // Test 5 - check inode data blocks against bitmap
-  for (int i = 0; i < inodeUsedCount; i++) {
-    bool isInodeUsedBlockInBitmap = false;
-    uint inodeUsedBlockNum = inodeUsed[i];
-    // debugPrintf("used inode data block %d\n", inodeUsedBlockNum);
-    for (int j = 29; j < bitmapUsedCount; j++) {
-      if (bitmapUsed[j] == inodeUsedBlockNum) {
-        isInodeUsedBlockInBitmap = true;
-        break;
-      }
-    }
-    if (!isInodeUsedBlockInBitmap) {
-      debugPrintf("ERROR: block %d not marked in bitmap\n", inodeUsedBlockNum);
-      fprintf(stderr, ERROR5_INODE_NOT_MARKED);
-      exit(1);
-    }
-  }
+  test5(inodeUsed, inodeUsedCount, bitmapUsed, bitmapUsedCount);
 
   // Test 6 - check bitmap against inode data blocks
-  for (int i = 29; i < bitmapUsedCount; i++) {
-    bool isBitmapUsedByInode = false;
-    uint bitmapUsedBlockNum = bitmapUsed[i];
-    // debugPrintf("used bitmap data block %d\n", bitmapUsedBlockNum);
-    for (int j = 0; j < inodeUsedCount; j++) {
-      if (inodeUsed[j] == bitmapUsedBlockNum) {
-        isBitmapUsedByInode = true;
-        break;
-      }
-    }
-    if (!isBitmapUsedByInode) {
-      debugPrintf("ERROR: bitmap %d not ref'd by inode\n", bitmapUsedBlockNum);
-      fprintf(stderr, ERROR6_BITMAP_NOT_MARKED);
-      exit(1);
-    }
-  }
+  test6(inodeUsed, inodeUsedCount, bitmapUsed, bitmapUsedCount);
 
   return 0;
 }
@@ -374,6 +334,46 @@ void collectBitmapUsed(uint *bitmapUsed, int *bitmapUsedCount) {
       if (bit == 1) {
         bitmapUsed[(*bitmapUsedCount)++] = blockNum;
       }
+    }
+  }
+}
+
+void test5(uint *inodeUsed, int inodeUsedCount, uint *bitmapUsed,
+           int bitmapUsedCount) {
+  for (int i = 0; i < inodeUsedCount; i++) {
+    bool isInodeUsedBlockInBitmap = false;
+    uint inodeUsedBlockNum = inodeUsed[i];
+    // debugPrintf("used inode data block %d\n", inodeUsedBlockNum);
+    for (int j = 29; j < bitmapUsedCount; j++) {
+      if (bitmapUsed[j] == inodeUsedBlockNum) {
+        isInodeUsedBlockInBitmap = true;
+        break;
+      }
+    }
+    if (!isInodeUsedBlockInBitmap) {
+      debugPrintf("ERROR: block %d not marked in bitmap\n", inodeUsedBlockNum);
+      fprintf(stderr, ERROR5_INODE_NOT_MARKED);
+      exit(1);
+    }
+  }
+}
+
+void test6(uint *inodeUsed, int inodeUsedCount, uint *bitmapUsed,
+           int bitmapUsedCount) {
+  for (int i = 29; i < bitmapUsedCount; i++) {
+    bool isBitmapUsedByInode = false;
+    uint bitmapUsedBlockNum = bitmapUsed[i];
+    // debugPrintf("used bitmap data block %d\n", bitmapUsedBlockNum);
+    for (int j = 0; j < inodeUsedCount; j++) {
+      if (inodeUsed[j] == bitmapUsedBlockNum) {
+        isBitmapUsedByInode = true;
+        break;
+      }
+    }
+    if (!isBitmapUsedByInode) {
+      debugPrintf("ERROR: bitmap %d not ref'd by inode\n", bitmapUsedBlockNum);
+      fprintf(stderr, ERROR6_BITMAP_NOT_MARKED);
+      exit(1);
     }
   }
 }
