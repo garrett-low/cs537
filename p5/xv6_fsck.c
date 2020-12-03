@@ -173,6 +173,15 @@ int main(int argc, char *argv[]) {
     // Setup for test 5 and 6
     collectInodeUsed(inodePtr, inodeUsed, &inodeUsedCount, isDirect);
     
+    
+    // Test 9
+    if (inodePtr->type == T_DIR || inodePtr->type == T_FILE || inodePtr->type == T_DEV) {
+      if (inodePtr->nlink <= 0) {
+        fprintf(stderr, "ERROR: inode marked use but not found in a directory.\n");
+        exit(1);
+      }
+    }
+    
     /*
     if (inodePtr->type == T_DIR) {
       debugPrintf("inode %d is a dir of size %d with links %d\n", i, inodePtr->size, inodePtr->nlink);
