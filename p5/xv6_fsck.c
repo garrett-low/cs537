@@ -95,6 +95,9 @@ void test1(uint i, short type);
 void test2(uint i, struct dinode *inodePtr);
 void test3();
 void test4(uint i, struct dinode *inodePtr);
+void collectInodeUsed(struct dinode *inodePtr, uint *inodeUsed,
+                      int *inodeUsedCount);
+void collectBitmapUsed(uint *bitmapUsed, int *bitmapUsedCount);
 
 int main(int argc, char *argv[]) {
   debugPrintf("constants: IPB %ld, BPB %d\n", IPB, BPB);
@@ -133,11 +136,11 @@ int main(int argc, char *argv[]) {
               sBlock->nblocks, sBlock->ninodes);
 
   // Traverse inodes - start at second block
-  uint inodeUsedBlocks[sBlock->nblocks];
-  int inodeUsedCount = 0;
   // Initialize array
+  uint inodeUsed[sBlock->nblocks];
+  int inodeUsedCount = 0;
   for (int i = 0; i < sBlock->nblocks; i++) {
-    inodeUsedBlocks[i] = 0;
+    inodeUsed[i] = 0;
   }
   struct dinode *inodePtr = (struct dinode *)(fsPtr + (2 * BSIZE));
   for (uint i = 0; i < sBlock->ninodes; i++, inodePtr++) {
@@ -150,71 +153,42 @@ int main(int argc, char *argv[]) {
     // Test 4 - each dir contains . and ..; . points to dir itself
     test4(i, inodePtr);
 
-    if (inodePtr->type == T_DIR || inodePtr->type == T_FILE) {
-      for (int j = 0; j < NDIRECT; j++) {
-        if (inodePtr->addrs[j] != 0) {
-          inodeUsedBlocks[inodeUsedCount++] = inodePtr->addrs[j];
-        }
-      }
-
-      if (inodePtr->addrs[NDIRECT]) {
-        inodeUsedBlocks[inodeUsedCount++] = inodePtr->addrs[NDIRECT];
-        uint *indirectAddr =
-            (uint *)(fsPtr + (inodePtr->addrs[NDIRECT] * BSIZE));
-        for (int j = 0; j < NINDIRECT; j++) {
-          if (indirectAddr[j] != 0) {
-            inodeUsedBlocks[inodeUsedCount++] = indirectAddr[j];
-          }
-        }
-      }
-    }
+    // Setup for test 5 and 6
+    collectInodeUsed(inodePtr, inodeUsed, &inodeUsedCount);
   }
 
   // Test 3 - root dir exists; inode num 1; parent is itself
   test3();
 
-  unsigned char *bitmap =
-      (unsigned char *)(fsPtr + (BBLOCK(0, sBlock->ninodes) * BSIZE));
-  int bitmapUsedBlocks[sBlock->size];
   // Initialize array
+  int bitmapUsed[sBlock->size];
   for (int i = 0; i < sBlock->size; i++) {
-    bitmapUsedBlocks[i] = 0;
+    bitmapUsed[i] = 0;
   }
-  int blockNum = 0;
   int bitmapUsedCount = 0;
-  for (int i = 0; i < BSIZE; i++) {
-    // for (int j = 7; j >= 0; j--, blockNum++) {
-    for (int j = 0; j < 8; j++, blockNum++) {
-      uint bit = (bitmap[i] >> j) & 1;
-      if (bit == 1) {
-        bitmapUsedBlocks[bitmapUsedCount] = blockNum;
-        bitmapUsedCount++;
-        // debugPrintf("dblock %u: used\n", blockNum);
-      }
-    }
-  }
+  collectBitmapUsed(bitmapUsed, &bitmapUsedCount);
 
   debugPrintf("inode block count: %d, bitmap block count: %d\n", inodeUsedCount,
               bitmapUsedCount);
   debugPrintf("inode used data blocks: ");
   for (int i = 0; i < inodeUsedCount; i++) {
-    debugPrintf("%d, ", inodeUsedBlocks[i]);
+    debugPrintf("%d, ", inodeUsed[i]);
   }
   debugPrintf("\n");
 
   debugPrintf("bitmap used data blocks: ");
   for (int i = 0; i < bitmapUsedCount; i++) {
-    debugPrintf("%d, ", bitmapUsedBlocks[i]);
+    debugPrintf("%d, ", bitmapUsed[i]);
   }
   debugPrintf("\n");
 
   // Test 5 - check inode data blocks against bitmap
   for (int i = 0; i < inodeUsedCount; i++) {
     bool isInodeUsedBlockInBitmap = false;
-    uint inodeUsedBlockNum = inodeUsedBlocks[i];
+    uint inodeUsedBlockNum = inodeUsed[i];
     // debugPrintf("used inode data block %d\n", inodeUsedBlockNum);
     for (int j = 29; j < bitmapUsedCount; j++) {
-      if (bitmapUsedBlocks[j] == inodeUsedBlockNum) {
+      if (bitmapUsed[j] == inodeUsedBlockNum) {
         isInodeUsedBlockInBitmap = true;
         break;
       }
@@ -229,10 +203,10 @@ int main(int argc, char *argv[]) {
   // Test 6 - check bitmap against inode data blocks
   for (int i = 29; i < bitmapUsedCount; i++) {
     bool isBitmapUsedByInode = false;
-    uint bitmapUsedBlockNum = bitmapUsedBlocks[i];
+    uint bitmapUsedBlockNum = bitmapUsed[i];
     // debugPrintf("used bitmap data block %d\n", bitmapUsedBlockNum);
     for (int j = 0; j < inodeUsedCount; j++) {
-      if (inodeUsedBlocks[j] == bitmapUsedBlockNum) {
+      if (inodeUsed[j] == bitmapUsedBlockNum) {
         isBitmapUsedByInode = true;
         break;
       }
@@ -365,6 +339,41 @@ void test4(uint i, struct dinode *inodePtr) {
                   foundCurrDot, foundParentDot, isDirUsed);
       fprintf(stderr, ERROR4_BAD_DIR_FORMAT);
       exit(1);
+    }
+  }
+}
+
+void collectInodeUsed(struct dinode *inodePtr, uint *inodeUsed,
+                      int *inodeUsedCount) {
+  if (inodePtr->type == T_DIR || inodePtr->type == T_FILE) {
+    for (int j = 0; j < NDIRECT; j++) {
+      if (inodePtr->addrs[j] != 0) {
+        inodeUsed[(*inodeUsedCount)++] = inodePtr->addrs[j];
+      }
+    }
+
+    if (inodePtr->addrs[NDIRECT]) {
+      inodeUsed[(*inodeUsedCount)++] = inodePtr->addrs[NDIRECT];
+      uint *indirectAddr = (uint *)(fsPtr + (inodePtr->addrs[NDIRECT] * BSIZE));
+      for (int j = 0; j < NINDIRECT; j++) {
+        if (indirectAddr[j] != 0) {
+          inodeUsed[(*inodeUsedCount)++] = indirectAddr[j];
+        }
+      }
+    }
+  }
+}
+
+void collectBitmapUsed(uint *bitmapUsed, int *bitmapUsedCount) {
+  unsigned char *bitmap =
+      (unsigned char *)(fsPtr + (BBLOCK(0, sBlock->ninodes) * BSIZE));
+  int blockNum = 0;
+  for (int i = 0; i < BSIZE; i++) {
+    for (int j = 0; j < 8; j++, blockNum++) {
+      uint bit = (bitmap[i] >> j) & 1;
+      if (bit == 1) {
+        bitmapUsed[(*bitmapUsedCount)++] = blockNum;
+      }
     }
   }
 }
