@@ -78,7 +78,13 @@ void printBits(size_t const size, void const *const ptr) {
 // (some gaps in here)
 
 int main(int argc, char *argv[]) {
-  char *fsName = "fs.img";
+  // Invalid # of arguments
+  if (argc != 2) {
+    fprintf(stderr, "blahblah\n");
+    exit(1);
+  }
+
+  char *fsName = argv[1];
 
   int fd = open(fsName, O_RDONLY);
   if (fd == -1) {
@@ -119,7 +125,8 @@ int main(int argc, char *argv[]) {
 
   printf("BBLOCK(1,200): %ld\n", BBLOCK(1, sBlock->ninodes));
   printf("BBLOCK(5,200): %ld\n", BBLOCK(5, sBlock->ninodes));
-  unsigned char *bitmap = (unsigned char *)(fsPtr + (BBLOCK(0, sBlock->ninodes) * BSIZE));
+  unsigned char *bitmap =
+      (unsigned char *)(fsPtr + (BBLOCK(0, sBlock->ninodes) * BSIZE));
   printf("bitmap: 0x");
   for (int i = 0; i < 512; i++) {
     printf("%x", bitmap[i]);
@@ -129,17 +136,18 @@ int main(int argc, char *argv[]) {
   printf("\n");
   printf("bitmap again: 0x");
   for (int i = 0; i < 512; i++) {
-    if (bitmap[i] == 0xff) {
-      printf("%x", bitmap[i]);
-    }
+    // if (bitmap[i] == 0xff) {
+    //   printf("%x", bitmap[i]);
+    // }
     // printf("%p, ", &bitmap[i]);
-    // printBits(sizeof(bitmap[i]), &bitmap[i]);
+    printBits(sizeof(bitmap[i]), &bitmap[i]);
   }
   printf("\n");
-  
-  uint bitblocks = sBlock->size/(512*8) + 1;
+
+  uint bitblocks = sBlock->size / (512 * 8) + 1;
   uint usedblocks = sBlock->ninodes / IPB + 3 + bitblocks;
   printf("initial used blocks: %d\n", usedblocks);
+  printf("IPB: %ld\n", IPB);
 
   return 0;
 }
