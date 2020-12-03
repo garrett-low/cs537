@@ -148,6 +148,16 @@ int main(int argc, char *argv[]) {
   uint usedblocks = sBlock->ninodes / IPB + 3 + bitblocks;
   printf("initial used blocks: %d\n", usedblocks);
   printf("IPB: %ld\n", IPB);
+  printf("0 & 1 = %i\n", 0 & 1);
+  printf("1 & 1 = %i\n", 1 & 1);
+  printf("(0b11001010 >> 7) & 1 = %i\n", (0b11001010 >> 7) & 1);
+  printf("(0b11001010 >> 6) & 1 = %i\n", (0b11001010 >> 6) & 1);
+  printf("(0b11001010 >> 5) & 1 = %i\n", (0b11001010 >> 5) & 1);
+  printf("(0b11001010 >> 4) & 1 = %i\n", (0b11001010 >> 4) & 1);
+  printf("(0b11001010 >> 3) & 1 = %i\n", (0b11001010 >> 3) & 1);
+  printf("(0b11001010 >> 2) & 1 = %i\n", (0b11001010 >> 2) & 1);
+  printf("(0b11001010 >> 1) & 1 = %i\n", (0b11001010 >> 1) & 1);
+  printf("(0b11001010 >> 0) & 1 = %i\n", (0b11001010 >> 0) & 1);
 
   return 0;
 }
