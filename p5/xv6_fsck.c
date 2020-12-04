@@ -98,19 +98,21 @@ struct dirent {
 
 void *fsPtr;
 struct superblock *sBlock;
+uint bitBlocks; // initial bit blocks
+uint hdrBlocks; // initial header blocks
 
 void test1(uint i, short type);
-void test2(uint i, struct dinode *inodePtr);
+void test2(uint i, struct dinode *iPtr);
 void test3();
-void test4(uint i, struct dinode *inodePtr);
-void collectInodeUsed(struct dinode *inodePtr, uint *inodeUsed,
-                      int *inodeUsedCount, short *isDirect);
-void collectBitmapUsed(uint *bitmapUsed, int *bitmapUsedCount);
-void test5(uint *inodeUsed, int inodeUsedCount, uint *bitmapUsed,
-           int bitmapUsedCount);
-void test6(uint *inodeUsed, int inodeUsedCount, uint *bitmapUsed,
-           int bitmapUsedCount);
-void test78(uint *inodeUsed, int inodeUsedCount, short *isDirect);
+void test4(uint i, struct dinode *iPtr);
+void collectInodeUsed(struct dinode *iPtr, uint *iUsed,
+                      int *iUsedCount, short *isDirect);
+void collectBitmapUsed(uint *bUsed, int *bUsedCount);
+void test5(uint *iUsed, int iUsedCount, uint *bUsed,
+           int bUsedCount);
+void test6(uint *iUsed, int iUsedCount, uint *bUsed,
+           int bUsedCount);
+void test78(uint *iUsed, int iUsedCount, short *isDirect);
 
 int main(int argc, char *argv[]) {
   debugPrintf("constants: IPB %ld, BPB %d\n", IPB, BPB);
@@ -147,54 +149,56 @@ int main(int argc, char *argv[]) {
   sBlock = (struct superblock *)(fsPtr + BSIZE);
   debugPrintf("sBlock: size %d, # data blocks %d, # inodes %d \n", sBlock->size,
               sBlock->nblocks, sBlock->ninodes);
+  bitBlocks = sBlock->size / (BSIZE * 8) + 1;
+  hdrBlocks = sBlock->ninodes / IPB + 3 + bitBlocks;
 
   // Traverse inodes - start at second block
   // Initialize array
-  uint inodeUsed[sBlock->nblocks];
-  int inodeUsedCount = 0;
+  uint iUsed[sBlock->nblocks];
+  int iUsedCount = 0;
   for (int i = 0; i < sBlock->nblocks; i++) {
-    inodeUsed[i] = 0;
+    iUsed[i] = 0;
   }
   short isDirect[sBlock->nblocks];
   for (int i = 0; i < sBlock->nblocks; i++) {
     isDirect[i] = DBLOCK_UNUSED;
   }
-  struct dinode *inodePtr = (struct dinode *)(fsPtr + (2 * BSIZE));
-  for (uint i = 0; i < sBlock->ninodes; i++, inodePtr++) {
+  struct dinode *iPtr = (struct dinode *)(fsPtr + (2 * BSIZE));
+  for (uint i = 0; i < sBlock->ninodes; i++, iPtr++) {
     // Test 1 - each inode is either unallocated or one of the valid types
-    test1(i, inodePtr->type);
+    test1(i, iPtr->type);
 
     // Test 2 - for inuse inodes; points to valid datablock address
-    test2(i, inodePtr);
+    test2(i, iPtr);
 
     // Test 4 - each dir contains . and ..; . points to dir itself
-    test4(i, inodePtr);
+    test4(i, iPtr);
 
     // Setup for test 5 and 6
-    collectInodeUsed(inodePtr, inodeUsed, &inodeUsedCount, isDirect);
+    collectInodeUsed(iPtr, iUsed, &iUsedCount, isDirect);
     
     
     // Test 9
-    if (inodePtr->type == T_DIR || inodePtr->type == T_FILE || inodePtr->type == T_DEV) {
-      if (inodePtr->nlink <= 0) {
+    if (iPtr->type == T_DIR || iPtr->type == T_FILE || iPtr->type == T_DEV) {
+      if (iPtr->nlink <= 0) {
         fprintf(stderr, "ERROR: inode marked use but not found in a directory.\n");
         exit(1);
       }
     }
     
-    /*
-    if (inodePtr->type == T_DIR) {
-      debugPrintf("inode %d is a dir of size %d with links %d\n", i, inodePtr->size, inodePtr->nlink);
+    
+    if (iPtr->type == T_DIR) {
+      debugPrintf("inode %d is a dir of size %d with links %d\n", i, iPtr->size, iPtr->nlink);
       for (int j = 0; j < NDIRECT; j++) {
-        if (inodePtr->addrs[j] != 0) {
-          debugPrintf("  dblock %d used\n", inodePtr->addrs[j]);
+        if (iPtr->addrs[j] != 0) {
+          debugPrintf("  dblock %d used\n", iPtr->addrs[j]);
         }
       }
 
-      if (inodePtr->addrs[NDIRECT]) {
-        debugPrintf("  dblock %d used\n", inodePtr->addrs[NDIRECT]);
+      if (iPtr->addrs[NDIRECT]) {
+        debugPrintf("  dblock %d used\n", iPtr->addrs[NDIRECT]);
         uint *indirectAddr =
-            (uint *)(fsPtr + (inodePtr->addrs[NDIRECT] * BSIZE));
+            (uint *)(fsPtr + (iPtr->addrs[NDIRECT] * BSIZE));
         for (int j = 0; j < NINDIRECT; j++) {
           if (indirectAddr[j] != 0) {
             debugPrintf("  dblock %d used\n", indirectAddr[j]);
@@ -202,18 +206,18 @@ int main(int argc, char *argv[]) {
         }
       }
     }
-    if (inodePtr->type == T_FILE) {
-      debugPrintf("inode %d is a file of size %d with links %d\n", i, inodePtr->size, inodePtr->nlink);
+    if (iPtr->type == T_FILE) {
+      debugPrintf("inode %d is a file of size %d with links %d\n", i, iPtr->size, iPtr->nlink);
       for (int j = 0; j < NDIRECT; j++) {
-        if (inodePtr->addrs[j] != 0) {
-          debugPrintf("  dblock %d used\n", inodePtr->addrs[j]);
+        if (iPtr->addrs[j] != 0) {
+          debugPrintf("  dblock %d used\n", iPtr->addrs[j]);
         }
       }
 
-      if (inodePtr->addrs[NDIRECT]) {
-        debugPrintf("  dblock %d used\n", inodePtr->addrs[NDIRECT]);
+      if (iPtr->addrs[NDIRECT]) {
+        debugPrintf("  dblock %d used\n", iPtr->addrs[NDIRECT]);
         uint *indirectAddr =
-            (uint *)(fsPtr + (inodePtr->addrs[NDIRECT] * BSIZE));
+            (uint *)(fsPtr + (iPtr->addrs[NDIRECT] * BSIZE));
         for (int j = 0; j < NINDIRECT; j++) {
           if (indirectAddr[j] != 0) {
             debugPrintf("  dblock %d used\n", indirectAddr[j]);
@@ -221,42 +225,42 @@ int main(int argc, char *argv[]) {
         }
       }
     }
-    */
+    
   }
 
   // Test 3 - root dir exists; inode num 1; parent is itself
   test3();
 
   // Initialize array
-  int bitmapUsed[sBlock->size];
+  int bUsed[sBlock->size];
   for (int i = 0; i < sBlock->size; i++) {
-    bitmapUsed[i] = 0;
+    bUsed[i] = 0;
   }
-  int bitmapUsedCount = 0;
-  collectBitmapUsed(bitmapUsed, &bitmapUsedCount);
+  int bUsedCount = 0;
+  collectBitmapUsed(bUsed, &bUsedCount);
 
-  debugPrintf("inode block count: %d, bitmap block count: %d\n", inodeUsedCount,
-              bitmapUsedCount);
+  debugPrintf("inode block count: %d, bitmap block count: %d\n", iUsedCount,
+              bUsedCount);
   debugPrintf("inode used data blocks: ");
-  for (int i = 0; i < inodeUsedCount; i++) {
-    debugPrintf("%d, ", inodeUsed[i]);
+  for (int i = 0; i < iUsedCount; i++) {
+    debugPrintf("%d, ", iUsed[i]);
   }
   debugPrintf("\n");
 
   debugPrintf("bitmap used data blocks: ");
-  for (int i = 0; i < bitmapUsedCount; i++) {
-    debugPrintf("%d, ", bitmapUsed[i]);
+  for (int i = 0; i < bUsedCount; i++) {
+    debugPrintf("%d, ", bUsed[i]);
   }
   debugPrintf("\n");
 
   // Test 5 - check inode data blocks against bitmap
-  test5(inodeUsed, inodeUsedCount, bitmapUsed, bitmapUsedCount);
+  test5(iUsed, iUsedCount, bUsed, bUsedCount);
 
   // Test 6 - check bitmap against inode data blocks
-  test6(inodeUsed, inodeUsedCount, bitmapUsed, bitmapUsedCount);
+  test6(iUsed, iUsedCount, bUsed, bUsedCount);
   // TODO test 6 is causing goodlarge to fail
 
-  test78(inodeUsed, inodeUsedCount, isDirect);
+  test78(iUsed, iUsedCount, isDirect);
 
   return 0;
 }
@@ -271,17 +275,17 @@ void test1(uint i, short type) {
 }
 
 // Test 2 - for inuse inodes; points to valid datablock address
-void test2(uint i, struct dinode *inodePtr) {
-  if (inodePtr->type != T_FILE) {
+void test2(uint i, struct dinode *iPtr) {
+  if (iPtr->type != T_FILE) {
     return;
   }
 
   // Direct block number invalid
   // debugPrintf("file inode %d: ", i);
   for (int j = 0; j < NDIRECT; j++) {
-    uint dblockNum = inodePtr->addrs[j];
+    uint dblockNum = iPtr->addrs[j];
     // debugPrintf("dblockNum %d, ", dblockNum);
-    if (!(dblockNum == 0 || ((dblockNum >= 29) && (dblockNum < 995 + 29)))) {
+    if (!(dblockNum == 0 || ((dblockNum >= 29) && (dblockNum < sBlock->size)))) {
       debugPrintf("\nERROR: inode %d: dblockNum: %d\n", i, dblockNum);
       fprintf(stderr, ERROR2_BAD_DIRECT_DATA);
       exit(1);
@@ -290,9 +294,9 @@ void test2(uint i, struct dinode *inodePtr) {
   // debugPrintf("\n");
 
   // Indirect block number invalid
-  uint indirectBlockNum = inodePtr->addrs[NDIRECT];
+  uint indirectBlockNum = iPtr->addrs[NDIRECT];
   if (!(indirectBlockNum == 0 ||
-        ((indirectBlockNum >= 29) && (indirectBlockNum < 995 + 29)))) {
+        ((indirectBlockNum >= 29) && (indirectBlockNum < sBlock->size)))) {
     debugPrintf("ERROR: inode %d: indirectBlockNum %d \n", i, indirectBlockNum);
     fprintf(stderr, ERROR2_BAD_INDIRECT_DATA);
     exit(1);
@@ -305,7 +309,7 @@ void test2(uint i, struct dinode *inodePtr) {
   uint *indirectAddr = (uint *)(fsPtr + (indirectBlockNum * BSIZE));
   for (int j = 0; j < NINDIRECT; j++) {
     uint dblockNum = indirectAddr[j];
-    if (!(dblockNum == 0 || ((dblockNum >= 29) && (dblockNum < 995 + 28)))) {
+    if (!(dblockNum == 0 || ((dblockNum >= 29) && (dblockNum < sBlock->size)))) {
       debugPrintf("inode %d: indirectBlockNum %d, dblockNum: %d \n", i,
                   indirectBlockNum, dblockNum);
       fprintf(stderr, ERROR2_BAD_INDIRECT_DATA);
@@ -316,15 +320,15 @@ void test2(uint i, struct dinode *inodePtr) {
 
 // Test 3 - root dir exists; inode num 1; parent is itself
 void test3() {
-  struct dinode *rootInodePtr =
+  struct dinode *rootiPtr =
       (struct dinode *)(fsPtr + (2 * BSIZE) + (1 * sizeof(struct dinode)));
-  if (rootInodePtr->type != T_DIR) {
+  if (rootiPtr->type != T_DIR) {
     debugPrintf("ERROR: type of inum 1 (root) not T_DIR\n");
     fprintf(stderr, ERROR3_BAD_ROOT);
     exit(1);
   }
   struct dirent *rootDirent =
-      (struct dirent *)(fsPtr + (rootInodePtr->addrs[0] * BSIZE));
+      (struct dirent *)(fsPtr + (rootiPtr->addrs[0] * BSIZE));
   if (!(rootDirent->inum == 1 && strcmp(rootDirent->name, ".") == 0)) {
     debugPrintf("ERROR: root not inum 1\n");
     fprintf(stderr, ERROR3_BAD_ROOT);
@@ -339,8 +343,8 @@ void test3() {
 }
 
 // Test 4 - each dir contains . and ..; . points to dir itself
-void test4(uint i, struct dinode *inodePtr) {
-  if (inodePtr->type == T_FILE || inodePtr->type == T_DEV) {
+void test4(uint i, struct dinode *iPtr) {
+  if (iPtr->type == T_FILE || iPtr->type == T_DEV) {
     return;
   }
   if (i == 1 || i == 0) {
@@ -352,7 +356,7 @@ void test4(uint i, struct dinode *inodePtr) {
   bool isDirUsed = false;
   for (int j = 0; j < NDIRECT; j++) {
     struct dirent *dirEntPtr =
-        (struct dirent *)(fsPtr + (inodePtr->addrs[j] * BSIZE));
+        (struct dirent *)(fsPtr + (iPtr->addrs[j] * BSIZE));
     for (int k = 0; k < MAXDIR_PER_BLOCK; k++, dirEntPtr++) {
       if (foundCurrDot && foundParentDot) {
         break;
@@ -383,36 +387,36 @@ void test4(uint i, struct dinode *inodePtr) {
   }
 }
 
-void collectInodeUsed(struct dinode *inodePtr, uint *inodeUsed,
-                      int *inodeUsedCount, short *isDirect) {
-  if (!(inodePtr->type == T_DIR || inodePtr->type == T_FILE)) {
+void collectInodeUsed(struct dinode *iPtr, uint *iUsed,
+                      int *iUsedCount, short *isDirect) {
+  if (!(iPtr->type == T_DIR || iPtr->type == T_FILE)) {
     return;
   }
 
   for (int j = 0; j < NDIRECT; j++) {
-    if (inodePtr->addrs[j] != 0) {
-      inodeUsed[*inodeUsedCount] = inodePtr->addrs[j];
-      isDirect[*inodeUsedCount] = DBLOCK_DIRECT;
-      (*inodeUsedCount)++;
+    if (iPtr->addrs[j] != 0) {
+      iUsed[*iUsedCount] = iPtr->addrs[j];
+      isDirect[*iUsedCount] = DBLOCK_DIRECT;
+      (*iUsedCount)++;
     }
   }
 
-  if (inodePtr->addrs[NDIRECT]) {
-    inodeUsed[*inodeUsedCount] = inodePtr->addrs[NDIRECT];
-    isDirect[*inodeUsedCount] = DBLOCK_DIRECT;
-    (*inodeUsedCount)++;
-    uint *indirectAddr = (uint *)(fsPtr + (inodePtr->addrs[NDIRECT] * BSIZE));
+  if (iPtr->addrs[NDIRECT]) {
+    iUsed[*iUsedCount] = iPtr->addrs[NDIRECT];
+    isDirect[*iUsedCount] = DBLOCK_DIRECT;
+    (*iUsedCount)++;
+    uint *indirectAddr = (uint *)(fsPtr + (iPtr->addrs[NDIRECT] * BSIZE));
     for (int j = 0; j < NINDIRECT; j++) {
       if (indirectAddr[j] != 0) {
-        inodeUsed[*inodeUsedCount] = indirectAddr[j];
-        isDirect[*inodeUsedCount] = DBLOCK_INDIRECT;
-        (*inodeUsedCount)++;
+        iUsed[*iUsedCount] = indirectAddr[j];
+        isDirect[*iUsedCount] = DBLOCK_INDIRECT;
+        (*iUsedCount)++;
       }
     }
   }
 }
 
-void collectBitmapUsed(uint *bitmapUsed, int *bitmapUsedCount) {
+void collectBitmapUsed(uint *bUsed, int *bUsedCount) {
   unsigned char *bitmap =
       (unsigned char *)(fsPtr + (BBLOCK(0, sBlock->ninodes) * BSIZE));
   int blockNum = 0;
@@ -420,61 +424,61 @@ void collectBitmapUsed(uint *bitmapUsed, int *bitmapUsedCount) {
     for (int j = 0; j < 8; j++, blockNum++) {
       uint bit = (bitmap[i] >> j) & 1;
       if (bit == 1) {
-        bitmapUsed[(*bitmapUsedCount)++] = blockNum;
+        bUsed[(*bUsedCount)++] = blockNum;
       }
     }
   }
 }
 
-void test5(uint *inodeUsed, int inodeUsedCount, uint *bitmapUsed,
-           int bitmapUsedCount) {
-  for (int i = 0; i < inodeUsedCount; i++) {
+void test5(uint *iUsed, int iUsedCount, uint *bUsed,
+           int bUsedCount) {
+  for (int i = 0; i < iUsedCount; i++) {
     bool isInodeUsedBlockInBitmap = false;
-    uint inodeUsedBlockNum = inodeUsed[i];
-    // debugPrintf("used inode data block %d\n", inodeUsedBlockNum);
-    for (int j = 29; j < bitmapUsedCount; j++) {
-      if (bitmapUsed[j] == inodeUsedBlockNum) {
+    uint iUsedBlockNum = iUsed[i];
+    // debugPrintf("used inode data block %d\n", iUsedBlockNum);
+    for (int j = 29; j < bUsedCount; j++) {
+      if (bUsed[j] == iUsedBlockNum) {
         isInodeUsedBlockInBitmap = true;
         break;
       }
     }
     if (!isInodeUsedBlockInBitmap) {
-      debugPrintf("ERROR: block %d not marked in bitmap\n", inodeUsedBlockNum);
+      debugPrintf("ERROR: block %d not marked in bitmap\n", iUsedBlockNum);
       fprintf(stderr, ERROR5_INODE_NOT_MARKED);
       exit(1);
     }
   }
 }
 
-void test6(uint *inodeUsed, int inodeUsedCount, uint *bitmapUsed,
-           int bitmapUsedCount) {
-  for (int i = 29; i < bitmapUsedCount; i++) {
+void test6(uint *iUsed, int iUsedCount, uint *bUsed,
+           int bUsedCount) {
+  for (int i = 29; i < bUsedCount; i++) {
     bool isBitmapUsedByInode = false;
-    uint bitmapUsedBlockNum = bitmapUsed[i];
-    // debugPrintf("used bitmap data block %d\n", bitmapUsedBlockNum);
-    for (int j = 0; j < inodeUsedCount; j++) {
-      if (inodeUsed[j] == bitmapUsedBlockNum) {
+    uint bUsedBlockNum = bUsed[i];
+    // debugPrintf("used bitmap data block %d\n", bUsedBlockNum);
+    for (int j = 0; j < iUsedCount; j++) {
+      if (iUsed[j] == bUsedBlockNum) {
         isBitmapUsedByInode = true;
         break;
       }
     }
     if (!isBitmapUsedByInode) {
-      debugPrintf("ERROR: bitmap %d not ref'd by inode\n", bitmapUsedBlockNum);
+      debugPrintf("ERROR: bitmap %d not ref'd by inode\n", bUsedBlockNum);
       fprintf(stderr, ERROR6_BITMAP_NOT_MARKED);
       exit(1);
     }
   }
 }
 
-void test78(uint *inodeUsed, int inodeUsedCount, short *isDirect) {
+void test78(uint *iUsed, int iUsedCount, short *isDirect) {
   bool dblockUnique = true;
-  for (int i = 0; i < inodeUsedCount; i++) {
-    uint currBlockNum = inodeUsed[i];
-    for (int j = 0; j < inodeUsedCount; j++) {
+  for (int i = 0; i < iUsedCount; i++) {
+    uint currBlockNum = iUsed[i];
+    for (int j = 0; j < iUsedCount; j++) {
       if (i == j) {
         continue;
       } else {
-        if (currBlockNum == inodeUsed[j]) {
+        if (currBlockNum == iUsed[j]) {
           if (isDirect[i] == DBLOCK_DIRECT) {
             fprintf(stderr, ERROR7_DIRECT_UNIQUE);
             exit(1);
