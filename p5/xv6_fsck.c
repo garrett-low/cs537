@@ -285,7 +285,7 @@ void test2(uint i, struct dinode *iPtr) {
   for (int j = 0; j < NDIRECT; j++) {
     uint dblockNum = iPtr->addrs[j];
     // debugPrintf("dblockNum %d, ", dblockNum);
-    if (!(dblockNum == 0 || ((dblockNum >= 29) && (dblockNum < sBlock->size)))) {
+    if (!(dblockNum == 0 || ((dblockNum >= hdrBlocks) && (dblockNum < sBlock->size)))) {
       debugPrintf("\nERROR: inode %d: dblockNum: %d\n", i, dblockNum);
       fprintf(stderr, ERROR2_BAD_DIRECT_DATA);
       exit(1);
@@ -296,7 +296,7 @@ void test2(uint i, struct dinode *iPtr) {
   // Indirect block number invalid
   uint indirectBlockNum = iPtr->addrs[NDIRECT];
   if (!(indirectBlockNum == 0 ||
-        ((indirectBlockNum >= 29) && (indirectBlockNum < sBlock->size)))) {
+        ((indirectBlockNum >= hdrBlocks) && (indirectBlockNum < sBlock->size)))) {
     debugPrintf("ERROR: inode %d: indirectBlockNum %d \n", i, indirectBlockNum);
     fprintf(stderr, ERROR2_BAD_INDIRECT_DATA);
     exit(1);
@@ -309,7 +309,7 @@ void test2(uint i, struct dinode *iPtr) {
   uint *indirectAddr = (uint *)(fsPtr + (indirectBlockNum * BSIZE));
   for (int j = 0; j < NINDIRECT; j++) {
     uint dblockNum = indirectAddr[j];
-    if (!(dblockNum == 0 || ((dblockNum >= 29) && (dblockNum < sBlock->size)))) {
+    if (!(dblockNum == 0 || ((dblockNum >= hdrBlocks) && (dblockNum < sBlock->size)))) {
       debugPrintf("inode %d: indirectBlockNum %d, dblockNum: %d \n", i,
                   indirectBlockNum, dblockNum);
       fprintf(stderr, ERROR2_BAD_INDIRECT_DATA);
@@ -436,7 +436,7 @@ void test5(uint *iUsed, int iUsedCount, uint *bUsed,
     bool isInodeUsedBlockInBitmap = false;
     uint iUsedBlockNum = iUsed[i];
     // debugPrintf("used inode data block %d\n", iUsedBlockNum);
-    for (int j = 29; j < bUsedCount; j++) {
+    for (int j = hdrBlocks; j < bUsedCount; j++) {
       if (bUsed[j] == iUsedBlockNum) {
         isInodeUsedBlockInBitmap = true;
         break;
@@ -452,7 +452,7 @@ void test5(uint *iUsed, int iUsedCount, uint *bUsed,
 
 void test6(uint *iUsed, int iUsedCount, uint *bUsed,
            int bUsedCount) {
-  for (int i = 29; i < bUsedCount; i++) {
+  for (int i = hdrBlocks; i < bUsedCount; i++) {
     bool isBitmapUsedByInode = false;
     uint bUsedBlockNum = bUsed[i];
     // debugPrintf("used bitmap data block %d\n", bUsedBlockNum);
