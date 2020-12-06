@@ -21,14 +21,14 @@
 #define ROOTINO 1  // root i-number
 #define BSIZE 512  // block size
 #define NDIRECT 12
-#define NINDIRECT (BSIZE / sizeof(uint))
+#define NINDIRECT (BSIZE / sizeof(int))
 #define MAXFILE (NDIRECT + NINDIRECT)
 
 // File system super block
 struct superblock {
-  uint size;     // Size of file system image (blocks)
-  uint nblocks;  // Number of data blocks
-  uint ninodes;  // Number of inodes.
+  int size;     // Size of file system image (blocks)
+  int nblocks;  // Number of data blocks
+  int ninodes;  // Number of inodes.
 };
 
 // Inode types
@@ -38,12 +38,12 @@ struct superblock {
 
 // On-disk inode structure
 struct dinode {
-  short type;               // File type
-  short major;              // Major device number (T_DEV only)
-  short minor;              // Minor device number (T_DEV only)
-  short nlink;              // Number of links to inode in file system
-  uint size;                // Size of file (bytes)
-  uint addrs[NDIRECT + 1];  // Data block addresses
+  short type;              // File type
+  short major;             // Major device number (T_DEV only)
+  short minor;             // Minor device number (T_DEV only)
+  short nlink;             // Number of links to inode in file system
+  int size;                // Size of file (bytes)
+  int addrs[NDIRECT + 1];  // Data block addresses
 };
 
 // Inodes per block.
@@ -62,7 +62,7 @@ struct dinode {
 #define DIRSIZ 14
 
 struct dirent {
-  ushort inum;
+  short inum;
   char name[DIRSIZ];
 };
 
@@ -96,6 +96,10 @@ struct dirent {
 #define ERROR10_INODE_REF_MARKED_FREE \
   "ERROR: inode referred to in directory but marked free.\n"
 #define ERROR11_INODE_REF_COUNT "ERROR: bad reference count for file.\n"
+#define ERROR12_DIR_ONCE \
+  "ERROR: directory appears more than once in file system.\n"
+#define EC1_PARENT_DIR_MISMATCH "ERROR: parent directory mismatch.\n"
+#define EC2_ORPHAN_DIR "ERROR: inaccessible directory exists.\n"
 
 #define DBLOCK_UNUSED 0
 #define DBLOCK_DIRECT 1
@@ -103,37 +107,40 @@ struct dirent {
 
 void *fs;
 struct superblock *sBlock;
-uint bitBlocks;  // initial bit blocks
-uint hdrBlocks;  // initial header blocks
+int bitBlocks;  // initial bit blocks
+int hdrBlocks;  // initial header blocks
 
 // Test and Setup functions
-void test1(uint i, short type);
-void test2(uint i, struct dinode *iPtr);
+void test1(int i, short type);
+void test2(int i, struct dinode *iPtr);
 void test3();
-void test4(uint i, struct dinode *iPtr);
-
-void test5(uint *iUsed, int iUsedCount, uint *bUsed, int bUsedCount);
-void test6(uint *iUsed, int iUsedCount, uint *bUsed, int bUsedCount);
-void collectBitmapUsed(uint *bUsed, uint *bUsedCount);
-void collectInodeUsed(struct dinode *iPtr, uint *iUsed, uint *iUsedCount,
+void test4(int i, struct dinode *iPtr);
+void test5(int *iUsed, int iUsedCount, int *bUsed, int bUsedCount);
+void test6(int *iUsed, int iUsedCount, int *bUsed, int bUsedCount);
+void collectBitmapUsed(int *bUsed, int *bUsedCount);
+void collectInodeUsed(struct dinode *iPtr, int *iUsed, int *iUsedCount,
                       short *isDirect);
-
-void test78(uint *iUsed, int iUsedCount, short *isDirect);
+void test78(int *iUsed, int iUsedCount, short *isDirect);
 void test9(struct dinode *iPtr);
-
 void test10(struct dinode *iPtr);
-void checkRefInodeIsUsed(uint refInum);
-
-void test11(uint *iRefsCount);
-void countInodeRefs(uint i, struct dinode *iPtr, uint *iRefsCount);
+void checkRefInodeIsUsed(int refInum);
+void test11(int *iRefsCount);
+void countInodeRefs(int i, struct dinode *iPtr, int *iRefsCount);
+void countInodeRefsHelper(int *iRefsCount, int dBlock);
+void test12(int *iRefsCount);
+void test13();
+void findChildInParent(struct dinode *parent, int childInum);
+void test14();
+void traverseUpDir(struct dinode *iPtr, int stepCount);
 
 // Utility functions
-struct dinode *getInode(uint inum);
-uint* getIndBlockNum(uint indBlockNum);
-struct dirent* getDirEnt(uint blockNum);
-void debugPrintUsedBlocks(uint i, struct dinode *iPtr);
-void debugPrintUsedBlocks2(uint iUsedCount, uint bUsedCount, uint *iUsed,
-                           uint *bUsed);
+struct dinode *getInode(int inum);
+int *getIndBlockNum(int indBlockNum);
+struct dirent *getDirEnt(int blockNum);
+int getParentInum(struct dinode *iPtr);
+void debugPrintUsedBlocks(int i, struct dinode *iPtr);
+void debugPrintUsedBlocks2(int iUsedCount, int bUsedCount, int *iUsed,
+                           int *bUsed);
 
 int main(int argc, char *argv[]) {
   debugPrintf("constants: IPB %ld, BPB %d\n", IPB, BPB);
@@ -174,8 +181,8 @@ int main(int argc, char *argv[]) {
   hdrBlocks = sBlock->ninodes / IPB + 3 + bitBlocks;
 
   // Initialize inode used blocks array
-  uint iUsed[sBlock->nblocks];
-  uint iUsedCount = 0;
+  int iUsed[sBlock->nblocks];
+  int iUsedCount = 0;
   for (int i = 0; i < sBlock->nblocks; i++) {
     iUsed[i] = 0;
   }
@@ -185,66 +192,44 @@ int main(int argc, char *argv[]) {
     isDirect[i] = DBLOCK_UNUSED;
   }
   // Initialize array to count how many times inode referenced in dirs
-  uint iRefsCount[sBlock->ninodes];
+  int iRefsCount[sBlock->ninodes];
   for (int i = 0; i < sBlock->ninodes; i++) {
     iRefsCount[i] = 0;
   }
 
   // Traverse inodes
   struct dinode *iPtr = (struct dinode *)(fs + (2 * BSIZE));
-  for (uint i = 0; i < sBlock->ninodes; i++, iPtr++) {
-    // Test 1 - each inode is either unallocated or one of the valid types
-    test1(i, iPtr->type);
-
-    // Test 2 - for inuse inodes; points to valid datablock address
-    test2(i, iPtr);
-
-    // Test 4 - each dir contains . and ..; . points to dir itself
-    test4(i, iPtr);
-
-    // Test 5 and 6 Setup
-    collectInodeUsed(iPtr, iUsed, &iUsedCount, isDirect);
-
-    // Test 9
-    test9(iPtr);
-
-    // Test 10
-    test10(iPtr);
-
-    // Test 11 Setup
-    countInodeRefs(i, iPtr, iRefsCount);
+  for (int i = 0; i < sBlock->ninodes; i++, iPtr++) {
+    test1(i, iPtr->type);  // Test 1 - each inode  unallocated or valid type
+    test2(i, iPtr);        // Test 2 - for inuse inodes; points to valid dblock
+    test4(i, iPtr);  // Test 4 - dir contains . and ..; . points to dir itself
+    collectInodeUsed(iPtr, iUsed, &iUsedCount, isDirect);  // Test 5 and 6 Setup
+    test9(iPtr);                          // inodes ref'd in at least one dir
+    test10(iPtr);                         // ref'd inode is allocated
+    countInodeRefs(i, iPtr, iRefsCount);  // Test 11 Setup
 
     // debugPrintUsedBlocks(i, iPtr);
   }
-
-  // Test 3 - root dir exists; inode num 1; parent is itself
-  test3();
-
-  // Initialize bitmap used blocks array
-  int bUsed[sBlock->size];
+  test3();  // Test 3 - root dir exists; inode num 1; parent is itself
+  int bUsed[sBlock->size];  // Test 5 and 6 setup
   for (int i = 0; i < sBlock->size; i++) {
     bUsed[i] = 0;
   }
-  uint bUsedCount = 0;
+  int bUsedCount = 0;
   collectBitmapUsed(bUsed, &bUsedCount);
-
-  // Test 5 - check inode data blocks against bitmap
-  test5(iUsed, iUsedCount, bUsed, bUsedCount);
-
-  // Test 6 - check bitmap against inode data blocks
-  test6(iUsed, iUsedCount, bUsed, bUsedCount);
-  // TODO test 6 is causing goodlarge to fail
-
-  test78(iUsed, iUsedCount, isDirect);
-
-  // Test 11
-  test11(iRefsCount);
+  test5(iUsed, iUsedCount, bUsed, bUsedCount);  // used blocks marked in bmap
+  test6(iUsed, iUsedCount, bUsed, bUsedCount);  // used bmap ref'd by inode
+  test78(iUsed, iUsedCount, isDirect);  // blocks only ref'd by one inode
+  test11(iRefsCount);                   // nlinks matches ref count
+  test12(iRefsCount);                   // dir linked once
+  test13();
+  test14();
 
   return 0;
 }
 
 // Test 1 - each inode is either unallocated or one of the valid types
-void test1(uint i, short type) {
+void test1(int i, short type) {
   if (!(type == 0 || type == T_FILE || type == T_DIR || type == T_DEV)) {
     debugPrintf("ERROR: inode %d, type %d\n", i, type);
     fprintf(stderr, ERROR1_BAD_INODE);
@@ -253,7 +238,7 @@ void test1(uint i, short type) {
 }
 
 // Test 2 - for inuse inodes; points to valid datablock address
-void test2(uint i, struct dinode *iPtr) {
+void test2(int i, struct dinode *iPtr) {
   if (iPtr->type != T_FILE) {
     return;
   }
@@ -261,7 +246,7 @@ void test2(uint i, struct dinode *iPtr) {
   // Direct block number invalid
   // debugPrintf("file inode %d: ", i);
   for (int j = 0; j < NDIRECT; j++) {
-    uint dblockNum = iPtr->addrs[j];
+    int dblockNum = iPtr->addrs[j];
     // debugPrintf("dblockNum %d, ", dblockNum);
     if (!(dblockNum == 0 ||
           ((dblockNum >= hdrBlocks) && (dblockNum < sBlock->size)))) {
@@ -273,9 +258,9 @@ void test2(uint i, struct dinode *iPtr) {
   // debugPrintf("\n");
 
   // Indirect block number invalid
-  uint indBlock = iPtr->addrs[NDIRECT];
-  if (!(indBlock == 0 || ((indBlock >= hdrBlocks) &&
-                                  (indBlock < sBlock->size)))) {
+  int indBlock = iPtr->addrs[NDIRECT];
+  if (!(indBlock == 0 ||
+        ((indBlock >= hdrBlocks) && (indBlock < sBlock->size)))) {
     debugPrintf("ERROR: inode %d: indBlock %d \n", i, indBlock);
     fprintf(stderr, ERROR2_BAD_INDIRECT_DATA);
     exit(1);
@@ -285,9 +270,9 @@ void test2(uint i, struct dinode *iPtr) {
   }
 
   // Traverse indirect blocks for invalid datablock address
-  uint *dBlock = getIndBlockNum(indBlock);
+  int *dBlock = getIndBlockNum(indBlock);
   for (int j = 0; j < NINDIRECT; j++) {
-    uint dblockNum = dBlock[j];
+    int dblockNum = dBlock[j];
     if (!(dblockNum == 0 ||
           ((dblockNum >= hdrBlocks) && (dblockNum < sBlock->size)))) {
       fprintf(stderr, ERROR2_BAD_INDIRECT_DATA);
@@ -320,7 +305,7 @@ void test3() {
 }
 
 // Test 4 - each dir contains . and ..; . points to dir itself
-void test4(uint i, struct dinode *iPtr) {
+void test4(int i, struct dinode *iPtr) {
   if (iPtr->type == T_FILE || iPtr->type == T_DEV) {
     return;
   }
@@ -339,14 +324,14 @@ void test4(uint i, struct dinode *iPtr) {
       if (foundCurrDot && foundParentDot) {
         break;
       }
-      if (dirEntPtr->inum == 0) { // empty
+      if (dirEntPtr->inum == 0) {  // empty
         continue;
       }
       isDirUsed = true;
 
       if (strcmp(dirEntPtr->name, ".") == 0) {
         foundCurrDot = true;
-        if (dirEntPtr->inum != i) { // . does not point to itself
+        if (dirEntPtr->inum != i) {  // . does not point to itself
           fprintf(stderr, ERROR4_BAD_DIR_FORMAT);
           exit(1);
         }
@@ -365,7 +350,7 @@ void test4(uint i, struct dinode *iPtr) {
   }
 }
 
-void collectInodeUsed(struct dinode *iPtr, uint *iUsed, uint *iUsedCount,
+void collectInodeUsed(struct dinode *iPtr, int *iUsed, int *iUsedCount,
                       short *isDirect) {
   if (!(iPtr->type == T_DIR || iPtr->type == T_FILE)) {
     return;
@@ -383,7 +368,7 @@ void collectInodeUsed(struct dinode *iPtr, uint *iUsed, uint *iUsedCount,
     iUsed[*iUsedCount] = iPtr->addrs[NDIRECT];
     isDirect[*iUsedCount] = DBLOCK_DIRECT;
     (*iUsedCount)++;
-    uint *dBlock = getIndBlockNum(iPtr->addrs[NDIRECT]);
+    int *dBlock = getIndBlockNum(iPtr->addrs[NDIRECT]);
     for (int j = 0; j < NINDIRECT; j++) {
       if (dBlock[j] != 0) {
         iUsed[*iUsedCount] = dBlock[j];
@@ -394,13 +379,13 @@ void collectInodeUsed(struct dinode *iPtr, uint *iUsed, uint *iUsedCount,
   }
 }
 
-void collectBitmapUsed(uint *bUsed, uint *bUsedCount) {
+void collectBitmapUsed(int *bUsed, int *bUsedCount) {
   unsigned char *bitmap =
       (unsigned char *)(fs + (BBLOCK(0, sBlock->ninodes) * BSIZE));
   int blockNum = 0;
   for (int i = 0; i < BSIZE; i++) {
     for (int j = 0; j < 8; j++, blockNum++) {
-      uint bit = (bitmap[i] >> j) & 1;
+      int bit = (bitmap[i] >> j) & 1;
       if (bit == 1) {
         bUsed[(*bUsedCount)++] = blockNum;
       }
@@ -408,10 +393,11 @@ void collectBitmapUsed(uint *bUsed, uint *bUsedCount) {
   }
 }
 
-void test5(uint *iUsed, int iUsedCount, uint *bUsed, int bUsedCount) {
+// Test 5 - check inode data blocks against bitmap
+void test5(int *iUsed, int iUsedCount, int *bUsed, int bUsedCount) {
   for (int i = 0; i < iUsedCount; i++) {
     bool isInodeUsedBlockInBitmap = false;
-    uint iUsedBlockNum = iUsed[i];
+    int iUsedBlockNum = iUsed[i];
     // debugPrintf("used inode data block %d\n", iUsedBlockNum);
     for (int j = hdrBlocks; j < bUsedCount; j++) {
       if (bUsed[j] == iUsedBlockNum) {
@@ -427,10 +413,10 @@ void test5(uint *iUsed, int iUsedCount, uint *bUsed, int bUsedCount) {
   }
 }
 
-void test6(uint *iUsed, int iUsedCount, uint *bUsed, int bUsedCount) {
+void test6(int *iUsed, int iUsedCount, int *bUsed, int bUsedCount) {
   for (int i = hdrBlocks; i < bUsedCount; i++) {
     bool isBitmapUsedByInode = false;
-    uint bUsedBlockNum = bUsed[i];
+    int bUsedBlockNum = bUsed[i];
     // debugPrintf("used bitmap data block %d\n", bUsedBlockNum);
     for (int j = 0; j < iUsedCount; j++) {
       if (iUsed[j] == bUsedBlockNum) {
@@ -446,10 +432,10 @@ void test6(uint *iUsed, int iUsedCount, uint *bUsed, int bUsedCount) {
   }
 }
 
-void test78(uint *iUsed, int iUsedCount, short *isDirect) {
+void test78(int *iUsed, int iUsedCount, short *isDirect) {
   bool dblockUnique = true;
   for (int i = 0; i < iUsedCount; i++) {
-    uint currBlockNum = iUsed[i];
+    int currBlockNum = iUsed[i];
     for (int j = 0; j < iUsedCount; j++) {
       if (i == j) {
         continue;
@@ -468,7 +454,7 @@ void test78(uint *iUsed, int iUsedCount, short *isDirect) {
   }
 }
 
-void debugPrintUsedBlocks(uint i, struct dinode *iPtr) {
+void debugPrintUsedBlocks(int i, struct dinode *iPtr) {
   if (iPtr->type == T_DIR) {
     debugPrintf("inode %d is a dir of size %d with links %d\n", i, iPtr->size,
                 iPtr->nlink);
@@ -480,7 +466,7 @@ void debugPrintUsedBlocks(uint i, struct dinode *iPtr) {
 
     if (iPtr->addrs[NDIRECT]) {
       debugPrintf("  dblock %d used\n", iPtr->addrs[NDIRECT]);
-      uint *dBlock = getIndBlockNum(iPtr->addrs[NDIRECT]);
+      int *dBlock = getIndBlockNum(iPtr->addrs[NDIRECT]);
       for (int j = 0; j < NINDIRECT; j++) {
         if (dBlock[j] != 0) {
           debugPrintf("  dblock %d used\n", dBlock[j]);
@@ -499,7 +485,7 @@ void debugPrintUsedBlocks(uint i, struct dinode *iPtr) {
 
     if (iPtr->addrs[NDIRECT]) {
       debugPrintf("  dblock %d used\n", iPtr->addrs[NDIRECT]);
-      uint *dBlock = getIndBlockNum(iPtr->addrs[NDIRECT]);
+      int *dBlock = getIndBlockNum(iPtr->addrs[NDIRECT]);
       for (int j = 0; j < NINDIRECT; j++) {
         if (dBlock[j] != 0) {
           debugPrintf("  dblock %d used\n", dBlock[j]);
@@ -530,7 +516,7 @@ void test10(struct dinode *iPtr) {
       // Traverse directory entry list
       struct dirent *dirEntPtr = getDirEnt(iPtr->addrs[j]);
       for (int k = 0; k < MAXDIR_PER_BLOCK; k++) {
-        uint refInum = dirEntPtr[k].inum;
+        int refInum = dirEntPtr[k].inum;
         checkRefInodeIsUsed(refInum);
       }
     }
@@ -538,13 +524,13 @@ void test10(struct dinode *iPtr) {
 
   // Traverse indirect blocks
   if (iPtr->addrs[NDIRECT]) {
-    uint *dBlock = getIndBlockNum(iPtr->addrs[NDIRECT]);
+    int *dBlock = getIndBlockNum(iPtr->addrs[NDIRECT]);
     for (int j = 0; j < NINDIRECT; j++) {
       if (dBlock[j] != 0) {
         // Traverse directory entry list
         struct dirent *dirEntPtr = getDirEnt(dBlock[j]);
         for (int k = 0; k < MAXDIR_PER_BLOCK; k++) {
-          uint refInum = dirEntPtr[k].inum;
+          int refInum = dirEntPtr[k].inum;
           checkRefInodeIsUsed(refInum);
         }
       }
@@ -552,7 +538,7 @@ void test10(struct dinode *iPtr) {
   }  // indirect
 }
 
-void checkRefInodeIsUsed(uint refInum) {
+void checkRefInodeIsUsed(int refInum) {
   if (!refInum) {
     return;
   }
@@ -563,11 +549,11 @@ void checkRefInodeIsUsed(uint refInum) {
   }
 }
 
-struct dinode *getInode(uint inum) {
+struct dinode *getInode(int inum) {
   return (struct dinode *)(fs + (2 * BSIZE) + (inum * sizeof(struct dinode)));
 }
 
-void countInodeRefs(uint i, struct dinode *iPtr, uint *iRefsCount) {
+void countInodeRefs(int i, struct dinode *iPtr, int *iRefsCount) {
   if (iPtr->type != T_DIR) {
     return;
   }
@@ -575,43 +561,40 @@ void countInodeRefs(uint i, struct dinode *iPtr, uint *iRefsCount) {
   // Traverse direct blocks
   for (int j = 0; j < NDIRECT; j++) {
     if (iPtr->addrs[j] != 0) {
-      // Traverse directory entry list
-      struct dirent *dirEntPtr = getDirEnt(iPtr->addrs[j]);
-      for (int k = 0; k < MAXDIR_PER_BLOCK; k++) {
-        uint refInum = dirEntPtr[k].inum;
-        if (refInum == 0) {
-          continue;
-        }
-        struct dinode *ip = getInode(refInum);
-        iRefsCount[refInum] += 1;
-        debugPrintf("dir inode %d: name %s inum %d\n", i, dirEntPtr[k].name, dirEntPtr[k].inum);
-      }
+      countInodeRefsHelper(iRefsCount, iPtr->addrs[j]);
     }
   }  // direct
 
   // Traverse indirect blocks
   if (iPtr->addrs[NDIRECT] != 0) {
-    uint *dBlock = getIndBlockNum(iPtr->addrs[NDIRECT]);
+    int *dBlock = getIndBlockNum(iPtr->addrs[NDIRECT]);
     for (int j = 0; j < NINDIRECT; j++) {
       if (dBlock[j] != 0) {
-        // Traverse directory entry list
-        struct dirent *dirEntPtr = getDirEnt(dBlock[j]);
-        for (int k = 0; k < MAXDIR_PER_BLOCK; k++) {
-          uint refInum = dirEntPtr[k].inum;
-          if (refInum == 0) {
-            continue;
-          }
-          struct dinode *ip = getInode(refInum);
-          iRefsCount[refInum] += 1;
-          debugPrintf("dir inode %d: name %s inum %d\n", i, dirEntPtr[k].name, dirEntPtr[k].inum);
-        }
+        countInodeRefsHelper(iRefsCount, dBlock[j]);
       }
     }
   }  // indirect
 }
 
-void debugPrintUsedBlocks2(uint iUsedCount, uint bUsedCount, uint *iUsed,
-                           uint *bUsed) {
+// Traverse directory entry list and count references
+void countInodeRefsHelper(int *iRefsCount, int dBlock) {
+  struct dirent *dirEntPtr = getDirEnt(dBlock);
+  for (int k = 0; k < MAXDIR_PER_BLOCK; k++) {
+    int refInum = dirEntPtr[k].inum;
+    if (refInum == 0) {
+      continue;
+    }
+    // Do not include . and .. as references
+    if (strcmp(dirEntPtr[k].name, ".") == 0 ||
+        strcmp(dirEntPtr[k].name, "..") == 0) {
+      continue;
+    }
+    iRefsCount[refInum] += 1;
+  }
+}
+
+void debugPrintUsedBlocks2(int iUsedCount, int bUsedCount, int *iUsed,
+                           int *bUsed) {
   debugPrintf("inode block count: %d, bitmap block count: %d\n", iUsedCount,
               bUsedCount);
   debugPrintf("inode used data blocks: ");
@@ -627,8 +610,8 @@ void debugPrintUsedBlocks2(uint iUsedCount, uint bUsedCount, uint *iUsed,
   debugPrintf("\n");
 }
 
-void test11(uint *iRefsCount) {
-  for (uint i = 0; i < sBlock->ninodes; i++) {
+void test11(int *iRefsCount) {
+  for (int i = 0; i < sBlock->ninodes; i++) {
     struct dinode *iPtr = getInode(i);
     if (!(iPtr->type == T_FILE)) {
       continue;
@@ -641,10 +624,131 @@ void test11(uint *iRefsCount) {
   }
 }
 
-struct dirent* getDirEnt(uint blockNum) {
+struct dirent *getDirEnt(int blockNum) {
   return (struct dirent *)(fs + (blockNum * BSIZE));
 }
 
-uint* getIndBlockNum(uint indBlockNum) {
-  return (uint *)(fs + (indBlockNum * BSIZE));
+int *getIndBlockNum(int indBlockNum) {
+  return (int *)(fs + (indBlockNum * BSIZE));
+}
+
+void test12(int *iRefsCount) {
+  for (int i = 0; i < sBlock->ninodes; i++) {
+    struct dinode *iPtr = getInode(i);
+    if (!(iPtr->type == T_DIR)) {
+      continue;
+    }
+
+    if (iRefsCount[i] > 1) {
+      fprintf(stderr, ERROR12_DIR_ONCE);
+      exit(1);
+    }
+  }
+}
+
+void test13() {
+  for (int i = 0; i < sBlock->ninodes; i++) {
+    if (getInode(i)->type != T_DIR) {
+      continue;
+    }
+    int parentInum = getParentInum(getInode(i));
+    debugPrintf("inum %d's parent is %d\n", i, parentInum);
+    findChildInParent(getInode(parentInum), i);
+  }
+}
+
+int getParentInum(struct dinode *iPtr) {
+  if (iPtr->type != T_DIR) {
+    return 0;
+  }
+
+  struct dirent *rootDir = getDirEnt(iPtr->addrs[0]);
+  struct dirent *parentDir = rootDir + 1;
+
+  if (strcmp(parentDir->name, "..") != 0) {
+    // debugPrintf("dir %d, name %s\n", parentDir->inum, parentDir->name);
+    fprintf(stderr, EC1_PARENT_DIR_MISMATCH);
+    exit(1);
+  }
+
+  // debugPrintf("parent: %s %d\n", parentDir->name, parentDir->inum);
+  return parentDir->inum;
+}
+
+void findChildInParent(struct dinode *parent, int childInum) {
+  if (parent->type != T_DIR) {
+    fprintf(stderr, EC1_PARENT_DIR_MISMATCH);
+    exit(1);
+  }
+
+  // debugPrintf("LOOKING FOR CHILD INUM %d\n", childInum);
+  bool foundChild = false;
+
+  // Traverse direct blocks
+  for (int j = 0; j < NDIRECT; j++) {
+    if (parent->addrs[j] != 0) {
+      struct dirent *dirEntPtr = getDirEnt(parent->addrs[j]);
+      for (int k = 0; k < MAXDIR_PER_BLOCK; k++) {
+        // debugPrintf("inum %d, name %s\n", dirEntPtr[k].inum, dirEntPtr[k].name);
+        // Look for child
+        if (dirEntPtr[k].inum == childInum) {
+          foundChild = true;
+          break;
+        }
+      }
+    }
+  }  // direct
+
+  // Traverse indirect blocks
+  if (parent->addrs[NDIRECT] != 0) {
+    int *dBlock = getIndBlockNum(parent->addrs[NDIRECT]);
+    for (int j = 0; j < NINDIRECT; j++) {
+      if (dBlock[j] != 0) {
+        struct dirent *dirEntPtr = getDirEnt(dBlock[j]);
+        for (int k = 0; k < MAXDIR_PER_BLOCK; k++) {
+          // debugPrintf("inum %d, name %s\n", dirEntPtr[k].inum,
+          //             dirEntPtr[k].name);
+          // Look for child
+          if (dirEntPtr[k].inum == childInum) {
+            foundChild = true;
+            break;
+          }
+        }
+      }
+    }
+  }  // indirect
+
+  if (!foundChild) {
+    fprintf(stderr, EC1_PARENT_DIR_MISMATCH);
+    exit(1);
+  }
+}
+
+void test14() {
+  for (int i = 0; i < sBlock->ninodes; i++) {
+    if (getInode(i)->type != T_DIR) {
+      continue;
+    }
+    traverseUpDir(getInode(i), 0);
+  }
+}
+
+void traverseUpDir(struct dinode *iPtr, int stepCount) {
+  if (iPtr->type != T_DIR) {
+    fprintf(stderr, EC2_ORPHAN_DIR);
+    exit(1);
+  }
+  struct dirent *rootDir = getDirEnt(iPtr->addrs[0]);
+  struct dirent *parentDir = rootDir + 1;
+  debugPrintf("traverse() %d: rootDir %d \"%s\" parentDir %d \"%s\"\n", stepCount, rootDir->inum, rootDir->name, parentDir->inum, parentDir->name);
+  if (rootDir->inum == 1) {
+    debugPrintf("Found root\n");
+    return;
+  }
+  if (stepCount > sBlock->ninodes) {
+    fprintf(stderr, EC2_ORPHAN_DIR);
+    exit(1);
+  }
+  
+  return traverseUpDir(getInode(parentDir->inum), ++stepCount);
 }
