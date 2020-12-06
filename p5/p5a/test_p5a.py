@@ -238,14 +238,14 @@ class Repair(FSTest):
 
 class Repair2(FSTest):
   name = 'Repair2'
-  description = '**extra**  repair a filesystem with lost inodes. check if there are any inconsistencies in the repaired image.'
+  description = '**extra**   repair a filesystem with lost inodes. check if there are any inconsistencies in the repaired image.'
   timeout = 10
   status = 0
   point_value = 5
 
   def run(self, command = None, stdout = None, stderr = None,
           addl_args = []):
-    shutil.copyfile(self.test_path + '/images/Repair',
+    shutil.copyfile(self.test_path + '/images/' + self.name,
                     self.project_path + "/" + self.name)
     in_path = self.project_path + "/" + self.name
     if command == None:
@@ -293,8 +293,8 @@ all_tests = [
   # Extra
   Mismatch,
   Loop,
-  # Repair,   # COMING SOON
-  # Repair2   # COMING SOON
+  Repair,
+  Repair2
   ]
 
 build_test = FSBuildTest

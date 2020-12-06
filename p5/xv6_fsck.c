@@ -1,3 +1,5 @@
+#include "xv6_fsck.h"
+
 #include <assert.h>
 #include <fcntl.h>
 #include <stdbool.h>
@@ -9,150 +11,38 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-// xv6 - FS constants
-// Block 0 is unused.
-// Block 1 is super block. (see mkfs -> wsect(1, sb))
-// Inodes start at block 2. Inodes per block = 8 -> 25 blocks for inodes
-// Empty block at 27.
-// Bitmap starts at block 28.
-// Data blocks start at block 29.
-// | boot | superblock | inode table | bitmap (data) | data |
-
-#define ROOTINO 1  // root i-number
-#define BSIZE 512  // block size
-#define NDIRECT 12
-#define NINDIRECT (BSIZE / sizeof(int))
-#define MAXFILE (NDIRECT + NINDIRECT)
-
-// File system super block
-struct superblock {
-  int size;     // Size of file system image (blocks)
-  int nblocks;  // Number of data blocks
-  int ninodes;  // Number of inodes.
-};
-
-// Inode types
-#define T_DIR 1   // Directory
-#define T_FILE 2  // File
-#define T_DEV 3   // Special device
-
-// On-disk inode structure
-struct dinode {
-  short type;              // File type
-  short major;             // Major device number (T_DEV only)
-  short minor;             // Minor device number (T_DEV only)
-  short nlink;             // Number of links to inode in file system
-  int size;                // Size of file (bytes)
-  int addrs[NDIRECT + 1];  // Data block addresses
-};
-
-// Inodes per block.
-#define IPB (BSIZE / sizeof(struct dinode))
-
-// Block containing inode i
-#define IBLOCK(i) ((i) / IPB + 2)
-
-// Bitmap bits per block
-#define BPB (BSIZE * 8)
-
-// Block containing bit for block b
-#define BBLOCK(b, ninodes) (b / BPB + (ninodes) / IPB + 3)
-
-// Directory is a file containing a sequence of dirent structures.
-#define DIRSIZ 14
-
-struct dirent {
-  short inum;
-  char name[DIRSIZ];
-};
-
-// P5 - My globals/constants
-
-// Debug preprocessor directives
-#ifdef DEBUG
-#define debugPrintf(...) printf(__VA_ARGS__)
-#else
-#define debugPrintf(...) ((void)0)
-#endif
-
-#define MAXDIR_PER_BLOCK (BSIZE / sizeof(struct dirent))
-
-// Errors
-#define USAGE_ERROR "Usage: xv6_fsck <file_system_image>.\n"
-#define FSIMAGE_ERROR "image not found.\n"
-#define ERROR1_BAD_INODE "ERROR: bad inode.\n"
-#define ERROR2_BAD_DIRECT_DATA "ERROR: bad direct address in inode.\n"
-#define ERROR2_BAD_INDIRECT_DATA "ERROR: bad indirect address in inode.\n"
-#define ERROR3_BAD_ROOT "ERROR: root directory does not exist.\n"
-#define ERROR4_BAD_DIR_FORMAT "ERROR: directory not properly formatted.\n"
-#define ERROR5_INODE_NOT_MARKED \
-  "ERROR: address used by inode but marked free in bitmap.\n"
-#define ERROR6_BITMAP_NOT_MARKED \
-  "ERROR: bitmap marks block in use but it is not in use.\n"
-#define ERROR7_DIRECT_UNIQUE "ERROR: direct address used more than once.\n"
-#define ERROR8_DIRECT_UNIQUE "ERROR: indirect address used more than once.\n"
-#define ERROR9_INODE_NOT_FOUND \
-  "ERROR: inode marked use but not found in a directory.\n"
-#define ERROR10_INODE_REF_MARKED_FREE \
-  "ERROR: inode referred to in directory but marked free.\n"
-#define ERROR11_INODE_REF_COUNT "ERROR: bad reference count for file.\n"
-#define ERROR12_DIR_ONCE \
-  "ERROR: directory appears more than once in file system.\n"
-#define EC1_PARENT_DIR_MISMATCH "ERROR: parent directory mismatch.\n"
-#define EC2_ORPHAN_DIR "ERROR: inaccessible directory exists.\n"
-
-#define DBLOCK_UNUSED 0
-#define DBLOCK_DIRECT 1
-#define DBLOCK_INDIRECT 2
-
 void *fs;
 struct superblock *sBlock;
 int bitBlocks;  // initial bit blocks
 int hdrBlocks;  // initial header blocks
 
-// Test and Setup functions
-void test1(int i, short type);
-void test2(int i, struct dinode *iPtr);
-void test3();
-void test4(int i, struct dinode *iPtr);
-void test5(int *iUsed, int iUsedCount, int *bUsed, int bUsedCount);
-void test6(int *iUsed, int iUsedCount, int *bUsed, int bUsedCount);
-void collectBitmapUsed(int *bUsed, int *bUsedCount);
-void collectInodeUsed(struct dinode *iPtr, int *iUsed, int *iUsedCount,
-                      short *isDirect);
-void test78(int *iUsed, int iUsedCount, short *isDirect);
-void test9(struct dinode *iPtr);
-void test10(struct dinode *iPtr);
-void checkRefInodeIsUsed(int refInum);
-void test11(int *iRefsCount);
-void countInodeRefs(int i, struct dinode *iPtr, int *iRefsCount);
-void countInodeRefsHelper(int *iRefsCount, int dBlock);
-void test12(int *iRefsCount);
-void test13();
-void findChildInParent(struct dinode *parent, int childInum);
-void test14();
-void traverseUpDir(struct dinode *iPtr, int stepCount);
-
-// Utility functions
-struct dinode *getInode(int inum);
-int *getIndBlockNum(int indBlockNum);
-struct dirent *getDirEnt(int blockNum);
-int getParentInum(struct dinode *iPtr);
-void debugPrintUsedBlocks(int i, struct dinode *iPtr);
-void debugPrintUsedBlocks2(int iUsedCount, int bUsedCount, int *iUsed,
-                           int *bUsed);
-
 int main(int argc, char *argv[]) {
   debugPrintf("constants: IPB %ld, BPB %d\n", IPB, BPB);
 
   // Invalid # of arguments
-  if (argc != 2) {
+  if (!(argc == 2 || argc == 3)) {
     fprintf(stderr, USAGE_ERROR);
     exit(1);
   }
 
+  char *fsName;
+  if (argc == 2) {
+    fsName = argv[1];
+  } else {
+    fsName = argv[2];
+  }
+
+  if (argc == 2) {
+    checkMode(fsName);
+  } else {
+    repairMode(fsName);
+  }
+
+  return 0;
+}
+
+void checkMode(char *fsName) {
   // FS image does not exist
-  char *fsName = argv[1];
   int fd = open(fsName, O_RDONLY);
   if (fd == -1) {
     fprintf(stderr, FSIMAGE_ERROR);
@@ -204,9 +94,9 @@ int main(int argc, char *argv[]) {
     test2(i, iPtr);        // Test 2 - for inuse inodes; points to valid dblock
     test4(i, iPtr);  // Test 4 - dir contains . and ..; . points to dir itself
     collectInodeUsed(iPtr, iUsed, &iUsedCount, isDirect);  // Test 5 and 6 Setup
-    test9(iPtr);                          // inodes ref'd in at least one dir
-    test10(iPtr);                         // ref'd inode is allocated
-    countInodeRefs(i, iPtr, iRefsCount);  // Test 11 Setup
+    test9(iPtr);                    // inodes ref'd in at least one dir
+    test10(iPtr);                   // ref'd inode is allocated
+    countInodeRefs(i, iRefsCount);  // Test 11 Setup
 
     // debugPrintUsedBlocks(i, iPtr);
   }
@@ -224,8 +114,6 @@ int main(int argc, char *argv[]) {
   test12(iRefsCount);                   // dir linked once
   test13();
   test14();
-
-  return 0;
 }
 
 // Test 1 - each inode is either unallocated or one of the valid types
@@ -433,7 +321,6 @@ void test6(int *iUsed, int iUsedCount, int *bUsed, int bUsedCount) {
 }
 
 void test78(int *iUsed, int iUsedCount, short *isDirect) {
-  bool dblockUnique = true;
   for (int i = 0; i < iUsedCount; i++) {
     int currBlockNum = iUsed[i];
     for (int j = 0; j < iUsedCount; j++) {
@@ -553,7 +440,8 @@ struct dinode *getInode(int inum) {
   return (struct dinode *)(fs + (2 * BSIZE) + (inum * sizeof(struct dinode)));
 }
 
-void countInodeRefs(int i, struct dinode *iPtr, int *iRefsCount) {
+void countInodeRefs(int i, int *iRefsCount) {
+  struct dinode *iPtr = getInode(i);
   if (iPtr->type != T_DIR) {
     return;
   }
@@ -659,7 +547,8 @@ void test13() {
 
 int getParentInum(struct dinode *iPtr) {
   if (iPtr->type != T_DIR) {
-    return 0;
+    fprintf(stderr, EC1_PARENT_DIR_MISMATCH);
+    exit(1);
   }
 
   struct dirent *rootDir = getDirEnt(iPtr->addrs[0]);
@@ -689,8 +578,8 @@ void findChildInParent(struct dinode *parent, int childInum) {
     if (parent->addrs[j] != 0) {
       struct dirent *dirEntPtr = getDirEnt(parent->addrs[j]);
       for (int k = 0; k < MAXDIR_PER_BLOCK; k++) {
-        // debugPrintf("inum %d, name %s\n", dirEntPtr[k].inum, dirEntPtr[k].name);
-        // Look for child
+        // debugPrintf("inum %d, name %s\n", dirEntPtr[k].inum,
+        // dirEntPtr[k].name); Look for child
         if (dirEntPtr[k].inum == childInum) {
           foundChild = true;
           break;
@@ -740,15 +629,143 @@ void traverseUpDir(struct dinode *iPtr, int stepCount) {
   }
   struct dirent *rootDir = getDirEnt(iPtr->addrs[0]);
   struct dirent *parentDir = rootDir + 1;
-  debugPrintf("traverse() %d: rootDir %d \"%s\" parentDir %d \"%s\"\n", stepCount, rootDir->inum, rootDir->name, parentDir->inum, parentDir->name);
+  // debugPrintf("traverse() %d: rootDir %d \"%s\" parentDir %d \"%s\"\n",
+  // stepCount, rootDir->inum, rootDir->name, parentDir->inum, parentDir->name);
   if (rootDir->inum == 1) {
-    debugPrintf("Found root\n");
+    // debugPrintf("Found root\n");
     return;
   }
   if (stepCount > sBlock->ninodes) {
     fprintf(stderr, EC2_ORPHAN_DIR);
     exit(1);
   }
-  
+
   return traverseUpDir(getInode(parentDir->inum), ++stepCount);
+}
+
+void repairMode(char *fsName) {
+  // FS image does not exist
+  int fd = open(fsName, O_RDWR);
+  if (fd == -1) {
+    fprintf(stderr, FSIMAGE_ERROR);
+    exit(1);
+  }
+
+  // Get size of FS file
+  struct stat fsStat;
+  if (fstat(fd, &fsStat) == -1) {
+    fprintf(stderr, FSIMAGE_ERROR);
+    exit(1);
+  }
+
+  // Read in the fs.img into memory
+  fs = mmap(NULL, fsStat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+  if (fs == MAP_FAILED) {
+    fprintf(stderr, "Failed to map memory to store FS file.\n");
+    exit(1);
+  }
+
+  // Superblock info
+  sBlock = (struct superblock *)(fs + BSIZE);
+  debugPrintf("sBlock: size %d, # data blocks %d, # inodes %d \n", sBlock->size,
+              sBlock->nblocks, sBlock->ninodes);
+  bitBlocks = sBlock->size / (BSIZE * 8) + 1;
+  hdrBlocks = sBlock->ninodes / IPB + 3 + bitBlocks;
+
+  int lostFoundDir = getLostFoundDirInum();
+  debugPrintf("lost_found inum %d\n", lostFoundDir);
+
+  // Initialize array to count how many times inode referenced in dirs
+  int iRefsCount[sBlock->ninodes];
+  for (int i = 0; i < sBlock->ninodes; i++) {
+    iRefsCount[i] = 0;
+    countInodeRefs(i, iRefsCount);  // Test 11 Setup
+  }
+
+  for (int i = 2; i < sBlock->ninodes; i++) {
+    struct dinode *iPtr = getInode(i);
+    // Copied from test9
+    if (iPtr->type != 0) {
+      continue;
+    }
+    // Perform repair
+    if (iPtr->nlink != iRefsCount[i]) {
+      debugPrintf("found lost inum %d\n", i);
+      iPtr->nlink = 1;  // now ref'd by lost_found dir
+      addToDir(lostFoundDir, i);
+    }
+  }
+
+  checkMode(fsName);
+}
+
+int getLostFoundDirInum() {
+  struct dinode *rootInode = getInode(1);  // assume lost_found in root dir
+  struct dirent *rootDirEnt = getDirEnt(rootInode->addrs[0]);
+  for (int k = 0; k < MAXDIR_PER_BLOCK; k++) {
+    debugPrintf("getLost(): inum %i root %s\n", rootDirEnt[k].inum,
+                rootDirEnt[k].name);
+    if (strcmp(rootDirEnt[k].name, "lost_found") == 0) {
+      return rootDirEnt[k].inum;
+    }
+  }
+
+  fprintf(stderr, "ERROR: run in repair mode without lost_found dir\n");
+  exit(1);
+}
+
+void addToDir(int parentInum, int childInum) {
+  struct dinode *parent = getInode(parentInum);
+  if (parent->type != T_DIR) {
+    fprintf(stderr, "ERROR: New parent inode is not a directory\n");
+    exit(1);
+  }
+
+  bool foundFree = false;
+
+  // Traverse direct blocks
+  for (int j = 0; j < NDIRECT; j++) {
+    if (parent->addrs[j] != 0) {
+      struct dirent *dirEntPtr = getDirEnt(parent->addrs[j]);
+      for (int k = 0; k < MAXDIR_PER_BLOCK; k++) {
+        // Find free entry
+        if (dirEntPtr[k].inum == 0) {
+          debugPrintf("hello1\n");
+          foundFree = true;
+          dirEntPtr[k].inum = childInum;
+          char name[DIRSIZ];
+          sprintf(name, "%d", childInum);
+          strcpy(dirEntPtr[k].name, name);
+          return;
+        }
+      }
+    }
+  }  // direct
+
+  // Traverse indirect blocks
+  if (parent->addrs[NDIRECT] != 0) {
+    int *dBlock = getIndBlockNum(parent->addrs[NDIRECT]);
+    for (int j = 0; j < NINDIRECT; j++) {
+      if (dBlock[j] != 0) {
+        struct dirent *dirEntPtr = getDirEnt(dBlock[j]);
+        for (int k = 0; k < MAXDIR_PER_BLOCK; k++) {
+          // Find free entry
+          if (dirEntPtr[k].inum == 0) {
+            debugPrintf("hello2\n");
+            foundFree = true;
+            dirEntPtr[k].inum = childInum;
+            char name[DIRSIZ];
+            sprintf(name, "%d", childInum);
+            strcpy(dirEntPtr[k].name, name);
+            return;
+          }
+        }
+      }
+    }
+  }  // indirect
+
+  if (!foundFree) {
+    fprintf(stderr, "ERROR: directory is already full\n");
+    exit(1);
+  }
 }
