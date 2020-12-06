@@ -539,7 +539,7 @@ void test13() {
       continue;
     }
     int parentInum = getParentInum(getInode(i));
-    debugPrintf("inum %d's parent is %d\n", i, parentInum);
+    // debugPrintf("%d's %d parent is %d\n", i, getInode(i)->type, parentInum);
     findChildInParent(getInode(parentInum), i);
   }
 }
@@ -578,7 +578,8 @@ void findChildInParent(struct dinode *parent, int childInum) {
       struct dirent *dirEntPtr = getDirEnt(parent->addrs[j]);
       for (int k = 0; k < MAXDIR_PER_BLOCK; k++) {
         // debugPrintf("inum %d, name %s\n", dirEntPtr[k].inum,
-        // dirEntPtr[k].name); Look for child
+        // dirEntPtr[k].name); 
+        // Look for child
         if (dirEntPtr[k].inum == childInum) {
           foundChild = true;
           break;
