@@ -1,5 +1,4 @@
 #include "xv6_fsck.h"
-
 #include <assert.h>
 #include <fcntl.h>
 #include <stdbool.h>
@@ -679,13 +678,18 @@ void repairMode(char *fsName) {
   int iRefsCount[sBlock->ninodes];
   for (int i = 0; i < sBlock->ninodes; i++) {
     iRefsCount[i] = 0;
+  }
+  
+  for (int i = 0; i < sBlock->ninodes; i++)
+  {
     countInodeRefs(i, iRefsCount);  // Test 11 Setup
   }
+  
 
   for (int i = 2; i < sBlock->ninodes; i++) {
     struct dinode *iPtr = getInode(i);
     // Copied from test9
-    if (iPtr->type != 0) {
+    if (iPtr->type == 0) {
       continue;
     }
     // Perform repair
@@ -695,8 +699,13 @@ void repairMode(char *fsName) {
       addToDir(lostFoundDir, i);
     }
   }
-
-  checkMode(fsName);
+  
+  if (msync(fs, fsStat.st_size, MS_SYNC) != 0) {
+    fprintf(stderr, "ERROR: msync failed\n");
+    exit(1);
+  }
+  
+  close(fd);
 }
 
 int getLostFoundDirInum() {
