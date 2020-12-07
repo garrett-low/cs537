@@ -1,4 +1,4 @@
-#5A: File System Checker
+# 5A: File System Checker
 
 1. Test 1
   - Loop through inodes and check type.
